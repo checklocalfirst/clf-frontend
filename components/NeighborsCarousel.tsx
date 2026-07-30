@@ -50,7 +50,7 @@ export default function NeighborsCarousel({ businesses }: { businesses: Business
   const desktopRef = useRef<HTMLDivElement>(null);
   const mobileRef = useRef<HTMLDivElement>(null);
 
-  function scrollBy(ref: React.RefObject<HTMLDivElement>, dir: "left" | "right", amount: number) {
+  function scrollBy(ref: { current: HTMLDivElement | null }, dir: "left" | "right", amount: number) {
     ref.current?.scrollBy({ left: dir === "right" ? amount : -amount, behavior: "smooth" });
   }
 
