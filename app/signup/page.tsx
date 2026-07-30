@@ -2,13 +2,18 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { apiFetch, ApiError } from "@/lib/api";
 
 type AccountType = "personal" | "business";
 
 const inputCls =
   "h-[44px] w-full bg-white border border-[#dbe0d9] rounded-[8px] px-4 font-body text-[14px] text-[#423926] placeholder:text-[#b7a78c] outline-none focus:border-[#2c4a34] transition-colors";
+
+const inputErrCls =
+  "h-[44px] w-full bg-white border border-red-400 rounded-[8px] px-4 font-body text-[14px] text-[#423926] placeholder:text-[#b7a78c] outline-none focus:border-red-500 transition-colors";
 
 const labelCls = "font-body font-semibold text-[13px] text-[#423926]";
 
@@ -17,41 +22,149 @@ function Field({
   id,
   type = "text",
   autoComplete,
+  placeholder,
   className = "",
+  error,
 }: {
   label: string;
   id: string;
   type?: string;
   autoComplete?: string;
+  placeholder?: string;
   className?: string;
+  error?: string;
 }) {
   return (
     <div className={`flex flex-col gap-2 ${className}`}>
       <label htmlFor={id} className={labelCls}>
         {label}
       </label>
-      <input id={id} name={id} type={type} autoComplete={autoComplete} className={inputCls} />
+      <input
+        id={id}
+        name={id}
+        type={type}
+        autoComplete={autoComplete}
+        placeholder={placeholder}
+        className={error ? inputErrCls : inputCls}
+      />
+      {error && <p className="font-body text-[12px] text-red-600">{error}</p>}
     </div>
   );
 }
 
 export default function SignupPage() {
+  const router = useRouter();
   const [accountType, setAccountType] = useState<AccountType>("personal");
 
-  function handleSubmit(e: React.FormEvent) {
+  // personal form state
+  const [personalLoading, setPersonalLoading] = useState(false);
+  const [personalError, setPersonalError] = useState("");
+  const [personalFieldErrors, setPersonalFieldErrors] = useState<Record<string, string>>({});
+
+  // business form state
+  const [businessLoading, setBusinessLoading] = useState(false);
+  const [businessError, setBusinessError] = useState("");
+  const [businessFieldErrors, setBusinessFieldErrors] = useState<Record<string, string>>({});
+  const [businessStep, setBusinessStep] = useState<"form" | "payment-pending">("form");
+
+  async function handlePersonalSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    // Auth will be wired up when API routes are provided
+    setPersonalError("");
+    setPersonalFieldErrors({});
+
+    const fd = new FormData(e.currentTarget);
+    const password = fd.get("password") as string;
+    const confirmPassword = fd.get("confirmPassword") as string;
+
+    if (password !== confirmPassword) {
+      setPersonalFieldErrors({ confirmPassword: "Passwords do not match." });
+      return;
+    }
+
+    setPersonalLoading(true);
+    try {
+      await apiFetch("/auth/signup/user", {
+        method: "POST",
+        body: JSON.stringify({
+          firstname: fd.get("firstName"),
+          lastname: fd.get("lastName"),
+          email: fd.get("email"),
+          phone: fd.get("phone"),
+          password,
+        }),
+      });
+      router.push("/login?registered=1");
+    } catch (err) {
+      if (err instanceof ApiError) {
+        if (err.fieldErrors) {
+          const flat: Record<string, string> = {};
+          for (const [k, msgs] of Object.entries(err.fieldErrors)) {
+            flat[k] = Array.isArray(msgs) ? msgs[0] : String(msgs);
+          }
+          setPersonalFieldErrors(flat);
+        } else {
+          setPersonalError(err.message);
+        }
+      } else {
+        setPersonalError("Something went wrong. Please try again.");
+      }
+    } finally {
+      setPersonalLoading(false);
+    }
+  }
+
+  async function handleBusinessSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setBusinessError("");
+    setBusinessFieldErrors({});
+    setBusinessLoading(true);
+
+    const fd = new FormData(e.currentTarget);
+    try {
+      const data = await apiFetch<{ client_secret: string }>("/stripe/signup/business/checkout", {
+        method: "POST",
+        body: JSON.stringify({
+          firstName: fd.get("ownerFirstName"),
+          lastName: fd.get("ownerLastName"),
+          businessName: fd.get("businessName"),
+          businessEmail: fd.get("businessEmail"),
+          businessPhone: fd.get("businessPhone"),
+          description: fd.get("description"),
+          streetAddress: fd.get("streetAddress"),
+          city: fd.get("city"),
+          state: fd.get("state"),
+          zip: fd.get("zip"),
+        }),
+      });
+      // Store client_secret for the payment page
+      sessionStorage.setItem("clf_biz_secret", data.client_secret);
+      setBusinessStep("payment-pending");
+    } catch (err) {
+      if (err instanceof ApiError) {
+        if (err.fieldErrors) {
+          const flat: Record<string, string> = {};
+          for (const [k, msgs] of Object.entries(err.fieldErrors)) {
+            flat[k] = Array.isArray(msgs) ? msgs[0] : String(msgs);
+          }
+          setBusinessFieldErrors(flat);
+        } else {
+          setBusinessError(err.message);
+        }
+      } else {
+        setBusinessError("Something went wrong. Please try again.");
+      }
+    } finally {
+      setBusinessLoading(false);
+    }
   }
 
   return (
     <>
       <Header />
 
-      {/* Form Wrap */}
       <main className="bg-[#faf6e9] min-h-[calc(100vh-96px)] flex flex-col items-center py-8 px-4 md:py-14">
         <div className="bg-[#faf6e9] border border-[#dbe0d9] rounded-[16px] p-8 md:p-12 flex flex-col gap-5 w-full max-w-[520px]">
 
-          {/* Back link */}
           <Link
             href="/"
             className="font-body text-[13px] text-[#b7a78c] hover:text-[#423926] transition-colors"
@@ -59,12 +172,10 @@ export default function SignupPage() {
             ← Back to home
           </Link>
 
-          {/* Heading */}
           <h1 className="font-display font-bold text-[32px] text-[#423926] leading-none">
             CREATE YOUR ACCOUNT
           </h1>
 
-          {/* Subtitle */}
           <p className="font-body text-[14px] text-[#b7a78c]">
             Join the Check Local First community.
           </p>
@@ -97,43 +208,128 @@ export default function SignupPage() {
 
           {/* ── Personal Account Form ── */}
           {accountType === "personal" && (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5 w-full">
+            <form onSubmit={handlePersonalSubmit} className="flex flex-col gap-5 w-full">
+              {personalError && (
+                <div className="bg-red-50 border border-red-200 rounded-[8px] px-4 py-3">
+                  <p className="font-body text-[13px] text-red-700">{personalError}</p>
+                </div>
+              )}
+
               <div className="flex flex-col gap-4 sm:flex-row sm:gap-4">
-                <Field label="First Name" id="firstName" autoComplete="given-name" className="flex-1" />
-                <Field label="Last Name" id="lastName" autoComplete="family-name" className="flex-1" />
+                <Field
+                  label="First Name"
+                  id="firstName"
+                  autoComplete="given-name"
+                  className="flex-1"
+                  error={personalFieldErrors.firstname}
+                />
+                <Field
+                  label="Last Name"
+                  id="lastName"
+                  autoComplete="family-name"
+                  className="flex-1"
+                  error={personalFieldErrors.lastname}
+                />
               </div>
-              <Field label="Email" id="email" type="email" autoComplete="email" />
-              <Field label="Phone" id="phone" type="tel" autoComplete="tel" />
+              <Field
+                label="Email"
+                id="email"
+                type="email"
+                autoComplete="email"
+                error={personalFieldErrors.email}
+              />
+              <Field
+                label="Phone"
+                id="phone"
+                type="tel"
+                autoComplete="tel"
+                placeholder="10 digits, no dashes"
+                error={personalFieldErrors.phone}
+              />
               <div className="flex flex-col gap-4 sm:flex-row sm:gap-4">
-                <Field label="Password" id="password" type="password" autoComplete="new-password" className="flex-1" />
-                <Field label="Confirm Password" id="confirmPassword" type="password" autoComplete="new-password" className="flex-1" />
+                <Field
+                  label="Password"
+                  id="password"
+                  type="password"
+                  autoComplete="new-password"
+                  className="flex-1"
+                  error={personalFieldErrors.password}
+                />
+                <Field
+                  label="Confirm Password"
+                  id="confirmPassword"
+                  type="password"
+                  autoComplete="new-password"
+                  className="flex-1"
+                  error={personalFieldErrors.confirmPassword}
+                />
               </div>
               <button
                 type="submit"
-                className="w-full bg-[#2c4a34] rounded-[8px] py-[14px] font-display font-bold text-[16px] text-white uppercase hover:bg-[#253022] transition-colors cursor-pointer"
+                disabled={personalLoading}
+                className="w-full bg-[#2c4a34] rounded-[8px] py-[14px] font-display font-bold text-[16px] text-white uppercase hover:bg-[#253022] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                CREATE ACCOUNT
+                {personalLoading ? "Creating account..." : "CREATE ACCOUNT"}
               </button>
             </form>
           )}
 
           {/* ── Business Account Form ── */}
-          {accountType === "business" && (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5 w-full">
+          {accountType === "business" && businessStep === "form" && (
+            <form onSubmit={handleBusinessSubmit} className="flex flex-col gap-5 w-full">
+              {businessError && (
+                <div className="bg-red-50 border border-red-200 rounded-[8px] px-4 py-3">
+                  <p className="font-body text-[13px] text-red-700">{businessError}</p>
+                </div>
+              )}
+
               <p className="font-display font-bold text-[11px] text-[#b7a78c] uppercase tracking-widest">
                 ACCOUNT OWNER
               </p>
               <div className="flex flex-col gap-4 sm:flex-row sm:gap-4">
-                <Field label="First Name" id="ownerFirstName" autoComplete="given-name" className="flex-1" />
-                <Field label="Last Name" id="ownerLastName" autoComplete="family-name" className="flex-1" />
+                <Field
+                  label="First Name"
+                  id="ownerFirstName"
+                  autoComplete="given-name"
+                  className="flex-1"
+                  error={businessFieldErrors.firstName}
+                />
+                <Field
+                  label="Last Name"
+                  id="ownerLastName"
+                  autoComplete="family-name"
+                  className="flex-1"
+                  error={businessFieldErrors.lastName}
+                />
               </div>
+
               <p className="font-display font-bold text-[11px] text-[#b7a78c] uppercase tracking-widest">
                 BUSINESS INFO
               </p>
-              <Field label="Business Name" id="businessName" autoComplete="organization" />
+              <Field
+                label="Business Name"
+                id="businessName"
+                autoComplete="organization"
+                error={businessFieldErrors.businessName}
+              />
               <div className="flex flex-col gap-4 sm:flex-row sm:gap-4">
-                <Field label="Business Email" id="businessEmail" type="email" autoComplete="email" className="flex-1" />
-                <Field label="Business Phone" id="businessPhone" type="tel" autoComplete="tel" className="flex-1" />
+                <Field
+                  label="Business Email"
+                  id="businessEmail"
+                  type="email"
+                  autoComplete="email"
+                  className="flex-1"
+                  error={businessFieldErrors.businessEmail}
+                />
+                <Field
+                  label="Business Phone"
+                  id="businessPhone"
+                  type="tel"
+                  autoComplete="tel"
+                  placeholder="10 digits"
+                  className="flex-1"
+                  error={businessFieldErrors.businessPhone}
+                />
               </div>
 
               <div className="flex flex-col gap-2">
@@ -147,24 +343,64 @@ export default function SignupPage() {
                 />
               </div>
 
-              <Field label="Street Address" id="streetAddress" autoComplete="street-address" />
+              <Field
+                label="Street Address"
+                id="streetAddress"
+                autoComplete="street-address"
+                error={businessFieldErrors.streetAddress}
+              />
 
               <div className="flex gap-3">
-                <Field label="City" id="city" autoComplete="address-level2" className="flex-1" />
-                <Field label="State" id="state" autoComplete="address-level1" className="flex-1" />
-                <Field label="Zip" id="zip" autoComplete="postal-code" className="flex-1" />
+                <Field
+                  label="City"
+                  id="city"
+                  autoComplete="address-level2"
+                  className="flex-1"
+                  error={businessFieldErrors.city}
+                />
+                <Field
+                  label="State"
+                  id="state"
+                  autoComplete="address-level1"
+                  className="flex-1"
+                  error={businessFieldErrors.state}
+                />
+                <Field
+                  label="Zip"
+                  id="zip"
+                  autoComplete="postal-code"
+                  className="flex-1"
+                  error={businessFieldErrors.zip}
+                />
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-[#2c4a34] rounded-[8px] py-[14px] font-display font-bold text-[16px] text-white uppercase hover:bg-[#253022] transition-colors cursor-pointer"
+                disabled={businessLoading}
+                className="w-full bg-[#2c4a34] rounded-[8px] py-[14px] font-display font-bold text-[16px] text-white uppercase hover:bg-[#253022] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                CREATE BUSINESS ACCOUNT
+                {businessLoading ? "Submitting..." : "CONTINUE TO PAYMENT"}
               </button>
             </form>
           )}
 
-          {/* Log in link */}
+          {/* ── Business: payment step ── */}
+          {accountType === "business" && businessStep === "payment-pending" && (
+            <div className="flex flex-col gap-4 items-center text-center py-4">
+              <div className="w-12 h-12 rounded-full bg-[#f0f5ee] border border-[#9ca889] flex items-center justify-center">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M3 10h14M10 3l7 7-7 7" stroke="#2c4a34" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <h2 className="font-display font-bold text-[20px] text-[#423926]">
+                Almost there!
+              </h2>
+              <p className="font-body text-[14px] text-[#596155]">
+                Your business info has been submitted. The payment step is coming next — check back shortly.
+              </p>
+            </div>
+          )}
+
           <p className="font-body text-[13px] text-[#b7a78c]">
             Already have an account?{" "}
             <Link

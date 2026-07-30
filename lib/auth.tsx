@@ -22,7 +22,7 @@ export interface AuthUser {
 interface AuthContextValue {
   user: AuthUser | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<AuthUser>;
   logout: () => Promise<void>;
 }
 
@@ -46,13 +46,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string): Promise<AuthUser> => {
     const data = await apiFetch<AuthUser>("/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
     });
     setUser(data);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    return data;
   }, []);
 
   const logout = useCallback(async () => {
