@@ -1,6 +1,12 @@
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import {
+  getCategories,
+  getEnrichedBusinesses,
+  isNewBusiness,
+  searchBusinesses,
+} from "@/lib/directory";
 
 // Category icon assets from Figma (expire in 7 days — replace with /public SVGs)
 const ICON_FORK_KNIFE = "https://www.figma.com/api/mcp/asset/1d78dbba-5a49-4c0b-acf0-27729a6091d0";
@@ -20,86 +26,44 @@ const CATEGORIES = [
   { label: "Arts & Entertainment", icon: ICON_CLAPPERBOARD, href: "/search?category=arts-entertainment" },
 ];
 
-const GRID_CARDS = [
-  {
-    name: "The Waste Less Shop",
-    category: "Shop & Goods",
-    location: "Reno, NV",
-    description:
-      "A thoughtfully curated refill shop focused on clean, non-toxic living and locally sourced everyday essentials.",
-    photo: "/sasquatchsnacks.jpg",
-    isNew: false,
-    href: "/businesses/waste-less-shop",
-  },
-  {
-    name: "The Nest",
-    category: "Shop & Goods",
-    location: "Reno, NV",
-    description:
-      "A cozy neighborhood shop for home goods, gifts, and locally made finds.",
-    photo: "/thenest.jpg",
-    isNew: true,
-    href: "/businesses/the-nest",
-  },
-  {
-    name: "Sierra Water Gardens",
-    category: "Home & Garden",
-    location: "Reno, NV",
-    description:
-      "Reno's water garden and pond specialists, from aquatic plants to koi.",
-    photo: "/farmers1.JPG",
-    isNew: true,
-    href: "/businesses/sierra-water-gardens",
-  },
-];
+interface ResultCard {
+  name: string;
+  category: string;
+  location: string;
+  description: string;
+  photo?: string;
+  isNew: boolean;
+  href: string;
+}
 
-const LIST_ITEMS = [
-  {
-    name: "The Daily Grind",
-    category: "Food & Drink",
-    location: "Reno, NV",
-    description:
-      "Specialty coffee, pour-overs, and house-made pastries in a bright, welcoming corner spot.",
-    photo: "/breadcompany.JPG",
-    href: "/businesses/daily-grind",
-  },
-  {
-    name: "Midtown Roasters",
-    category: "Food & Drink",
-    location: "Reno, NV",
-    description:
-      "Small-batch roastery with seasonal blends, cold brew, and a cozy cafe nook.",
-    photo: "/modestmix.JPG",
-    href: "/businesses/midtown-roasters",
-  },
-  {
-    name: "The Coffee Club",
-    category: "Food & Drink",
-    location: "Reno, NV",
-    description:
-      "Community-focused cafe with espresso, tea, and a rotating selection of local treats.",
-    photo: "/market.JPG",
-    href: "/businesses/coffee-club",
-  },
-  {
-    name: "Brew & Bean",
-    category: "Food & Drink",
-    location: "Reno, NV",
-    description:
-      "Quick, high-quality coffee and breakfast sandwiches made with locally sourced ingredients.",
-    photo: "/thenest.jpg",
-    href: "/businesses/brew-bean",
-  },
-  {
-    name: "Sunrise Coffee Co.",
-    category: "Food & Drink",
-    location: "Reno, NV",
-    description:
-      "Family-owned coffee shop with a warm atmosphere and a daily breakfast menu.",
-    photo: "/farmers1.JPG",
-    href: "/businesses/sunrise-coffee",
-  },
-];
+async function getResultCards(query: string, category: string): Promise<ResultCard[]> {
+  if (query || category) {
+    const [results, categories] = await Promise.all([
+      searchBusinesses(query, category),
+      getCategories(),
+    ]);
+    const categoryNameById = new Map(categories.map((c) => [c.id, c.name]));
+
+    return results.map(({ business, bestMatch }) => ({
+      name: business.name,
+      category: categoryNameById.get(bestMatch.category_id) ?? "Uncategorized",
+      location: `${business.city}, ${business.state}`,
+      description: business.description ?? bestMatch.name,
+      isNew: isNewBusiness(business.created_at),
+      href: `/businesses/${business.slug}`,
+    }));
+  }
+
+  const businesses = await getEnrichedBusinesses();
+  return businesses.map((b) => ({
+    name: b.name,
+    category: b.categoryNames[0] ?? "Uncategorized",
+    location: `${b.city}, ${b.state}`,
+    description: b.description ?? "No description yet.",
+    isNew: b.isNew,
+    href: `/businesses/${b.slug}`,
+  }));
+}
 
 export default async function SearchPage({
   searchParams,
@@ -109,6 +73,13 @@ export default async function SearchPage({
   const params = await searchParams;
   const raw = params.q;
   const query = typeof raw === "string" ? raw : Array.isArray(raw) ? raw[0] : "";
+  const rawCategory = params.category;
+  const category =
+    typeof rawCategory === "string" ? rawCategory : Array.isArray(rawCategory) ? rawCategory[0] : "";
+
+  const allResults = await getResultCards(query, category);
+  const GRID_CARDS = allResults.slice(0, 3);
+  const LIST_ITEMS = allResults.slice(3);
 
   const resultCount = GRID_CARDS.length + LIST_ITEMS.length;
 
@@ -258,11 +229,13 @@ export default async function SearchPage({
             >
               {/* Photo */}
               <div className="relative h-[220px] w-full bg-[#c9d2cf] flex-shrink-0 rounded-t-[16px] overflow-hidden">
-                <img
-                  src={card.photo}
-                  alt={card.name}
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
+                {card.photo && (
+                  <img
+                    src={card.photo}
+                    alt={card.name}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                )}
                 {card.isNew && (
                   <div className="absolute top-[14px] left-[14px] bg-[#2c4a34] px-[10px] py-[5px] rounded-[4px]">
                     <span className="font-mono font-semibold text-[11px] text-white uppercase">
@@ -301,11 +274,13 @@ export default async function SearchPage({
             >
               {/* Photo */}
               <div className="relative h-[180px] w-full bg-[#c9d2cf] overflow-hidden">
-                <img
-                  src={card.photo}
-                  alt={card.name}
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
+                {card.photo && (
+                  <img
+                    src={card.photo}
+                    alt={card.name}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                )}
                 {card.isNew && (
                   <div className="absolute top-3 left-3 bg-[#2c4a34] px-2 py-1 rounded-[4px]">
                     <span className="font-mono font-semibold text-[10px] text-white uppercase">
@@ -344,11 +319,13 @@ export default async function SearchPage({
               >
                 {/* Thumbnail */}
                 <div className="relative w-[52px] h-[52px] md:w-[72px] md:h-[72px] flex-shrink-0 rounded-[8px] md:rounded-[12px] border border-[#dbe0d9] overflow-hidden bg-[#c9d2cf]">
-                  <img
-                    src={item.photo}
-                    alt={item.name}
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
+                  {item.photo && (
+                    <img
+                      src={item.photo}
+                      alt={item.name}
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  )}
                 </div>
 
                 {/* Content */}

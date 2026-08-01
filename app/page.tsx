@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import SearchBar from "@/components/SearchBar";
 import FollowCarousel from "@/components/FollowCarousel";
 import NeighborsCarousel from "@/components/NeighborsCarousel";
+import { getEnrichedBusinesses } from "@/lib/directory";
 
 /* ─────────────────────────────────────────────
    Figma image assets — 7-day URLs.
@@ -15,22 +16,11 @@ const IMG = {
   heroMobile:      "https://www.figma.com/api/mcp/asset/b1157f7d-5441-4f52-a6d4-855b00c1f5f8",
   wordmarkMobile:  "https://www.figma.com/api/mcp/asset/d338f53e-a458-48f6-bf2e-ed36c4aa1e68",
   aboutMobile:     "https://www.figma.com/api/mcp/asset/3f3fcc43-9c32-4a09-b6f6-ee9cd1fdfa26",
-  featuredPhoto:   "https://www.figma.com/api/mcp/asset/c2feba24-46cc-41d1-b134-0cd99b0b5961",
-  card1:           "https://www.figma.com/api/mcp/asset/38609162-eb44-4acf-a350-9bf0995dd3e4",
-  card2:           "https://www.figma.com/api/mcp/asset/574c1b7d-d6b7-45e4-8867-ce80fc90955e",
-  card3:           "https://www.figma.com/api/mcp/asset/c09a48fd-807b-4d1a-bf35-37048efcfbf4",
   ig1:             "/breadcompany.JPG",
   ig2:             "/farmers1.JPG",
   ig3:             "/modestmix.JPG",
   ig4:             "/sasquatchsnacks.jpg",
 };
-
-const BUSINESSES = [
-  { category: "Refill · Zero Waste",  name: "The White Line Shop",  neighborhood: "Wells Avenue",  description: "Eco-friendly household goods and a low-waste refill pantry.", img: IMG.card1, href: "/businesses/white-line-shop" },
-  { category: "Vintage · Home",        name: "The Nest",             neighborhood: "Midtown",        description: "Mid-century furniture, vintage textiles, and eccentric finds.", img: IMG.card2, href: "/businesses/the-nest" },
-  { category: "Garden · Nursery",      name: "Sierra Water Gardens", neighborhood: "Dickerson Road", description: "Rare succulents, terrariums, and clay pots along the river.", img: IMG.card3, href: "/businesses/sierra-water-gardens" },
-  { category: "Bakery · Coffee",       name: "Perenn Bakery",        neighborhood: "Riverside",      description: "Naturally leavened breads, seasonal pastries, and coffee roasted with care.", img: "/breadcompany.JPG", href: "/businesses/perenn-bakery" },
-];
 
 const MARQUEE_ITEMS = [
   "Made with intention", "Made in Reno, NV",
@@ -51,7 +41,24 @@ function ChevronRight({ color = "currentColor" }: { color?: string }) {
   );
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  const businesses = await getEnrichedBusinesses();
+
+  const carouselBusinesses = businesses.filter((b) => b.in_carousel);
+  const neighbors = (carouselBusinesses.length > 0 ? carouselBusinesses : businesses.slice(0, 4)).map(
+    (b) => ({
+      category: b.categoryNames[0] ?? "Local Business",
+      name: b.name,
+      neighborhood: `${b.city}, ${b.state}`,
+      description: b.description,
+      img: null,
+      href: `/businesses/${b.slug}`,
+    })
+  );
+
+  const featured = businesses.find((b) => b.is_featured) ?? businesses[0];
+  const featuredCategory = featured?.categoryNames[0] ?? "Local Business";
+
   return (
     <>
       <Header />
@@ -148,7 +155,7 @@ export default function HomePage() {
           MEET YOUR NEIGHBORS
       ════════════════════════════════ */}
 
-      <NeighborsCarousel businesses={BUSINESSES} />
+      <NeighborsCarousel businesses={neighbors} />
 
       {/* ════════════════════════════════
           ABOUT US
@@ -191,79 +198,63 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ════════════════════════════════
-          FEATURED BUSINESS — THE NEST
-      ════════════════════════════════ */}
+      {featured && (
+        <>
+          {/* ════════════════════════════════
+              FEATURED BUSINESS
+          ════════════════════════════════ */}
 
-      {/* Mobile */}
-      <section className="md:hidden bg-[#d9d1c7] flex flex-col">
-        <div className="flex flex-col gap-[14px] items-center text-center pt-[56px] pb-6 px-[30px]">
-          <p className="font-display font-bold text-[9px] text-[#6b7d67] tracking-[3px] uppercase w-full">Featured business</p>
-          <h2 className="font-display font-bold text-[30px] text-[#253022] leading-[38px] w-full">The Nest</h2>
-          <p className="font-display font-bold text-[9px] text-[#423926] tracking-[1.8px] uppercase w-full">
-            Vintage &amp; Decor · Woman-owned
-          </p>
-        </div>
-        <div className="px-5 pt-[10px]">
-          <div className="relative h-[300px] w-full rounded-[2px] overflow-hidden">
-            <img src={IMG.featuredPhoto} alt="The Nest" className="absolute inset-0 w-full h-full object-cover" />
-          </div>
-        </div>
-        <div className="flex flex-col gap-5 items-center text-center pt-7 pb-[56px] px-[30px]">
-          <p className="font-body italic text-[14px] text-[#253022] leading-6">
-            &ldquo;Shop Small. Shop Local. Be Awesome.&rdquo;
-          </p>
-          <p className="font-body text-[12px] text-[#423926] leading-[22px]">
-            The Nest is a Reno boutique overflowing with vintage treasures — mid-century furniture, vintage clothing, decor and the kind of finds you didn&apos;t know you were looking for.
-          </p>
-          <p className="font-body text-[12px] text-[#423926] leading-[22px]">
-            Woman-owned and operated, it&apos;s built on a simple philosophy: shop small, shop local, be awesome.
-          </p>
-          <Link href="/businesses/the-nest" className="bg-[#2c4a34] text-[#faf6e9] font-display font-bold text-[10px] tracking-[1.8px] uppercase px-7 py-4 rounded-[2px] hover:bg-[#253022] transition-colors">
-            View full profile
-          </Link>
-        </div>
-      </section>
-
-      {/* Desktop */}
-      <section className="hidden md:block relative bg-[#faf6e9] h-[648px] overflow-hidden">
-        <div className="absolute left-20 right-20 top-24">
-          <p className="font-display font-bold text-[13px] text-[#b7a78c] uppercase tracking-wider">FEATURED BUSINESS</p>
-          <p className="font-display font-bold text-[40px] text-[#151814] mt-[6px]">THE NEST</p>
-          <p className="font-display font-bold text-[13px] text-[#596155] uppercase mt-1">VINTAGE &amp; DECOR</p>
-
-          {/* Left: photo + owner card */}
-          <div className="absolute top-[116px] left-0 w-[560px]">
-            <div className="relative h-[340px] w-full rounded-[12px] overflow-hidden bg-[#b7a78c]">
-              <img src={IMG.featuredPhoto} alt="The Nest" className="absolute inset-0 w-full h-full object-cover" />
+          {/* Mobile */}
+          <section className="md:hidden bg-[#d9d1c7] flex flex-col">
+            <div className="flex flex-col gap-[14px] items-center text-center pt-[56px] pb-6 px-[30px]">
+              <p className="font-display font-bold text-[9px] text-[#6b7d67] tracking-[3px] uppercase w-full">Featured business</p>
+              <h2 className="font-display font-bold text-[30px] text-[#253022] leading-[38px] w-full">{featured.name}</h2>
+              <p className="font-display font-bold text-[9px] text-[#423926] tracking-[1.8px] uppercase w-full">
+                {featuredCategory}
+              </p>
             </div>
-            <div className="absolute bottom-[-12px] left-4 bg-white rounded-[10px] shadow-[0px_4px_16px_rgba(37,48,34,0.10)] w-[320px] h-[148px] flex items-start p-4 gap-4 overflow-hidden">
-              <div className="w-[60px] h-[60px] rounded-full flex-shrink-0 overflow-hidden bg-[#d9d4cc]">
-                <img src="/thenest.jpg" alt="" className="w-full h-full object-cover" />
-              </div>
-              <div className="flex flex-col gap-[3px] overflow-hidden">
-                <p className="font-display font-bold text-[11px] text-[#b7a78c] uppercase">WOMAN-OWNED &amp; OPERATED</p>
-                <p className="font-display font-bold text-[16px] text-[#151814]">The Nest</p>
-                <p className="font-display text-[12px] text-[#596155]">Locally run, Reno since day one</p>
-                <p className="font-display text-[12px] text-[#596155] mt-2">&ldquo;Shop Small. Shop Local. Be Awesome.&rdquo;</p>
+            <div className="px-5 pt-[10px]">
+              <div className="relative h-[300px] w-full rounded-[2px] overflow-hidden bg-[#c9d2cf] flex items-center justify-center">
+                <p className="font-body text-[13px] text-[#8c9c81]">Photo coming soon</p>
               </div>
             </div>
-          </div>
+            <div className="flex flex-col gap-5 items-center text-center pt-7 pb-[56px] px-[30px]">
+              <p className="font-body text-[12px] text-[#423926] leading-[22px]">
+                {featured.description ?? "No description provided yet."}
+              </p>
+              <Link href={`/businesses/${featured.slug}`} className="bg-[#2c4a34] text-[#faf6e9] font-display font-bold text-[10px] tracking-[1.8px] uppercase px-7 py-4 rounded-[2px] hover:bg-[#253022] transition-colors">
+                View full profile
+              </Link>
+            </div>
+          </section>
 
-          {/* Right: text */}
-          <div className="absolute top-[116px] left-[620px] w-[560px] flex flex-col gap-7">
-            <p className="font-display text-[17px] text-[#151814] leading-relaxed">
-              The Nest is a Reno boutique overflowing with vintage treasures — mid-century furniture, vintage clothing, decor, and one-of-a-kind finds. Every piece is hand-selected for character, not just condition.
-            </p>
-            <p className="font-display text-[17px] text-[#151814] leading-relaxed">
-              Woman-owned and operated, The Nest is built on a simple philosophy: shop small, shop local, be awesome. It&apos;s proof that supporting an independent business can be just as fun as it is meaningful.
-            </p>
-            <Link href="/businesses/the-nest" className="inline-flex items-center gap-3 bg-[#2c4a34] text-white font-display font-bold text-[16px] uppercase px-6 h-12 rounded-[8px] w-fit hover:bg-[#253022] transition-colors">
-              VIEW FULL PROFILE <ChevronRight color="white" />
-            </Link>
-          </div>
-        </div>
-      </section>
+          {/* Desktop */}
+          <section className="hidden md:block relative bg-[#faf6e9] py-24 overflow-hidden">
+            <div className="px-20">
+              <p className="font-display font-bold text-[13px] text-[#b7a78c] uppercase tracking-wider">FEATURED BUSINESS</p>
+              <p className="font-display font-bold text-[40px] text-[#151814] mt-[6px]">{featured.name.toUpperCase()}</p>
+              <p className="font-display font-bold text-[13px] text-[#596155] uppercase mt-1">{featuredCategory}</p>
+
+              <div className="flex gap-20 mt-[48px]">
+                {/* Left: photo placeholder */}
+                <div className="relative h-[340px] w-[560px] flex-shrink-0 rounded-[12px] overflow-hidden bg-[#c9d2cf] flex items-center justify-center">
+                  <p className="font-body text-[15px] text-[#8c9c81]">Photo coming soon</p>
+                </div>
+
+                {/* Right: text */}
+                <div className="flex flex-col gap-7 flex-1">
+                  <p className="font-display text-[17px] text-[#151814] leading-relaxed">
+                    {featured.description ?? "No description provided yet."}
+                  </p>
+                  <Link href={`/businesses/${featured.slug}`} className="inline-flex items-center gap-3 bg-[#2c4a34] text-white font-display font-bold text-[16px] uppercase px-6 h-12 rounded-[8px] w-fit hover:bg-[#253022] transition-colors">
+                    VIEW FULL PROFILE <ChevronRight color="white" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </section>
+        </>
+      )}
 
       {/* ════════════════════════════════
           BECOME A MEMBER

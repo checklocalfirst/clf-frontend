@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import SearchBar from "@/components/SearchBar";
+import { getBusinessBySlug } from "@/lib/directory";
+import { ApiError } from "@/lib/api";
 
 // Figma assets — replace with local /public paths when available
 const HERO_IMG = "https://www.figma.com/api/mcp/asset/bd56b993-c2dd-4af0-b36e-bfe6f39a6b28";
@@ -9,9 +12,6 @@ const T2021_IMG = "https://www.figma.com/api/mcp/asset/e7b5c2b2-3f21-4eb6-af5c-0
 const T2022_IMG = "https://www.figma.com/api/mcp/asset/26fdb531-89d2-47c0-96fd-bd03ff76c867";
 const T2023_IMG = "https://www.figma.com/api/mcp/asset/9aac0b2b-1d50-4e9d-95a0-fc41767c86c3";
 const PILOT_BADGE_IMG = "https://www.figma.com/api/mcp/asset/c74691d5-b634-4596-a6bd-48d2a03b099a";
-
-const ABOUT_TEXT =
-  "A thoughtfully curated refill shop focused on clean, non-toxic living. Offering sustainable everyday essentials, refillable products, and locally sourced goods that make intentional living feel easy and elevated.";
 
 const OWNER_INTRO =
   "[Add a short, warm introduction to the owner here — who they are and what led them to open this business.]";
@@ -36,7 +36,24 @@ const TIMELINE = [
 
 const TICKER_ITEM = "10% OFF YOUR FIRST VISIT";
 
-export default function BusinessDetailPage() {
+export default async function BusinessDetailPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+
+  let business;
+  try {
+    business = await getBusinessBySlug(slug);
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) notFound();
+    throw err;
+  }
+
+  const fullAddress = `${business.address}, ${business.city}, ${business.state} ${business.zip}`;
+  const phoneDigits = business.phone.replace(/\D/g, "");
+
   return (
     <main className="bg-[#faf6e9]">
       <Header />
@@ -92,16 +109,16 @@ export default function BusinessDetailPage() {
             ← All Businesses
           </Link>
           <h1 className="font-display font-bold text-[64px] text-[#423926] tracking-[-0.32px] leading-none">
-            THE WASTE LESS SHOP
+            {business.name.toUpperCase()}
           </h1>
           <p className="font-body text-[20px] text-[rgba(66,57,38,0.8)] max-w-[500px]">
-            7300 Rancharrah Pkwy Ste 120, Reno, NV 89511
+            {fullAddress}
           </p>
         </div>
 
         <div className="flex items-center gap-[16px] flex-shrink-0">
           <a
-            href="tel:+17752223344"
+            href={`tel:+1${phoneDigits}`}
             className="bg-[#423926] text-[#f3f5e7] font-display font-bold text-[20px] tracking-[1px] px-[28px] py-[13px] rounded-full whitespace-nowrap hover:bg-[#2c4a34] transition-colors"
           >
             Call Now
@@ -176,13 +193,13 @@ export default function BusinessDetailPage() {
           ← All Businesses
         </Link>
         <h1 className="font-display font-bold text-[30px] text-[#423926] tracking-[-0.15px] leading-tight mt-[12px]">
-          THE WASTE LESS SHOP
+          {business.name.toUpperCase()}
         </h1>
         <p className="font-body text-[20px] text-[rgba(66,57,38,0.8)] mt-[16px]">
-          7300 Rancharrah Pkwy Ste 120, Reno, NV 89511
+          {fullAddress}
         </p>
         <a
-          href="tel:+17752223344"
+          href={`tel:+1${phoneDigits}`}
           className="flex items-center justify-center w-full bg-[#423926] text-[#f3f5e7] font-display font-bold text-[20px] tracking-[1px] py-[13px] rounded-full mt-[24px] hover:bg-[#2c4a34] transition-colors"
         >
           Call Now
@@ -212,7 +229,7 @@ export default function BusinessDetailPage() {
 
       {/* ── Mobile: Hero Photo ── */}
       <div className="md:hidden mx-[16px] mt-[24px] h-[240px] bg-[#c96f47] rounded-[12px] overflow-hidden">
-        <img src={HERO_IMG} alt="The Waste Less Shop storefront" className="w-full h-full object-cover" />
+        <img src={HERO_IMG} alt={`${business.name} storefront`} className="w-full h-full object-cover" />
       </div>
 
       {/* ── Desktop: Hero Photo + About + Pilot Badge ── */}
@@ -221,11 +238,11 @@ export default function BusinessDetailPage() {
         <div className="relative h-[700px] bg-[#b7a78c] overflow-hidden">
           <img
             src={HERO_IMG}
-            alt="The Waste Less Shop storefront"
+            alt={`${business.name} storefront`}
             className="absolute inset-0 w-full h-full object-cover"
           />
           <p className="absolute bottom-0 w-full text-center font-display text-[14px] text-[rgba(66,57,38,0.8)] tracking-[0.56px] py-[8px] bg-gradient-to-t from-[#b7a78c]/40 to-transparent">
-            THE WASTE LESS SHOP — STOREFRONT PHOTO
+            {business.name.toUpperCase()} — STOREFRONT PHOTO
           </p>
         </div>
 
@@ -235,7 +252,7 @@ export default function BusinessDetailPage() {
             ABOUT
           </h2>
           <p className="font-body text-[20px] text-[rgba(66,57,38,0.8)] leading-[1.6] mt-[16px] max-w-[760px]">
-            {ABOUT_TEXT}
+            {business.description ?? "No description provided yet."}
           </p>
         </div>
 
@@ -259,7 +276,7 @@ export default function BusinessDetailPage() {
           ABOUT
         </h2>
         <p className="font-body text-[20px] text-[rgba(66,57,38,0.8)] leading-[1.6] mt-[20px]">
-          {ABOUT_TEXT}
+          {business.description ?? "No description provided yet."}
         </p>
       </div>
 
