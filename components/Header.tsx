@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import { useAuth, type AccountType } from "@/lib/auth";
 
 const NAV_LINKS = [
   { label: "Home", href: "/" },
@@ -12,8 +13,29 @@ const NAV_LINKS = [
   { label: "Search", href: "/search" },
 ];
 
+function accountHref(accountType: AccountType) {
+  if (accountType === "business") return "/dashboard";
+  if (accountType === "admin") return "/admin";
+  return "/account";
+}
+
+function AccountIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <circle cx="8" cy="5.5" r="2.75" stroke="white" strokeWidth="1.4" />
+      <path
+        d="M2.5 14c0-3 2.5-5 5.5-5s5.5 2 5.5 5"
+        stroke="white"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 export default function Header() {
   const pathname = usePathname();
+  const { user, loading, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
   // Close on route change
@@ -51,12 +73,24 @@ export default function Header() {
               ))}
             </nav>
 
-            <Link
-              href="/login"
-              className="bg-[#2c4a34] text-white font-display font-bold text-[20px] uppercase px-6 py-[10px] rounded-[6px] whitespace-nowrap hover:bg-[#253022] transition-colors"
-            >
-              Log In
-            </Link>
+            {!loading && (
+              user ? (
+                <Link
+                  href={accountHref(user.accountType)}
+                  aria-label="My account"
+                  className="flex-shrink-0 bg-[#2c4a34] w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#253022] transition-colors"
+                >
+                  <AccountIcon />
+                </Link>
+              ) : (
+                <Link
+                  href="/login"
+                  className="bg-[#2c4a34] text-white font-display font-bold text-[20px] uppercase px-6 py-[10px] rounded-[6px] whitespace-nowrap hover:bg-[#253022] transition-colors"
+                >
+                  Log In
+                </Link>
+              )
+            )}
           </div>
         </div>
 
@@ -99,8 +133,20 @@ export default function Header() {
                 <path d="M11 11L15.5 15.5" stroke="#151814" strokeWidth="1.4" strokeLinecap="round" />
               </svg>
             </Link>
-            <Link href="/account" aria-label="My account">
-              <div className="w-[15px] h-[15px] border-[1.4px] border-[#151814] rounded-[2px]" />
+            <Link href={user ? accountHref(user.accountType) : "/login"} aria-label="My account">
+              {user ? (
+                <svg width="17" height="17" viewBox="0 0 16 16" fill="none">
+                  <circle cx="8" cy="5.5" r="2.75" stroke="#151814" strokeWidth="1.4" />
+                  <path
+                    d="M2.5 14c0-3 2.5-5 5.5-5s5.5 2 5.5 5"
+                    stroke="#151814"
+                    strokeWidth="1.4"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              ) : (
+                <div className="w-[15px] h-[15px] border-[1.4px] border-[#151814] rounded-[2px]" />
+              )}
             </Link>
           </div>
         </div>
@@ -147,20 +193,43 @@ export default function Header() {
 
           {/* Bottom CTAs */}
           <div className="px-8 pb-12 flex flex-col gap-3 flex-shrink-0">
-            <Link
-              href="/signup"
-              onClick={() => setMenuOpen(false)}
-              className="w-full bg-[#9ca889] text-[#253022] font-display font-bold text-[15px] uppercase text-center py-4 rounded-[8px] hover:opacity-90 transition-opacity"
-            >
-              Create Account
-            </Link>
-            <Link
-              href="/login"
-              onClick={() => setMenuOpen(false)}
-              className="w-full border border-[rgba(250,246,233,0.3)] text-[#faf6e9] font-display font-bold text-[15px] uppercase text-center py-4 rounded-[8px] hover:border-[rgba(250,246,233,0.6)] transition-colors"
-            >
-              Log In
-            </Link>
+            {user ? (
+              <>
+                <Link
+                  href={accountHref(user.accountType)}
+                  onClick={() => setMenuOpen(false)}
+                  className="w-full bg-[#9ca889] text-[#253022] font-display font-bold text-[15px] uppercase text-center py-4 rounded-[8px] hover:opacity-90 transition-opacity"
+                >
+                  My Account
+                </Link>
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    logout();
+                  }}
+                  className="w-full border border-[rgba(250,246,233,0.3)] text-[#faf6e9] font-display font-bold text-[15px] uppercase text-center py-4 rounded-[8px] hover:border-[rgba(250,246,233,0.6)] transition-colors cursor-pointer"
+                >
+                  Log Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/signup"
+                  onClick={() => setMenuOpen(false)}
+                  className="w-full bg-[#9ca889] text-[#253022] font-display font-bold text-[15px] uppercase text-center py-4 rounded-[8px] hover:opacity-90 transition-opacity"
+                >
+                  Create Account
+                </Link>
+                <Link
+                  href="/login"
+                  onClick={() => setMenuOpen(false)}
+                  className="w-full border border-[rgba(250,246,233,0.3)] text-[#faf6e9] font-display font-bold text-[15px] uppercase text-center py-4 rounded-[8px] hover:border-[rgba(250,246,233,0.6)] transition-colors"
+                >
+                  Log In
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}

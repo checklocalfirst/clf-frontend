@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import StripeCheckout from "@/components/StripeCheckout";
 import { apiFetch, ApiError } from "@/lib/api";
 
 type AccountType = "personal" | "business";
@@ -65,7 +66,9 @@ export default function SignupPage() {
   const [businessLoading, setBusinessLoading] = useState(false);
   const [businessError, setBusinessError] = useState("");
   const [businessFieldErrors, setBusinessFieldErrors] = useState<Record<string, string>>({});
-  const [businessStep, setBusinessStep] = useState<"form" | "payment-pending">("form");
+  const [businessStep, setBusinessStep] = useState<"form" | "payment" | "success">("form");
+  const [businessClientSecret, setBusinessClientSecret] = useState("");
+  const [businessTier, setBusinessTier] = useState<"basic" | "premium">("basic");
 
   async function handlePersonalSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -124,21 +127,21 @@ export default function SignupPage() {
       const data = await apiFetch<{ client_secret: string }>("/stripe/signup/business/checkout", {
         method: "POST",
         body: JSON.stringify({
-          firstName: fd.get("ownerFirstName"),
-          lastName: fd.get("ownerLastName"),
-          businessName: fd.get("businessName"),
-          businessEmail: fd.get("businessEmail"),
-          businessPhone: fd.get("businessPhone"),
+          firstname: fd.get("ownerFirstName"),
+          lastname: fd.get("ownerLastName"),
+          name: fd.get("businessName"),
+          email: fd.get("businessEmail"),
+          phone: fd.get("businessPhone"),
           description: fd.get("description"),
-          streetAddress: fd.get("streetAddress"),
+          address: fd.get("streetAddress"),
           city: fd.get("city"),
           state: fd.get("state"),
           zip: fd.get("zip"),
+          business_tier: businessTier,
         }),
       });
-      // Store client_secret for the payment page
-      sessionStorage.setItem("clf_biz_secret", data.client_secret);
-      setBusinessStep("payment-pending");
+      setBusinessClientSecret(data.client_secret);
+      setBusinessStep("payment");
     } catch (err) {
       if (err instanceof ApiError) {
         if (err.fieldErrors) {
@@ -292,14 +295,14 @@ export default function SignupPage() {
                   id="ownerFirstName"
                   autoComplete="given-name"
                   className="flex-1"
-                  error={businessFieldErrors.firstName}
+                  error={businessFieldErrors.firstname}
                 />
                 <Field
                   label="Last Name"
                   id="ownerLastName"
                   autoComplete="family-name"
                   className="flex-1"
-                  error={businessFieldErrors.lastName}
+                  error={businessFieldErrors.lastname}
                 />
               </div>
 
@@ -310,7 +313,7 @@ export default function SignupPage() {
                 label="Business Name"
                 id="businessName"
                 autoComplete="organization"
-                error={businessFieldErrors.businessName}
+                error={businessFieldErrors.name}
               />
               <div className="flex flex-col gap-4 sm:flex-row sm:gap-4">
                 <Field
@@ -319,7 +322,7 @@ export default function SignupPage() {
                   type="email"
                   autoComplete="email"
                   className="flex-1"
-                  error={businessFieldErrors.businessEmail}
+                  error={businessFieldErrors.email}
                 />
                 <Field
                   label="Business Phone"
@@ -328,7 +331,7 @@ export default function SignupPage() {
                   autoComplete="tel"
                   placeholder="10 digits"
                   className="flex-1"
-                  error={businessFieldErrors.businessPhone}
+                  error={businessFieldErrors.phone}
                 />
               </div>
 
@@ -347,7 +350,7 @@ export default function SignupPage() {
                 label="Street Address"
                 id="streetAddress"
                 autoComplete="street-address"
-                error={businessFieldErrors.streetAddress}
+                error={businessFieldErrors.address}
               />
 
               <div className="flex gap-3">
@@ -374,6 +377,37 @@ export default function SignupPage() {
                 />
               </div>
 
+              <div className="flex flex-col gap-2">
+                <p className={labelCls}>Plan</p>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setBusinessTier("basic")}
+                    className={`flex-1 border rounded-[8px] px-4 py-3 text-left transition-colors cursor-pointer ${
+                      businessTier === "basic"
+                        ? "border-[#2c4a34] bg-[#f0f5ee]"
+                        : "border-[#dbe0d9] bg-white hover:border-[#b7a78c]"
+                    }`}
+                  >
+                    <p className="font-display font-bold text-[14px] text-[#423926]">BASIC</p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBusinessTier("premium")}
+                    className={`flex-1 border rounded-[8px] px-4 py-3 text-left transition-colors cursor-pointer ${
+                      businessTier === "premium"
+                        ? "border-[#2c4a34] bg-[#f0f5ee]"
+                        : "border-[#dbe0d9] bg-white hover:border-[#b7a78c]"
+                    }`}
+                  >
+                    <p className="font-display font-bold text-[14px] text-[#423926]">PREMIUM</p>
+                  </button>
+                </div>
+                {businessFieldErrors.business_tier && (
+                  <p className="font-body text-[12px] text-red-600">{businessFieldErrors.business_tier}</p>
+                )}
+              </div>
+
               <button
                 type="submit"
                 disabled={businessLoading}
@@ -385,7 +419,22 @@ export default function SignupPage() {
           )}
 
           {/* ── Business: payment step ── */}
-          {accountType === "business" && businessStep === "payment-pending" && (
+          {accountType === "business" && businessStep === "payment" && (
+            <div className="flex flex-col gap-5 w-full">
+              <p className="font-body text-[13px] text-[#596155]">
+                Your business info is saved — enter payment details to finish signing up.
+              </p>
+              <StripeCheckout
+                clientSecret={businessClientSecret}
+                returnPath="/signup"
+                submitLabel="COMPLETE SIGNUP"
+                onSuccess={() => setBusinessStep("success")}
+              />
+            </div>
+          )}
+
+          {/* ── Business: success step ── */}
+          {accountType === "business" && businessStep === "success" && (
             <div className="flex flex-col gap-4 items-center text-center py-4">
               <div className="w-12 h-12 rounded-full bg-[#f0f5ee] border border-[#9ca889] flex items-center justify-center">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -393,10 +442,10 @@ export default function SignupPage() {
                 </svg>
               </div>
               <h2 className="font-display font-bold text-[20px] text-[#423926]">
-                Almost there!
+                Payment received!
               </h2>
               <p className="font-body text-[14px] text-[#596155]">
-                Your business info has been submitted. The payment step is coming next — check back shortly.
+                Check your email for a link to set up your login and finish activating your business account.
               </p>
             </div>
           )}
