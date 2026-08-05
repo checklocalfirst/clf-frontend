@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono, Fragment_Mono, JetBrains_Mono } from "next/font/google";
 import { AuthProvider } from "@/lib/auth";
+import { ToastProvider } from "@/components/dashboard/ToastProvider";
 import "./globals.css";
 
 const ibmPlexMono = IBM_Plex_Mono({
@@ -37,7 +38,9 @@ export default function RootLayout({
       className={`${ibmPlexMono.variable} ${fragmentMono.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[#faf8f5]">
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            <ToastProvider>{children}</ToastProvider>
+          </AuthProvider>
         </body>
     </html>
   );

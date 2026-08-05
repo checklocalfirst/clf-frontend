@@ -7,7 +7,11 @@
       "Bash(node -e ' *)",
       "Bash(npx tsc *)",
       "Bash(npx eslint *)",
-      "Bash(git stash *)"
+      "Bash(git stash *)",
+      "Bash(curl -s -m 20 -o C:/Users/Justy/AppData/Local/Temp/claude/C--Users-Justy-Desktop-checklocalfirstfrontend/20817609-97ad-40aa-a87b-fbc56db5105d/scratchpad/search_response.html -w 'HTTP %{http_code}\\\\n' http://localhost:3000/search?q=nest)",
+      "Bash(curl -s -o /tmp/home3002.html -w \"STATUS:%{http_code}\\\\n\" http://localhost:3002/)",
+      "Read(//tmp/**)",
+      "Bash(awk '{print $5, $9}')"
     ]
   }
 }

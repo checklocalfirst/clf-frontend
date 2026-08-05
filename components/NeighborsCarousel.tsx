@@ -133,7 +133,7 @@ export default function NeighborsCarousel({ businesses }: { businesses: Business
                   <img src={b.img} alt={b.name} className="absolute inset-0 w-full h-full object-cover" />
                 )}
               </div>
-              <p className="font-body text-[20px] text-[#596155] leading-[1.5]">
+              <p className="font-body text-[20px] text-[#596155] leading-[1.5] line-clamp-2">
                 {b.description ?? b.neighborhood}
               </p>
             </Link>

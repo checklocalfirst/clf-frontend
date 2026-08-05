@@ -2,39 +2,16 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import SearchBar from "@/components/SearchBar";
-import { getBusinessBySlug } from "@/lib/directory";
+import TrackedLink from "@/components/TrackedLink";
+import DiscountRedeemButton from "@/components/DiscountRedeemButton";
+import { getBusinessBySlug, getBusinessPhotos, trackBusinessEvent } from "@/lib/directory";
+import { getPublicDiscounts } from "@/lib/business-dashboard";
 import { ApiError } from "@/lib/api";
 
 // Figma assets — replace with local /public paths when available
 const HERO_IMG = "https://www.figma.com/api/mcp/asset/bd56b993-c2dd-4af0-b36e-bfe6f39a6b28";
 const OWNER_IMG = "https://www.figma.com/api/mcp/asset/a9b5f067-3110-41a8-829f-d20441fca1ce";
-const T2021_IMG = "https://www.figma.com/api/mcp/asset/e7b5c2b2-3f21-4eb6-af5c-07edd654c5fd";
-const T2022_IMG = "https://www.figma.com/api/mcp/asset/26fdb531-89d2-47c0-96fd-bd03ff76c867";
-const T2023_IMG = "https://www.figma.com/api/mcp/asset/9aac0b2b-1d50-4e9d-95a0-fc41767c86c3";
 const PILOT_BADGE_IMG = "https://www.figma.com/api/mcp/asset/c74691d5-b634-4596-a6bd-48d2a03b099a";
-
-const OWNER_INTRO =
-  "[Add a short, warm introduction to the owner here — who they are and what led them to open this business.]";
-
-const TIMELINE = [
-  {
-    year: "2021",
-    img: T2021_IMG,
-    desc: "Started questioning the amount of plastic waste in everyday household products. Began experimenting with refillable alternatives at home.",
-  },
-  {
-    year: "2022",
-    img: T2022_IMG,
-    desc: "Launched a small pop-up refill station at the Reno farmers market. The response from the community was immediate and overwhelming.",
-  },
-  {
-    year: "2023",
-    img: T2023_IMG,
-    desc: "Opened the doors to the permanent storefront at Rancharrah Parkway — a full refill shop offering clean, non-toxic everyday essentials.",
-  },
-];
-
-const TICKER_ITEM = "10% OFF YOUR FIRST VISIT";
 
 export default async function BusinessDetailPage({
   params,
@@ -47,12 +24,48 @@ export default async function BusinessDetailPage({
   try {
     business = await getBusinessBySlug(slug);
   } catch (err) {
-    if (err instanceof ApiError && err.status === 404) notFound();
+    // The backend doesn't cleanly 404 an unknown slug — a missing row surfaces as a
+    // 500 with Supabase's raw `.single()` error instead. Treat that the same as a 404.
+    const isMissing =
+      err instanceof ApiError &&
+      (err.status === 404 || err.message.includes("Cannot coerce the result to a single JSON object"));
+    if (isMissing) notFound();
     throw err;
   }
 
+  await trackBusinessEvent(slug, "page_view");
+
+  const discounts = await getPublicDiscounts(slug).catch(() => []);
+  const activeDiscount = discounts[0] ?? null;
+
+  const photos = await getBusinessPhotos(slug).catch(() => []);
+  const approvedPhotos = photos
+    .filter((p) => p.approved)
+    .sort((a, b) => a.display_order - b.display_order);
+  const listingPhoto = approvedPhotos.find((p) => p.photo_type === "listing");
+  const ownerPhoto = approvedPhotos.find((p) => p.photo_type === "owner");
+  const timelinePhotos = approvedPhotos.filter((p) => p.photo_type === "timeline");
+  const heroPhotoUrl = listingPhoto?.photo_url ?? HERO_IMG;
+  const ownerPhotoUrl = ownerPhoto?.photo_url ?? OWNER_IMG;
+
   const fullAddress = `${business.address}, ${business.city}, ${business.state} ${business.zip}`;
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`;
   const phoneDigits = business.phone.replace(/\D/g, "");
+
+  const timelineEntries = (
+    [
+      { slot: 1 as const, year: business.timeline_year_1, desc: business.timeline_description_1 },
+      { slot: 2 as const, year: business.timeline_year_2, desc: business.timeline_description_2 },
+      { slot: 3 as const, year: business.timeline_year_3, desc: business.timeline_description_3 },
+    ] satisfies { slot: 1 | 2 | 3; year: string | null; desc: string | null }[]
+  )
+    .filter((t): t is { slot: 1 | 2 | 3; year: string; desc: string } => !!t.year && !!t.desc)
+    .map((t) => ({
+      ...t,
+      img: timelinePhotos.find((p) => p.timeline_slot === t.slot)?.photo_url,
+    }));
+  const showTimeline = business.business_tier === "premium" && timelineEntries.length > 0;
+  const showOwnerSection = !!business.about_owner?.trim() && !!ownerPhoto;
 
   return (
     <main className="bg-[#faf6e9]">
@@ -69,6 +82,8 @@ export default async function BusinessDetailPage({
       </div>
 
       {/* ── Discount Banner ── */}
+      {activeDiscount && (
+      <>
       {/* Desktop: animated ticker */}
       <div className="hidden md:block relative bg-[#bc6239] h-[56px] overflow-hidden">
         <div
@@ -78,7 +93,7 @@ export default async function BusinessDetailPage({
           {Array.from({ length: 16 }).map((_, i) => (
             <span key={i} className="flex items-center shrink-0" style={{ width: "420px" }}>
               <span className="font-display font-bold text-[18px] text-white whitespace-nowrap">
-                {TICKER_ITEM}
+                {activeDiscount.description}
               </span>
               <span className="inline-block w-[6px] h-[6px] rounded-full bg-white ml-[12px]" />
             </span>
@@ -86,24 +101,33 @@ export default async function BusinessDetailPage({
         </div>
         <div className="absolute inset-y-0 left-0 w-[70px] bg-gradient-to-r from-[#bc6239] to-transparent z-10 pointer-events-none" />
         <div className="absolute inset-y-0 right-0 w-[222px] bg-gradient-to-l from-[#bc6239] to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-[22px] top-[11px] z-20 bg-[#faf6e9] rounded-full h-[34px] flex items-center px-[16px]">
-          <span className="font-display font-bold text-[12px] text-[#bc6239] whitespace-nowrap">
-            SIGN UP TO USE DISCOUNT
-          </span>
-        </div>
+        <DiscountRedeemButton
+          slug={business.slug}
+          discountId={activeDiscount.id}
+          className="absolute right-[22px] top-[11px] z-20 bg-[#faf6e9] rounded-full h-[34px] flex items-center px-[16px] cursor-pointer hover:opacity-90 transition-opacity"
+          textClassName="font-display font-bold text-[12px] text-[#bc6239] whitespace-nowrap"
+        />
       </div>
       {/* Mobile: static bar */}
-      <div className="md:hidden bg-[#253022] h-[40px] flex items-center justify-center px-4">
-        <p className="font-display font-bold text-[12px] text-[#faf6e9] text-center whitespace-nowrap">
-          10% OFF YOUR FIRST VISIT — SIGN UP TO USE DISCOUNT
+      <div className="md:hidden bg-[#253022] h-[40px] flex items-center justify-center gap-[8px] px-4">
+        <p className="font-display font-bold text-[12px] text-[#faf6e9] text-center whitespace-nowrap overflow-hidden text-ellipsis">
+          {activeDiscount.description}
         </p>
+        <DiscountRedeemButton
+          slug={business.slug}
+          discountId={activeDiscount.id}
+          className="flex-shrink-0 bg-[#faf6e9] rounded-full h-[26px] flex items-center px-[10px] cursor-pointer hover:opacity-90 transition-opacity"
+          textClassName="font-display font-bold text-[10px] text-[#253022] whitespace-nowrap"
+        />
       </div>
+      </>
+      )}
 
       {/* ── Desktop: Business Info Bar ── */}
       <div className="hidden md:flex items-center justify-between bg-[#faf6e9] min-h-[275px] px-[64px] pt-[48px] pb-[32px] gap-[32px]">
         <div className="flex flex-col gap-[10px] min-w-0">
           <Link
-            href="/businesses"
+            href="/search"
             className="font-body text-[20px] text-[rgba(66,57,38,0.8)] whitespace-nowrap hover:opacity-70 transition-opacity"
           >
             ← All Businesses
@@ -111,21 +135,149 @@ export default async function BusinessDetailPage({
           <h1 className="font-display font-bold text-[64px] text-[#423926] tracking-[-0.32px] leading-none">
             {business.name.toUpperCase()}
           </h1>
-          <p className="font-body text-[20px] text-[rgba(66,57,38,0.8)] max-w-[500px]">
+          <TrackedLink
+            slug={business.slug}
+            event="address_click"
+            href={mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block font-body text-[20px] text-[rgba(66,57,38,0.8)] max-w-[500px] hover:opacity-70 transition-opacity"
+          >
             {fullAddress}
-          </p>
+          </TrackedLink>
         </div>
 
         <div className="flex items-center gap-[16px] flex-shrink-0">
-          <a
+          <TrackedLink
+            slug={business.slug}
+            event="call_click"
             href={`tel:+1${phoneDigits}`}
             className="bg-[#423926] text-[#f3f5e7] font-display font-bold text-[20px] tracking-[1px] px-[28px] py-[13px] rounded-full whitespace-nowrap hover:bg-[#2c4a34] transition-colors"
           >
             Call Now
-          </a>
-          <a
-            href="#"
-            className="relative bg-[#bc6239] h-[52px] w-[199px] rounded-[8px] flex items-center px-[24px] hover:opacity-90 transition-opacity overflow-hidden"
+          </TrackedLink>
+          {business.website_url && (
+            <TrackedLink
+              slug={business.slug}
+              event="website_click"
+              href={business.website_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative bg-[#bc6239] h-[52px] w-[199px] rounded-[8px] flex items-center px-[24px] hover:opacity-90 transition-opacity overflow-hidden"
+            >
+              <span className="font-display font-bold text-[16px] text-white">VISIT WEBSITE</span>
+              <svg
+                className="absolute right-[24px]"
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+              >
+                <path
+                  d="M3 13L13 3M13 3H7M13 3V9"
+                  stroke="white"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </TrackedLink>
+          )}
+          <div className="flex items-center gap-[12px]">
+            {business.instagram_url && (
+              <TrackedLink
+                slug={business.slug}
+                event="instagram_click"
+                href={business.instagram_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="bg-[#2c4a34] w-[36px] h-[36px] rounded-full flex items-center justify-center hover:bg-[#253022] transition-colors"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <rect x="2" y="2" width="12" height="12" rx="3" stroke="white" strokeWidth="1.2" />
+                  <circle cx="8" cy="8" r="2.5" stroke="white" strokeWidth="1.2" />
+                  <circle cx="11.5" cy="4.5" r="0.75" fill="white" />
+                </svg>
+              </TrackedLink>
+            )}
+            {business.facebook_url && (
+              <TrackedLink
+                slug={business.slug}
+                event="facebook_click"
+                href={business.facebook_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+                className="bg-[#2c4a34] w-[36px] h-[36px] rounded-full flex items-center justify-center hover:bg-[#253022] transition-colors"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path
+                    d="M10 2H8.5C7.4 2 7 2.9 7 4V6H5V8.5H7V14H9.5V8.5H11.5L12 6H9.5V4.5C9.5 3.9 9.7 3.5 10 3.5H12V2H10Z"
+                    fill="white"
+                  />
+                </svg>
+              </TrackedLink>
+            )}
+            {business.yelp_url && (
+              <TrackedLink
+                slug={business.slug}
+                event="yelp_click"
+                href={business.yelp_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Yelp"
+                className="bg-[#2c4a34] w-[36px] h-[36px] rounded-full flex items-center justify-center hover:bg-[#253022] transition-colors"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path
+                    d="M8 1L9.8 5.6L14.5 5.9L10.9 9L12 13.6L8 11.1L4 13.6L5.1 9L1.5 5.9L6.2 5.6L8 1Z"
+                    fill="white"
+                  />
+                </svg>
+              </TrackedLink>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Mobile: Business Info ── */}
+      <div className="md:hidden bg-[#faf6e9] px-[16px]">
+        <Link
+          href="/search"
+          className="block font-body text-[20px] text-[rgba(66,57,38,0.8)] mt-[24px] hover:opacity-70 transition-opacity"
+        >
+          ← All Businesses
+        </Link>
+        <h1 className="font-display font-bold text-[30px] text-[#423926] tracking-[-0.15px] leading-tight mt-[12px]">
+          {business.name.toUpperCase()}
+        </h1>
+        <TrackedLink
+          slug={business.slug}
+          event="address_click"
+          href={mapsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block font-body text-[20px] text-[rgba(66,57,38,0.8)] mt-[16px] hover:opacity-70 transition-opacity"
+        >
+          {fullAddress}
+        </TrackedLink>
+        <TrackedLink
+          slug={business.slug}
+          event="call_click"
+          href={`tel:+1${phoneDigits}`}
+          className="flex items-center justify-center w-full bg-[#423926] text-[#f3f5e7] font-display font-bold text-[20px] tracking-[1px] py-[13px] rounded-full mt-[24px] hover:bg-[#2c4a34] transition-colors"
+        >
+          Call Now
+        </TrackedLink>
+        {business.website_url && (
+          <TrackedLink
+            slug={business.slug}
+            event="website_click"
+            href={business.website_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="relative flex items-center w-full bg-[#bc6239] h-[52px] rounded-[8px] mt-[16px] px-[24px] hover:opacity-90 transition-opacity"
           >
             <span className="font-display font-bold text-[16px] text-white">VISIT WEBSITE</span>
             <svg
@@ -143,93 +295,23 @@ export default async function BusinessDetailPage({
                 strokeLinejoin="round"
               />
             </svg>
-          </a>
-          <div className="flex items-center gap-[12px]">
-            <a
-              href="#"
-              aria-label="Instagram"
-              className="bg-[#2c4a34] w-[36px] h-[36px] rounded-full flex items-center justify-center hover:bg-[#253022] transition-colors"
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <rect x="2" y="2" width="12" height="12" rx="3" stroke="white" strokeWidth="1.2" />
-                <circle cx="8" cy="8" r="2.5" stroke="white" strokeWidth="1.2" />
-                <circle cx="11.5" cy="4.5" r="0.75" fill="white" />
-              </svg>
-            </a>
-            <a
-              href="#"
-              aria-label="Facebook"
-              className="bg-[#2c4a34] w-[36px] h-[36px] rounded-full flex items-center justify-center hover:bg-[#253022] transition-colors"
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path
-                  d="M10 2H8.5C7.4 2 7 2.9 7 4V6H5V8.5H7V14H9.5V8.5H11.5L12 6H9.5V4.5C9.5 3.9 9.7 3.5 10 3.5H12V2H10Z"
-                  fill="white"
-                />
-              </svg>
-            </a>
-            <a
-              href="#"
-              aria-label="TikTok"
-              className="bg-[#2c4a34] w-[36px] h-[36px] rounded-full flex items-center justify-center hover:bg-[#253022] transition-colors"
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path
-                  d="M11 2C11 4 12.5 5 14 5V7C12.5 7 11.5 6.5 11 6V11C11 13.2 9.2 15 7 15C4.8 15 3 13.2 3 11C3 8.8 4.8 7 7 7V9C5.9 9 5 9.9 5 11C5 12.1 5.9 13 7 13C8.1 13 9 12.1 9 11V2H11Z"
-                  fill="white"
-                />
-              </svg>
-            </a>
-          </div>
-        </div>
+          </TrackedLink>
+        )}
       </div>
 
-      {/* ── Mobile: Business Info ── */}
-      <div className="md:hidden bg-[#faf6e9] px-[16px]">
-        <Link
-          href="/businesses"
-          className="block font-body text-[20px] text-[rgba(66,57,38,0.8)] mt-[24px] hover:opacity-70 transition-opacity"
-        >
-          ← All Businesses
-        </Link>
-        <h1 className="font-display font-bold text-[30px] text-[#423926] tracking-[-0.15px] leading-tight mt-[12px]">
-          {business.name.toUpperCase()}
-        </h1>
-        <p className="font-body text-[20px] text-[rgba(66,57,38,0.8)] mt-[16px]">
-          {fullAddress}
-        </p>
-        <a
-          href={`tel:+1${phoneDigits}`}
-          className="flex items-center justify-center w-full bg-[#423926] text-[#f3f5e7] font-display font-bold text-[20px] tracking-[1px] py-[13px] rounded-full mt-[24px] hover:bg-[#2c4a34] transition-colors"
-        >
-          Call Now
-        </a>
-        <a
-          href="#"
-          className="relative flex items-center w-full bg-[#bc6239] h-[52px] rounded-[8px] mt-[16px] px-[24px] hover:opacity-90 transition-opacity"
-        >
-          <span className="font-display font-bold text-[16px] text-white">VISIT WEBSITE</span>
-          <svg
-            className="absolute right-[24px]"
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-          >
-            <path
-              d="M3 13L13 3M13 3H7M13 3V9"
-              stroke="white"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+      {/* ── Mobile: Hero Photo + Pilot Badge ── */}
+      <div className="md:hidden relative mx-[16px] mt-[24px] h-[240px] bg-[#c96f47] rounded-[12px] overflow-hidden">
+        <img src={heroPhotoUrl} alt={`${business.name} storefront`} className="w-full h-full object-cover" />
+        {business.pilot_business && (
+          <div className="absolute z-10 bottom-[8px] right-[8px] w-[96px] h-[82px]">
+            <img
+              src={PILOT_BADGE_IMG}
+              alt="Pilot Business"
+              className="w-full h-full object-contain"
+              style={{ transform: "rotate(2.97deg)" }}
             />
-          </svg>
-        </a>
-      </div>
-
-      {/* ── Mobile: Hero Photo ── */}
-      <div className="md:hidden mx-[16px] mt-[24px] h-[240px] bg-[#c96f47] rounded-[12px] overflow-hidden">
-        <img src={HERO_IMG} alt={`${business.name} storefront`} className="w-full h-full object-cover" />
+          </div>
+        )}
       </div>
 
       {/* ── Desktop: Hero Photo + About + Pilot Badge ── */}
@@ -237,7 +319,7 @@ export default async function BusinessDetailPage({
         {/* Hero Photo */}
         <div className="relative h-[700px] bg-[#b7a78c] overflow-hidden">
           <img
-            src={HERO_IMG}
+            src={heroPhotoUrl}
             alt={`${business.name} storefront`}
             className="absolute inset-0 w-full h-full object-cover"
           />
@@ -257,6 +339,7 @@ export default async function BusinessDetailPage({
         </div>
 
         {/* Pilot Business Badge */}
+        {business.pilot_business && (
         <div
           className="absolute z-10"
           style={{ top: "569px", right: "40px", width: "292px", height: "248px" }}
@@ -268,6 +351,7 @@ export default async function BusinessDetailPage({
             style={{ transform: "rotate(2.97deg)" }}
           />
         </div>
+        )}
       </div>
 
       {/* ── Mobile: About Section ── */}
@@ -281,6 +365,7 @@ export default async function BusinessDetailPage({
       </div>
 
       {/* ── Desktop: Meet the Owner ── */}
+      {showOwnerSection && (
       <div className="hidden md:block bg-[#9ca889] py-[67px]">
         <div className="flex items-start pl-[139px] pr-[105px] gap-[253px]">
           {/* Polaroid — sits 31px lower than the text to match Figma */}
@@ -302,7 +387,7 @@ export default async function BusinessDetailPage({
                 className="absolute rounded-[2px] overflow-hidden"
                 style={{ top: "33px", left: "24px", right: "26px", height: "307px" }}
               >
-                <img src={OWNER_IMG} alt="Owner" className="w-full h-full object-cover" />
+                <img src={ownerPhotoUrl} alt="Owner" className="w-full h-full object-cover" />
               </div>
               <p
                 className="absolute font-display text-[14px] text-[#423926] tracking-[0.56px] whitespace-nowrap"
@@ -319,26 +404,30 @@ export default async function BusinessDetailPage({
               MEET THE OWNER
             </h2>
             <p className="font-body text-[20px] text-[#f3f5e7] leading-[1.6] mt-[56px]">
-              {OWNER_INTRO}
+              {business.about_owner}
             </p>
           </div>
         </div>
       </div>
+      )}
 
       {/* ── Mobile: Meet the Owner ── */}
+      {showOwnerSection && (
       <div className="md:hidden px-[16px] pb-[32px]">
         <h2 className="font-display font-bold text-[26px] text-[#253022] tracking-[0.26px] leading-none">
           MEET THE OWNER
         </h2>
         <div className="mt-[16px] h-[260px] bg-[#c9d2cf] rounded-[12px] overflow-hidden">
-          <img src={OWNER_IMG} alt="Owner" className="w-full h-full object-cover" />
+          <img src={ownerPhotoUrl} alt="Owner" className="w-full h-full object-cover" />
         </div>
         <p className="font-body text-[20px] text-[#666b61] leading-[1.6] mt-[16px]">
-          {OWNER_INTRO}
+          {business.about_owner}
         </p>
       </div>
+      )}
 
       {/* ── Desktop: How They Started Timeline ── */}
+      {showTimeline && (
       <div className="hidden md:flex flex-col gap-[36px] bg-[#423926] px-[80px] py-[96px]">
         <h2 className="font-display font-bold text-[64px] text-[#faf6e9] tracking-[0.64px] leading-none">
           HOW THEY STARTED
@@ -351,14 +440,16 @@ export default async function BusinessDetailPage({
             style={{ top: "284px" }}
           />
 
-          {TIMELINE.map(({ year, img, desc }) => (
-            <div key={year} className="flex flex-col gap-[24px] items-center flex-1 min-w-0">
-              {/* Polaroid mount */}
-              <div className="bg-[#faf6e9] rounded-[4px] shadow-[0px_8px_8px_rgba(0,0,0,0.25)] p-[12px] pb-[24px] w-[240px] h-[240px] flex-shrink-0">
-                <div className="w-full h-full rounded-[2px] overflow-hidden">
-                  <img src={img} alt={year} className="w-full h-full object-cover" />
+          {timelineEntries.map(({ year, img, desc }, i) => (
+            <div key={i} className="flex flex-col gap-[24px] items-center flex-1 min-w-0">
+              {/* Polaroid mount — only when this slot has a photo */}
+              {img && (
+                <div className="bg-[#faf6e9] rounded-[4px] shadow-[0px_8px_8px_rgba(0,0,0,0.25)] p-[12px] pb-[24px] w-[240px] h-[240px] flex-shrink-0">
+                  <div className="w-full h-full rounded-[2px] overflow-hidden">
+                    <img src={img} alt={year} className="w-full h-full object-cover" />
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Dot */}
               <div className="flex items-center justify-center h-[40px] w-full relative z-10">
@@ -399,6 +490,62 @@ export default async function BusinessDetailPage({
           </a>
         </div>
       </div>
+      )}
+
+      {/* ── Mobile: How They Started Timeline ── */}
+      {showTimeline && (
+      <div className="md:hidden flex flex-col gap-[32px] bg-[#423926] px-[16px] py-[48px]">
+        <h2 className="font-display font-bold text-[26px] text-[#faf6e9] tracking-[0.26px] leading-none">
+          HOW THEY STARTED
+        </h2>
+
+        <div className="flex flex-col gap-[32px]">
+          {timelineEntries.map(({ year, img, desc }, i) => (
+            <div key={i} className="flex flex-col gap-[16px]">
+              {/* Polaroid mount — only when this slot has a photo */}
+              {img && (
+                <div className="bg-[#faf6e9] rounded-[4px] shadow-[0px_8px_8px_rgba(0,0,0,0.25)] p-[10px] pb-[20px] w-[180px] h-[180px] mx-auto">
+                  <div className="w-full h-full rounded-[2px] overflow-hidden">
+                    <img src={img} alt={year} className="w-full h-full object-cover" />
+                  </div>
+                </div>
+              )}
+
+              {/* Year + description */}
+              <div className="flex flex-col gap-[8px] text-center">
+                <p className="font-display font-bold text-[32px] text-[#c9d2cf] tracking-[-0.5px] leading-none">
+                  {year}
+                </p>
+                <p className="font-body text-[15px] text-[rgba(250,246,233,0.7)] leading-[1.6]">
+                  {desc}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Visit Us CTA */}
+        <div className="flex items-center justify-center pt-[8px]">
+          <a
+            href="#"
+            className="bg-[#faf6e9] rounded-full h-[56px] w-[200px] flex items-center justify-center gap-[10px] hover:bg-white transition-colors"
+          >
+            <span className="font-display font-bold text-[18px] text-[#423926] tracking-[1px]">
+              VISIT US
+            </span>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <path
+                d="M3 8H13M13 8L9 4M13 8L9 12"
+                stroke="#423926"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </a>
+        </div>
+      </div>
+      )}
 
       {/* ── Desktop Footer ── */}
       <footer className="hidden md:block bg-[#9ca889] px-[80px] pt-[80px] pb-[40px]">

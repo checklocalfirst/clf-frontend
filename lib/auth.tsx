@@ -87,3 +87,10 @@ export function useAuth(): AuthContextValue {
 export function useToken(): string | undefined {
   return useAuth().user?.access_token;
 }
+
+// Single source of truth for "where does this account type's dashboard live"
+export function accountHomeFor(accountType: AccountType): string {
+  if (accountType === "business") return "/dashboard";
+  if (accountType === "admin") return "/admin";
+  return "/account";
+}

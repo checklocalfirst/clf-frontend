@@ -2,22 +2,29 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
-import { useAuth, type AccountType } from "@/lib/auth";
+import { useState, useEffect, useRef } from "react";
+import { useAuth, accountHomeFor, type AccountType } from "@/lib/auth";
 
-const NAV_LINKS = [
+const NAV_LINKS_BEFORE_MEMBERSHIP = [
   { label: "Home", href: "/" },
   { label: "Businesses", href: "/businesses" },
-  { label: "Membership", href: "/membership" },
+];
+
+const NAV_LINKS_AFTER_MEMBERSHIP = [
   { label: "About", href: "/about" },
   { label: "Search", href: "/search" },
 ];
 
-function accountHref(accountType: AccountType) {
-  if (accountType === "business") return "/dashboard";
-  if (accountType === "admin") return "/admin";
-  return "/account";
-}
+const MEMBERSHIP_LINKS = [
+  { label: "Locals", href: "/membership/locals" },
+  { label: "Businesses", href: "/membership/businesses" },
+];
+
+const ACCOUNT_LABEL: Record<AccountType, string> = {
+  admin: "Admin Dashboard",
+  business: "Business Dashboard",
+  user: "My Account",
+};
 
 function AccountIcon() {
   return (
@@ -33,20 +40,72 @@ function AccountIcon() {
   );
 }
 
+function ChevronIcon({ open }: { open: boolean }) {
+  return (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 12 12"
+      fill="none"
+      className={`transition-transform flex-shrink-0 ${open ? "rotate-180" : ""}`}
+    >
+      <path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export default function Header() {
   const pathname = usePathname();
   const { user, loading, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const [membershipMenuOpen, setMembershipMenuOpen] = useState(false);
+  const [mobileMembershipOpen, setMobileMembershipOpen] = useState(false);
+  const accountMenuRef = useRef<HTMLDivElement>(null);
+  const membershipMenuRef = useRef<HTMLDivElement>(null);
+
+  const membershipActive = pathname.startsWith("/membership");
 
   // Close on route change
   useEffect(() => {
     setMenuOpen(false);
+    setAccountMenuOpen(false);
+    setMembershipMenuOpen(false);
   }, [pathname]);
+
+  // Close the account dropdown on an outside click
+  useEffect(() => {
+    if (!accountMenuOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (accountMenuRef.current && !accountMenuRef.current.contains(e.target as Node)) {
+        setAccountMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [accountMenuOpen]);
+
+  // Close the membership dropdown on an outside click
+  useEffect(() => {
+    if (!membershipMenuOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (membershipMenuRef.current && !membershipMenuRef.current.contains(e.target as Node)) {
+        setMembershipMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [membershipMenuOpen]);
 
   // Lock body scroll while menu is open
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
+  }, [menuOpen]);
+
+  // Collapse the mobile membership accordion whenever the full-screen menu closes
+  useEffect(() => {
+    if (!menuOpen) setMobileMembershipOpen(false);
   }, [menuOpen]);
 
   return (
@@ -60,7 +119,48 @@ export default function Header() {
 
           <div className="flex items-center gap-6">
             <nav className="flex items-center gap-5">
-              {NAV_LINKS.map(({ label, href }) => (
+              {NAV_LINKS_BEFORE_MEMBERSHIP.map(({ label, href }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`font-display font-bold text-[20px] uppercase whitespace-nowrap transition-colors ${
+                    pathname === href ? "text-[#253022]" : "text-[#596155] hover:text-[#253022]"
+                  }`}
+                >
+                  {label}
+                </Link>
+              ))}
+
+              <div className="relative flex-shrink-0" ref={membershipMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setMembershipMenuOpen((o) => !o)}
+                  aria-expanded={membershipMenuOpen}
+                  className={`font-display font-bold text-[20px] uppercase whitespace-nowrap transition-colors flex items-center gap-1 cursor-pointer ${
+                    membershipActive ? "text-[#253022]" : "text-[#596155] hover:text-[#253022]"
+                  }`}
+                >
+                  Membership
+                  <ChevronIcon open={membershipMenuOpen} />
+                </button>
+
+                {membershipMenuOpen && (
+                  <div className="absolute left-0 top-[calc(100%+8px)] w-[200px] bg-white border border-[#dbe0d9] rounded-[12px] shadow-lg py-2 flex flex-col z-50">
+                    {MEMBERSHIP_LINKS.map(({ label, href }) => (
+                      <Link
+                        key={href}
+                        href={href}
+                        onClick={() => setMembershipMenuOpen(false)}
+                        className="font-display font-bold text-[13px] text-[#253022] uppercase px-4 py-3 hover:bg-[#faf6e9] transition-colors"
+                      >
+                        {label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {NAV_LINKS_AFTER_MEMBERSHIP.map(({ label, href }) => (
                 <Link
                   key={href}
                   href={href}
@@ -75,13 +175,40 @@ export default function Header() {
 
             {!loading && (
               user ? (
-                <Link
-                  href={accountHref(user.accountType)}
-                  aria-label="My account"
-                  className="flex-shrink-0 bg-[#2c4a34] w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#253022] transition-colors"
-                >
-                  <AccountIcon />
-                </Link>
+                <div className="relative flex-shrink-0" ref={accountMenuRef}>
+                  <button
+                    type="button"
+                    onClick={() => setAccountMenuOpen((o) => !o)}
+                    aria-label="My account"
+                    aria-expanded={accountMenuOpen}
+                    className="bg-[#2c4a34] w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#253022] transition-colors cursor-pointer"
+                  >
+                    <AccountIcon />
+                  </button>
+
+                  {accountMenuOpen && (
+                    <div className="absolute right-0 top-[calc(100%+8px)] w-[220px] bg-white border border-[#dbe0d9] rounded-[12px] shadow-lg py-2 flex flex-col z-50">
+                      <Link
+                        href={accountHomeFor(user.accountType)}
+                        onClick={() => setAccountMenuOpen(false)}
+                        className="font-display font-bold text-[13px] text-[#253022] uppercase px-4 py-3 hover:bg-[#faf6e9] transition-colors"
+                      >
+                        {ACCOUNT_LABEL[user.accountType]}
+                      </Link>
+                      <div className="h-px bg-[#dbe0d9] mx-4" />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAccountMenuOpen(false);
+                          logout();
+                        }}
+                        className="font-display font-bold text-[13px] text-[#596155] uppercase px-4 py-3 text-left hover:bg-[#faf6e9] transition-colors cursor-pointer"
+                      >
+                        Log Out
+                      </button>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <Link
                   href="/login"
@@ -133,7 +260,7 @@ export default function Header() {
                 <path d="M11 11L15.5 15.5" stroke="#151814" strokeWidth="1.4" strokeLinecap="round" />
               </svg>
             </Link>
-            <Link href={user ? accountHref(user.accountType) : "/login"} aria-label="My account">
+            <Link href={user ? accountHomeFor(user.accountType) : "/login"} aria-label="My account">
               {user ? (
                 <svg width="17" height="17" viewBox="0 0 16 16" fill="none">
                   <circle cx="8" cy="5.5" r="2.75" stroke="#151814" strokeWidth="1.4" />
@@ -176,8 +303,50 @@ export default function Header() {
           </div>
 
           {/* Nav links */}
-          <nav className="flex flex-col px-8 pt-10 gap-1 flex-1">
-            {NAV_LINKS.map(({ label, href }) => (
+          <nav className="flex flex-col px-8 pt-10 gap-1 flex-1 overflow-y-auto">
+            {NAV_LINKS_BEFORE_MEMBERSHIP.map(({ label, href }) => (
+              <Link
+                key={href}
+                href={href}
+                onClick={() => setMenuOpen(false)}
+                className={`font-display font-bold text-[38px] uppercase leading-tight py-3 border-b border-[rgba(250,246,233,0.10)] transition-opacity ${
+                  pathname === href ? "text-[#faf6e9]" : "text-[rgba(250,246,233,0.55)] hover:text-[#faf6e9]"
+                }`}
+              >
+                {label}
+              </Link>
+            ))}
+
+            <div className="flex flex-col border-b border-[rgba(250,246,233,0.10)]">
+              <button
+                type="button"
+                onClick={() => setMobileMembershipOpen((o) => !o)}
+                aria-expanded={mobileMembershipOpen}
+                className={`flex items-center justify-between gap-3 font-display font-bold text-[38px] uppercase leading-tight py-3 transition-opacity cursor-pointer ${
+                  membershipActive ? "text-[#faf6e9]" : "text-[rgba(250,246,233,0.55)] hover:text-[#faf6e9]"
+                }`}
+              >
+                Membership
+                <ChevronIcon open={mobileMembershipOpen} />
+              </button>
+
+              {mobileMembershipOpen && (
+                <div className="flex flex-col gap-1 pb-4 pl-2">
+                  {MEMBERSHIP_LINKS.map(({ label, href }) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      onClick={() => setMenuOpen(false)}
+                      className="font-display font-bold text-[22px] uppercase text-[rgba(250,246,233,0.7)] hover:text-[#faf6e9] transition-opacity py-2"
+                    >
+                      {label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {NAV_LINKS_AFTER_MEMBERSHIP.map(({ label, href }) => (
               <Link
                 key={href}
                 href={href}
@@ -196,7 +365,7 @@ export default function Header() {
             {user ? (
               <>
                 <Link
-                  href={accountHref(user.accountType)}
+                  href={accountHomeFor(user.accountType)}
                   onClick={() => setMenuOpen(false)}
                   className="w-full bg-[#9ca889] text-[#253022] font-display font-bold text-[15px] uppercase text-center py-4 rounded-[8px] hover:opacity-90 transition-opacity"
                 >

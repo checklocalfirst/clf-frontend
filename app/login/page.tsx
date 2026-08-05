@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { useAuth } from "@/lib/auth";
+import { useAuth, accountHomeFor } from "@/lib/auth";
 import { ApiError } from "@/lib/api";
 
 export default function LoginPage() {
@@ -17,9 +17,14 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [justRegistered, setJustRegistered] = useState(false);
+  const [sessionExpired, setSessionExpired] = useState(false);
+  const [next, setNext] = useState<string | null>(null);
 
   useEffect(() => {
-    setJustRegistered(new URLSearchParams(window.location.search).has("registered"));
+    const params = new URLSearchParams(window.location.search);
+    setJustRegistered(params.has("registered"));
+    setSessionExpired(params.has("expired"));
+    setNext(params.get("next"));
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -28,9 +33,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const data = await login(email, password);
-      if (data.accountType === "admin") router.push("/admin");
-      else if (data.accountType === "business") router.push("/dashboard");
-      else router.push("/account");
+      router.push(next || accountHomeFor(data.accountType));
     } catch (err) {
       setError(
         err instanceof ApiError
@@ -63,6 +66,14 @@ export default function LoginPage() {
               <div className="bg-[#f0f5ee] border border-[#9ca889] rounded-[8px] px-4 py-3">
                 <p className="font-body text-[13px] text-[#2c4a34]">
                   Account created! Log in below.
+                </p>
+              </div>
+            )}
+
+            {sessionExpired && (
+              <div className="bg-[#faf6e9] border border-[#b7a78c] rounded-[8px] px-4 py-3">
+                <p className="font-body text-[13px] text-[#423926]">
+                  Your session expired — log back in to continue.
                 </p>
               </div>
             )}

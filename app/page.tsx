@@ -4,7 +4,7 @@ import Footer from "@/components/Footer";
 import SearchBar from "@/components/SearchBar";
 import FollowCarousel from "@/components/FollowCarousel";
 import NeighborsCarousel from "@/components/NeighborsCarousel";
-import { getEnrichedBusinesses } from "@/lib/directory";
+import { getEnrichedBusinesses, getFeaturedBusiness, getListingPhotoUrl } from "@/lib/directory";
 
 /* ─────────────────────────────────────────────
    Figma image assets — 7-day URLs.
@@ -20,6 +20,15 @@ const IMG = {
   ig2:             "/farmers1.JPG",
   ig3:             "/modestmix.JPG",
   ig4:             "/sasquatchsnacks.jpg",
+};
+
+// Shown only when GET /businesses/featured has nothing set, or the featured
+// business hasn't had a listing photo uploaded yet — keeps the homepage from
+// ever showing a broken/empty featured slot.
+const FEATURED_FALLBACK = {
+  name: "The Nest",
+  slug: "the-nest",
+  img: "/the-nest.jpg",
 };
 
 const MARQUEE_ITEMS = [
@@ -45,19 +54,34 @@ export default async function HomePage() {
   const businesses = await getEnrichedBusinesses();
 
   const carouselBusinesses = businesses.filter((b) => b.in_carousel);
-  const neighbors = (carouselBusinesses.length > 0 ? carouselBusinesses : businesses.slice(0, 4)).map(
-    (b) => ({
-      category: b.categoryNames[0] ?? "Local Business",
-      name: b.name,
-      neighborhood: `${b.city}, ${b.state}`,
-      description: b.description,
-      img: null,
-      href: `/businesses/${b.slug}`,
-    })
-  );
+  const neighborBusinesses = carouselBusinesses.length > 0 ? carouselBusinesses : businesses.slice(0, 4);
+  const neighborPhotos = await Promise.all(neighborBusinesses.map((b) => getListingPhotoUrl(b.slug)));
+  const neighbors = neighborBusinesses.map((b, i) => ({
+    category: b.categoryNames[0] ?? "Local Business",
+    name: b.name,
+    neighborhood: `${b.city}, ${b.state}`,
+    description: b.description,
+    img: neighborPhotos[i] ?? null,
+    href: `/businesses/${b.slug}`,
+  }));
 
-  const featured = businesses.find((b) => b.is_featured) ?? businesses[0];
-  const featuredCategory = featured?.categoryNames[0] ?? "Local Business";
+  const featuredBusiness = await getFeaturedBusiness().catch(() => null);
+  const featuredPhotoUrl = featuredBusiness
+    ? await getListingPhotoUrl(featuredBusiness.slug).catch(() => undefined)
+    : undefined;
+  const useFeaturedFallback = !featuredBusiness || !featuredPhotoUrl;
+
+  const featuredEnriched = featuredBusiness
+    ? businesses.find((b) => b.slug === featuredBusiness.slug)
+    : undefined;
+
+  const featured = useFeaturedFallback
+    ? { name: FEATURED_FALLBACK.name, slug: FEATURED_FALLBACK.slug, description: null as string | null }
+    : featuredBusiness!;
+  const featuredImg = useFeaturedFallback ? FEATURED_FALLBACK.img : featuredPhotoUrl!;
+  const featuredCategory = useFeaturedFallback
+    ? "Local Business"
+    : featuredEnriched?.categoryNames[0] ?? "Local Business";
 
   return (
     <>
@@ -198,63 +222,59 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {featured && (
-        <>
-          {/* ════════════════════════════════
-              FEATURED BUSINESS
-          ════════════════════════════════ */}
+      {/* ════════════════════════════════
+          FEATURED BUSINESS
+      ════════════════════════════════ */}
 
-          {/* Mobile */}
-          <section className="md:hidden bg-[#d9d1c7] flex flex-col">
-            <div className="flex flex-col gap-[14px] items-center text-center pt-[56px] pb-6 px-[30px]">
-              <p className="font-display font-bold text-[9px] text-[#6b7d67] tracking-[3px] uppercase w-full">Featured business</p>
-              <h2 className="font-display font-bold text-[30px] text-[#253022] leading-[38px] w-full">{featured.name}</h2>
-              <p className="font-display font-bold text-[9px] text-[#423926] tracking-[1.8px] uppercase w-full">
-                {featuredCategory}
-              </p>
+      {/* Mobile */}
+      <section className="md:hidden bg-[#d9d1c7] flex flex-col">
+        <div className="flex flex-col gap-[14px] items-center text-center pt-[56px] pb-6 px-[30px]">
+          <p className="font-display font-bold text-[9px] text-[#6b7d67] tracking-[3px] uppercase w-full">Featured business</p>
+          <h2 className="font-display font-bold text-[30px] text-[#253022] leading-[38px] w-full">{featured.name}</h2>
+          <p className="font-display font-bold text-[9px] text-[#423926] tracking-[1.8px] uppercase w-full">
+            {featuredCategory}
+          </p>
+        </div>
+        <div className="px-5 pt-[10px]">
+          <div className="relative h-[300px] w-full rounded-[2px] overflow-hidden bg-[#c9d2cf]">
+            <img src={featuredImg} alt={featured.name} className="absolute inset-0 w-full h-full object-cover" />
+          </div>
+        </div>
+        <div className="flex flex-col gap-5 items-center text-center pt-7 pb-[56px] px-[30px]">
+          <p className="font-body text-[12px] text-[#423926] leading-[22px]">
+            {featured.description ?? "No description provided yet."}
+          </p>
+          <Link href={`/businesses/${featured.slug}`} className="bg-[#2c4a34] text-[#faf6e9] font-display font-bold text-[10px] tracking-[1.8px] uppercase px-7 py-4 rounded-[2px] hover:bg-[#253022] transition-colors">
+            View full profile
+          </Link>
+        </div>
+      </section>
+
+      {/* Desktop */}
+      <section className="hidden md:block relative bg-[#faf6e9] py-24 overflow-hidden">
+        <div className="px-20">
+          <p className="font-display font-bold text-[13px] text-[#b7a78c] uppercase tracking-wider">FEATURED BUSINESS</p>
+          <p className="font-display font-bold text-[40px] text-[#151814] mt-[6px]">{featured.name.toUpperCase()}</p>
+          <p className="font-display font-bold text-[13px] text-[#596155] uppercase mt-1">{featuredCategory}</p>
+
+          <div className="flex gap-20 mt-[48px]">
+            {/* Left: photo */}
+            <div className="relative h-[340px] w-[560px] flex-shrink-0 rounded-[12px] overflow-hidden bg-[#c9d2cf]">
+              <img src={featuredImg} alt={featured.name} className="absolute inset-0 w-full h-full object-cover" />
             </div>
-            <div className="px-5 pt-[10px]">
-              <div className="relative h-[300px] w-full rounded-[2px] overflow-hidden bg-[#c9d2cf] flex items-center justify-center">
-                <p className="font-body text-[13px] text-[#8c9c81]">Photo coming soon</p>
-              </div>
-            </div>
-            <div className="flex flex-col gap-5 items-center text-center pt-7 pb-[56px] px-[30px]">
-              <p className="font-body text-[12px] text-[#423926] leading-[22px]">
+
+            {/* Right: text */}
+            <div className="flex flex-col gap-7 flex-1">
+              <p className="font-display text-[17px] text-[#151814] leading-relaxed">
                 {featured.description ?? "No description provided yet."}
               </p>
-              <Link href={`/businesses/${featured.slug}`} className="bg-[#2c4a34] text-[#faf6e9] font-display font-bold text-[10px] tracking-[1.8px] uppercase px-7 py-4 rounded-[2px] hover:bg-[#253022] transition-colors">
-                View full profile
+              <Link href={`/businesses/${featured.slug}`} className="inline-flex items-center gap-3 bg-[#2c4a34] text-white font-display font-bold text-[16px] uppercase px-6 h-12 rounded-[8px] w-fit hover:bg-[#253022] transition-colors">
+                VIEW FULL PROFILE <ChevronRight color="white" />
               </Link>
             </div>
-          </section>
-
-          {/* Desktop */}
-          <section className="hidden md:block relative bg-[#faf6e9] py-24 overflow-hidden">
-            <div className="px-20">
-              <p className="font-display font-bold text-[13px] text-[#b7a78c] uppercase tracking-wider">FEATURED BUSINESS</p>
-              <p className="font-display font-bold text-[40px] text-[#151814] mt-[6px]">{featured.name.toUpperCase()}</p>
-              <p className="font-display font-bold text-[13px] text-[#596155] uppercase mt-1">{featuredCategory}</p>
-
-              <div className="flex gap-20 mt-[48px]">
-                {/* Left: photo placeholder */}
-                <div className="relative h-[340px] w-[560px] flex-shrink-0 rounded-[12px] overflow-hidden bg-[#c9d2cf] flex items-center justify-center">
-                  <p className="font-body text-[15px] text-[#8c9c81]">Photo coming soon</p>
-                </div>
-
-                {/* Right: text */}
-                <div className="flex flex-col gap-7 flex-1">
-                  <p className="font-display text-[17px] text-[#151814] leading-relaxed">
-                    {featured.description ?? "No description provided yet."}
-                  </p>
-                  <Link href={`/businesses/${featured.slug}`} className="inline-flex items-center gap-3 bg-[#2c4a34] text-white font-display font-bold text-[16px] uppercase px-6 h-12 rounded-[8px] w-fit hover:bg-[#253022] transition-colors">
-                    VIEW FULL PROFILE <ChevronRight color="white" />
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </section>
-        </>
-      )}
+          </div>
+        </div>
+      </section>
 
       {/* ════════════════════════════════
           BECOME A MEMBER

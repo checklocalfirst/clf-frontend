@@ -1,9 +1,11 @@
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SearchBar from "@/components/SearchBar";
 import {
   getCategories,
   getEnrichedBusinesses,
+  getListingPhotoUrl,
   isNewBusiness,
   searchBusinesses,
 } from "@/lib/directory";
@@ -38,28 +40,32 @@ interface ResultCard {
 
 async function getResultCards(query: string, category: string): Promise<ResultCard[]> {
   if (query || category) {
-    const [results, categories] = await Promise.all([
+    const [{ data: results }, categories] = await Promise.all([
       searchBusinesses(query, category),
       getCategories(),
     ]);
     const categoryNameById = new Map(categories.map((c) => [c.id, c.name]));
+    const photos = await Promise.all(results.map(({ business }) => getListingPhotoUrl(business.slug)));
 
-    return results.map(({ business, bestMatch }) => ({
+    return results.map(({ business, bestMatch }, i) => ({
       name: business.name,
       category: categoryNameById.get(bestMatch.category_id) ?? "Uncategorized",
       location: `${business.city}, ${business.state}`,
       description: business.description ?? bestMatch.name,
+      photo: photos[i],
       isNew: isNewBusiness(business.created_at),
       href: `/businesses/${business.slug}`,
     }));
   }
 
   const businesses = await getEnrichedBusinesses();
-  return businesses.map((b) => ({
+  const photos = await Promise.all(businesses.map((b) => getListingPhotoUrl(b.slug)));
+  return businesses.map((b, i) => ({
     name: b.name,
     category: b.categoryNames[0] ?? "Uncategorized",
     location: `${b.city}, ${b.state}`,
     description: b.description ?? "No description yet.",
+    photo: photos[i],
     isNew: b.isNew,
     href: `/businesses/${b.slug}`,
   }));
@@ -89,6 +95,11 @@ export default async function SearchPage({
 
       <div className="bg-[#faf6e9]">
       <div className="max-w-[1280px] mx-auto w-full px-5 md:px-10">
+
+      {/* ── Search Bar ── */}
+      <div className="pt-5 md:pt-8">
+        <SearchBar defaultValue={query} className="w-full md:max-w-[640px]" />
+      </div>
 
       {/* ── Browse By Category ── */}
       <section>

@@ -1,5 +1,17 @@
 const BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(/\/$/, "");
 
+export interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface Paginated<T> {
+  data: T[];
+  pagination: Pagination;
+}
+
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -23,8 +35,11 @@ export async function apiFetch<T = unknown>(
 ): Promise<T> {
   const { token, headers: extraHeaders, ...rest } = options;
 
+  // Skip Content-Type for FormData bodies — the browser needs to set its own multipart boundary
+  const isFormData = typeof FormData !== "undefined" && rest.body instanceof FormData;
+
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
+    ...(isFormData ? {} : { "Content-Type": "application/json" }),
     ...(extraHeaders as Record<string, string>),
   };
 
@@ -52,7 +67,10 @@ export async function apiFetch<T = unknown>(
     throw new ApiError(res.status, extractError(body));
   }
 
-  // Success envelope: { success: true, data } or { success: true, message }
-  if ("data" in body) return body.data as T;
+  // Success envelope: { success: true, data }, { success: true, data, pagination }, or { success: true, message }
+  if ("data" in body) {
+    if ("pagination" in body) return { data: body.data, pagination: body.pagination } as T;
+    return body.data as T;
+  }
   return body as T;
 }
