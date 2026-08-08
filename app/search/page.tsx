@@ -1,41 +1,73 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import {
+  Store,
+  Shirt,
+  Sofa,
+  Gift,
+  Palette,
+  Gem,
+  Flower2,
+  Leaf,
+  Sparkles,
+  Tag,
+  type LucideIcon,
+} from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SearchBar from "@/components/SearchBar";
+import NearMeButton from "@/components/NearMeButton";
 import {
+  getBusinessCategories,
   getCategories,
   getEnrichedBusinesses,
   getListingPhotoUrl,
   isNewBusiness,
   searchBusinesses,
+  type Category,
 } from "@/lib/directory";
 
 export const metadata: Metadata = {
   title: "Browse Local Businesses",
   description:
-    "Search and browse independently owned businesses in Reno, NV by category — food & drink, shops, home & garden, health & beauty, services, and more.",
+    "Search and browse independently owned businesses in Reno, NV by category — clothing, home decor, gifts, art, jewelry, plants, sustainable goods, beauty, and more.",
   alternates: { canonical: "/search" },
 };
 
-// Category icon assets from Figma (expire in 7 days — replace with /public SVGs)
-const ICON_FORK_KNIFE = "https://www.figma.com/api/mcp/asset/1d78dbba-5a49-4c0b-acf0-27729a6091d0";
-const ICON_STOREFRONT = "https://www.figma.com/api/mcp/asset/6e1d77ea-c31e-4a21-af68-005f4fe4f3b1";
-const ICON_FLOWER_VASE = "https://www.figma.com/api/mcp/asset/a365cd62-b543-4d44-9c94-17dc06671414";
-const ICON_DUMBBELL = "https://www.figma.com/api/mcp/asset/6cfba0b6-2418-4582-bd48-3644366d5f5a";
-const ICON_HELMET = "https://www.figma.com/api/mcp/asset/fe7186a4-6900-4026-ac9c-980a6678ad0c";
-const ICON_CLAPPERBOARD = "https://www.figma.com/api/mcp/asset/f5dd878e-1522-4d85-96e1-fae8b7924c15";
+// Keyed by the real category slugs from GET /categories — not display labels, since
+// those are admin-editable. Anything not in this map (a newly added category) still
+// renders, just with the DEFAULT_CATEGORY_ICON fallback below.
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  "clothing-and-apparel": Shirt,
+  "home-decor-and-furniture": Sofa,
+  "gifts-and-specialty": Gift,
+  "art-and-design": Palette,
+  "jewelry-and-accessories": Gem,
+  "plants-and-garden": Flower2,
+  "sustainable-living": Leaf,
+  "beauty-and-wellness": Sparkles,
+};
+const DEFAULT_CATEGORY_ICON = Tag;
 
-const CATEGORIES = [
-  { label: "All Businesses", icon: null, href: "/search" },
-  { label: "Food & Drink", icon: ICON_FORK_KNIFE, href: "/search?category=food-drink" },
-  { label: "Shop & Goods", icon: ICON_STOREFRONT, href: "/search?category=shop-goods" },
-  { label: "Home & Garden", icon: ICON_FLOWER_VASE, href: "/search?category=home-garden" },
-  { label: "Health & Beauty", icon: ICON_DUMBBELL, href: "/search?category=health-beauty" },
-  { label: "Services", icon: ICON_HELMET, href: "/search?category=services" },
-  { label: "Arts & Entertainment", icon: ICON_CLAPPERBOARD, href: "/search?category=arts-entertainment" },
-];
+interface CategoryTile {
+  label: string;
+  Icon: LucideIcon;
+  href: string;
+}
+
+function buildCategoryTiles(categories: Category[]): CategoryTile[] {
+  return [
+    { label: "All Businesses", Icon: Store, href: "/search" },
+    ...categories.map((c) => ({
+      label: c.name,
+      Icon: CATEGORY_ICONS[c.slug] ?? DEFAULT_CATEGORY_ICON,
+      href: `/search?category=${encodeURIComponent(c.slug)}`,
+    })),
+  ];
+}
+
+const NEAR_ME_RADIUS_MILES = 30;
 
 interface ResultCard {
   name: string;
@@ -45,26 +77,45 @@ interface ResultCard {
   photo?: string;
   isNew: boolean;
   href: string;
+  distanceMiles?: number;
 }
 
-async function getResultCards(query: string, category: string): Promise<ResultCard[]> {
-  if (query || category) {
-    const [{ data: results }, categories] = await Promise.all([
-      searchBusinesses(query, category),
-      getCategories(),
+async function getResultCards(
+  query: string,
+  category: string,
+  coords?: { lat: number; lng: number }
+): Promise<ResultCard[]> {
+  // Distance filtering only exists on /search, so a location fix routes through the
+  // same path as a text/category search, even with neither of those actually set.
+  if (query || category || coords) {
+    const { data: results } = await searchBusinesses(
+      query,
+      category,
+      undefined,
+      coords ? { ...coords, radiusMiles: NEAR_ME_RADIUS_MILES } : undefined
+    );
+    // Business's own category badges, not the matched service's category — those can
+    // differ, and business_categories is what the category filter above actually uses.
+    const [photos, categoryLists] = await Promise.all([
+      Promise.all(results.map(({ business }) => getListingPhotoUrl(business.slug))),
+      Promise.all(results.map(({ business }) => getBusinessCategories(business.slug).catch(() => []))),
     ]);
-    const categoryNameById = new Map(categories.map((c) => [c.id, c.name]));
-    const photos = await Promise.all(results.map(({ business }) => getListingPhotoUrl(business.slug)));
 
-    return results.map(({ business, bestMatch }, i) => ({
+    const cards = results.map(({ business, bestMatch, distance_miles }, i) => ({
       name: business.name,
-      category: categoryNameById.get(bestMatch.category_id) ?? "Uncategorized",
+      category: categoryLists[i][0]?.name ?? "Uncategorized",
       location: `${business.city}, ${business.state}`,
       description: business.description ?? bestMatch.name,
       photo: photos[i],
       isNew: isNewBusiness(business.created_at),
       href: `/businesses/${business.slug}`,
+      distanceMiles: distance_miles,
     }));
+
+    // Closest-first is the whole point of "near me" — sort client-side on the page
+    // we already have rather than trusting the backend's default ordering.
+    if (coords) cards.sort((a, b) => (a.distanceMiles ?? Infinity) - (b.distanceMiles ?? Infinity));
+    return cards;
   }
 
   const businesses = await getEnrichedBusinesses();
@@ -92,11 +143,23 @@ export default async function SearchPage({
   const category =
     typeof rawCategory === "string" ? rawCategory : Array.isArray(rawCategory) ? rawCategory[0] : "";
 
-  const allResults = await getResultCards(query, category);
+  const rawLat = params.lat;
+  const rawLng = params.lng;
+  const latStr = typeof rawLat === "string" ? rawLat : Array.isArray(rawLat) ? rawLat[0] : undefined;
+  const lngStr = typeof rawLng === "string" ? rawLng : Array.isArray(rawLng) ? rawLng[0] : undefined;
+  const lat = latStr !== undefined ? Number(latStr) : NaN;
+  const lng = lngStr !== undefined ? Number(lngStr) : NaN;
+  const coords = Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : undefined;
+
+  const [allResults, categories] = await Promise.all([
+    getResultCards(query, category, coords),
+    getCategories(),
+  ]);
   const GRID_CARDS = allResults.slice(0, 3);
   const LIST_ITEMS = allResults.slice(3);
 
   const resultCount = GRID_CARDS.length + LIST_ITEMS.length;
+  const CATEGORIES = buildCategoryTiles(categories);
 
   return (
     <>
@@ -108,6 +171,9 @@ export default async function SearchPage({
       {/* ── Search Bar ── */}
       <div className="pt-5 md:pt-8">
         <SearchBar defaultValue={query} className="w-full md:max-w-[640px]" />
+        <div className="mt-2">
+          <NearMeButton active={!!coords} query={query} category={category} />
+        </div>
       </div>
 
       {/* ── Browse By Category ── */}
@@ -118,18 +184,14 @@ export default async function SearchPage({
             BROWSE BY CATEGORY
           </h2>
           <div className="h-px bg-[#dbe0d9] w-full mb-3" />
-          <div className="flex items-end justify-between py-2">
-            {CATEGORIES.map(({ label, icon, href }) => (
+          <div className="flex gap-6 overflow-x-auto py-2 scrollbar-none">
+            {CATEGORIES.map(({ label, Icon, href }) => (
               <Link
                 key={label}
                 href={href}
-                className="flex flex-col items-center gap-[10px] w-[150px] group"
+                className="flex flex-col items-center gap-[10px] w-[150px] flex-shrink-0 group"
               >
-                {icon ? (
-                  <Image src={icon} alt="" width={60} height={60} className="w-[60px] h-[60px] object-contain" />
-                ) : (
-                  <div className="h-[60px]" />
-                )}
+                <Icon className="w-[60px] h-[60px] text-[#423926]" strokeWidth={1.5} />
                 <span className="font-mono text-[15px] text-[#423926] text-center leading-tight group-hover:underline">
                   {label}
                 </span>
@@ -146,19 +208,13 @@ export default async function SearchPage({
           </h2>
           <div className="h-px bg-[#dbe0d9] mb-4" />
           <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none">
-            {CATEGORIES.map(({ label, icon, href }) => (
+            {CATEGORIES.map(({ label, Icon, href }) => (
               <Link
                 key={label}
                 href={href}
                 className="flex flex-col items-center gap-2 flex-shrink-0 w-[88px] group"
               >
-                {icon ? (
-                  <Image src={icon} alt="" width={36} height={36} className="w-9 h-9 object-contain" />
-                ) : (
-                  <div className="w-9 h-9 flex items-center justify-center">
-                    <div className="w-5 h-5 rounded-full border-2 border-[#423926]" />
-                  </div>
-                )}
+                <Icon className="w-9 h-9 text-[#423926]" strokeWidth={1.5} />
                 <span className="font-mono text-[11px] text-[#423926] text-center leading-tight">
                   {label}
                 </span>
@@ -169,51 +225,16 @@ export default async function SearchPage({
         </div>
       </section>
 
-      {/* ── Filter / Sort Bar ── */}
-      <div className="flex items-center justify-between pt-4 pb-3 md:pt-5 md:pb-0">
-        {/* Left: filter controls */}
-        <div className="flex items-center gap-5 md:gap-7">
-          <span className="font-mono text-[13px] md:text-[15px] text-[#423926]">
-            Filter
-          </span>
-          <button className="flex items-center gap-1">
-            <span className="font-mono text-[13px] md:text-[15px] text-[#423926] underline font-medium">
-              City
-            </span>
-            <span className="font-mono text-[11px] md:text-[13px] text-[#423926]">⌄</span>
-          </button>
-          <button className="flex items-center gap-1">
-            <span className="font-mono text-[13px] md:text-[15px] text-[#423926] underline font-medium">
-              Category
-            </span>
-            <span className="font-mono text-[11px] md:text-[13px] text-[#423926]">⌄</span>
-          </button>
-        </div>
-
-        {/* Right: count + sort */}
-        <div className="flex items-center gap-3 md:gap-4">
-          <span className="hidden md:inline font-mono text-[15px] text-[#b7a78c]">
-            {resultCount} businesses
-          </span>
-          <span className="hidden md:inline font-mono text-[15px] text-[#dbe0d9]">|</span>
-          <span className="hidden md:inline font-mono text-[15px] text-[#b7a78c]">
-            Sort by
-          </span>
-          <button className="flex items-center gap-1">
-            <span className="font-mono text-[13px] md:text-[15px] text-[#423926] underline font-medium">
-              Featured
-            </span>
-            <span className="font-mono text-[11px] md:text-[13px] text-[#423926]">⌄</span>
-          </button>
-        </div>
-      </div>
-
       {/* ── Results Heading ── */}
-      <div className="flex items-center pt-4 pb-2 md:pt-5 md:pb-3">
+      <div className="flex items-center pt-6 pb-2 md:pt-8 md:pb-3">
         <div className="flex items-center gap-3">
           {query ? (
             <h1 className="font-display font-bold text-[20px] md:text-[24px] text-[#423926] uppercase whitespace-nowrap">
               Results for &ldquo;{query}&rdquo;
+            </h1>
+          ) : coords ? (
+            <h1 className="font-display font-bold text-[20px] md:text-[24px] text-[#423926] uppercase">
+              Businesses Near You
             </h1>
           ) : (
             <h1 className="font-display font-bold text-[20px] md:text-[24px] text-[#423926] uppercase">
@@ -261,7 +282,10 @@ export default async function SearchPage({
                 <p className="font-display font-bold text-[20px] text-[#423926] uppercase underline leading-tight">
                   {card.name}
                 </p>
-                <p className="font-mono text-[13px] text-[#b7a78c]">{card.location}</p>
+                <p className="font-mono text-[13px] text-[#b7a78c]">
+                  {card.location}
+                  {card.distanceMiles != null && ` · ${card.distanceMiles.toFixed(1)} mi`}
+                </p>
                 <p className="font-mono text-[14px] text-[#423926] leading-snug">
                   {card.description}
                 </p>
@@ -300,7 +324,10 @@ export default async function SearchPage({
                 <p className="font-display font-bold text-[16px] text-[#423926] uppercase underline leading-tight">
                   {card.name}
                 </p>
-                <p className="font-mono text-[12px] text-[#b7a78c]">{card.location}</p>
+                <p className="font-mono text-[12px] text-[#b7a78c]">
+                  {card.location}
+                  {card.distanceMiles != null && ` · ${card.distanceMiles.toFixed(1)} mi`}
+                </p>
                 <p className="font-mono text-[13px] text-[#423926] leading-snug">
                   {card.description}
                 </p>
@@ -331,6 +358,7 @@ export default async function SearchPage({
                     </p>
                     <p className="font-mono text-[12px] md:text-[13px] text-[#b7a78c] whitespace-nowrap flex-shrink-0">
                       {item.location}
+                      {item.distanceMiles != null && ` · ${item.distanceMiles.toFixed(1)} mi`}
                     </p>
                   </div>
 

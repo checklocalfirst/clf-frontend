@@ -8,7 +8,7 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
-import { apiFetch } from "./api";
+import { apiFetch, SESSION_STORAGE_KEY } from "./api";
 
 export type AccountType = "user" | "business" | "admin";
 
@@ -28,16 +28,16 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-const STORAGE_KEY = "clf_session";
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Rehydrate from localStorage on mount
+  // Rehydrate from localStorage on mount. This has to be an effect — localStorage
+  // doesn't exist during SSR, so the read can't happen during render.
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(SESSION_STORAGE_KEY);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time client-only rehydration, not derivable during render
       if (raw) setUser(JSON.parse(raw));
     } catch {
       // Corrupt storage — ignore
@@ -52,14 +52,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       body: JSON.stringify({ email, password }),
     });
     setUser(data);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(data));
     return data;
   }, []);
 
   const logout = useCallback(async () => {
     const token = user?.access_token;
     setUser(null);
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(SESSION_STORAGE_KEY);
     if (token) {
       await apiFetch("/auth/logout", {
         method: "POST",

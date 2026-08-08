@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
 import Header from "@/components/Header";
 import SearchBar from "@/components/SearchBar";
 import Footer from "@/components/Footer";
 import FeatureAccordion from "@/components/FeatureAccordion";
+import JoinNowLink from "@/components/JoinNowLink";
 
 export const metadata: Metadata = {
   title: "Business Membership",
@@ -94,12 +94,9 @@ function PricingCard({
       </ul>
 
       {/* CTA */}
-      <Link
-        href="/signup"
-        className="mt-auto bg-[#2c4a34] rounded-full flex items-center justify-center px-7 py-3 text-[#faf6e9] font-body font-semibold text-[15px] hover:bg-[#253022] transition-colors"
-      >
+      <JoinNowLink className="mt-auto bg-[#2c4a34] rounded-full flex items-center justify-center px-7 py-3 text-[#faf6e9] font-body font-semibold text-[15px] hover:bg-[#253022] transition-colors">
         Join Now →
-      </Link>
+      </JoinNowLink>
     </div>
   );
 }

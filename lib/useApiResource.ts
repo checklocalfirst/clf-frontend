@@ -1,22 +1,19 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth, useToken } from "./auth";
+import { useToken } from "./auth";
 import { ApiError } from "./api";
 
 /**
  * Fetches a resource with the current session token, re-running whenever `deps` change.
- * On a 401 (no refresh-token flow exists — see backend doc §0/§10), logs out and bounces
- * to /login?expired=1 instead of leaving the caller to handle it individually.
+ * A 401 is handled globally by apiFetch itself (clears the session and redirects to
+ * /login?expired=1), so this only needs to handle everything else.
  */
 export function useApiResource<T>(
   fetcher: (token: string) => Promise<T>,
   deps: unknown[] = []
 ) {
   const token = useToken();
-  const { logout } = useAuth();
-  const router = useRouter();
 
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
@@ -29,6 +26,7 @@ export function useApiResource<T>(
     if (!token) return;
     let cancelled = false;
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- resetting loading/error state ahead of an async fetch, the standard data-fetching-effect shape
     setLoading(true);
     setError(null);
 
@@ -38,11 +36,6 @@ export function useApiResource<T>(
       })
       .catch((err) => {
         if (cancelled) return;
-        if (err instanceof ApiError && err.status === 401) {
-          logout();
-          router.replace("/login?expired=1");
-          return;
-        }
         setError(err instanceof ApiError ? err.message : "Something went wrong.");
       })
       .finally(() => {

@@ -68,6 +68,8 @@ export interface SearchResult {
   bestMatch: Service;
   matchingServices: Service[];
   matchCount: number;
+  // Only present when a lat/lng/radius_miles location filter was active on the request.
+  distance_miles?: number;
 }
 
 export interface EnrichedBusiness extends Business {
@@ -147,12 +149,18 @@ export function getAllServices(): Promise<ServiceWithBusiness[]> {
 export function searchBusinesses(
   q?: string,
   category?: string,
-  page?: number
+  page?: number,
+  location?: { lat: number; lng: number; radiusMiles: number }
 ): Promise<Paginated<SearchResult>> {
   const params = new URLSearchParams();
   if (q) params.set("q", q);
   if (category) params.set("category", category);
   if (page) params.set("page", String(page));
+  if (location) {
+    params.set("lat", String(location.lat));
+    params.set("lng", String(location.lng));
+    params.set("radius_miles", String(location.radiusMiles));
+  }
   return apiFetch<Paginated<SearchResult>>(`/search?${params.toString()}`);
 }
 
@@ -162,29 +170,19 @@ export function isNewBusiness(createdAt: string): boolean {
   return Date.now() - new Date(createdAt).getTime() < THIRTY_DAYS_MS;
 }
 
-// Categories live on services, not businesses — join in memory (small, unpaginated dataset)
+// Pulls each business's own category badges (GET /businesses/:slug/categories) rather
+// than inferring categories from its services — those can diverge, and business_categories
+// is what /search's category filter actually matches against, so it's the source of truth.
 export async function getEnrichedBusinesses(): Promise<EnrichedBusiness[]> {
-  const [businesses, services, categories] = await Promise.all([
-    getBusinesses(),
-    getAllServices(),
-    getCategories(),
-  ]);
-
-  const categoryNameById = new Map(categories.map((c) => [c.id, c.name]));
-  const categoryNamesBySlug = new Map<string, Set<string>>();
-  for (const service of services) {
-    const slug = service.businesses?.slug;
-    const categoryName = categoryNameById.get(service.category_id);
-    if (!slug || !categoryName) continue;
-    const set = categoryNamesBySlug.get(slug) ?? new Set<string>();
-    set.add(categoryName);
-    categoryNamesBySlug.set(slug, set);
-  }
+  const businesses = await getBusinesses();
+  const categoryLists = await Promise.all(
+    businesses.map((b) => getBusinessCategories(b.slug).catch(() => [] as Category[]))
+  );
 
   return businesses
-    .map((business) => ({
+    .map((business, i) => ({
       ...business,
-      categoryNames: Array.from(categoryNamesBySlug.get(business.slug) ?? []),
+      categoryNames: categoryLists[i].map((c) => c.name),
       isNew: isNewBusiness(business.created_at),
     }))
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());

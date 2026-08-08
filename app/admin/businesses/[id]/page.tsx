@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useToken } from "@/lib/auth";
 import { useAdminBusiness } from "@/components/dashboard/AdminBusinessContext";
@@ -12,6 +12,7 @@ import {
   setCarousel,
   deleteAdminBusiness,
   type AdminBusinessEditInput,
+  type BusinessFull,
 } from "@/lib/admin/businesses";
 import type { BusinessStatus, BusinessTier } from "@/lib/directory";
 import FormField from "@/components/FormField";
@@ -22,6 +23,35 @@ import { ApiError } from "@/lib/api";
 
 const STATUSES: BusinessStatus[] = ["pending", "approved", "suspended", "rejected"];
 
+function buildForm(business: BusinessFull): AdminBusinessEditInput {
+  return {
+    name: business.name ?? "",
+    description: business.description ?? "",
+    address: business.address ?? "",
+    city: business.city ?? "",
+    state: business.state ?? "",
+    zip: business.zip ?? "",
+    phone: business.phone ?? "",
+    email: business.email ?? "",
+    website_url: business.website_url ?? "",
+    about_owner: business.about_owner ?? "",
+    facebook_url: business.facebook_url ?? "",
+    instagram_url: business.instagram_url ?? "",
+    yelp_url: business.yelp_url ?? "",
+    timeline_year_1: business.timeline_year_1 ?? "",
+    timeline_year_2: business.timeline_year_2 ?? "",
+    timeline_year_3: business.timeline_year_3 ?? "",
+    timeline_description_1: business.timeline_description_1 ?? "",
+    timeline_description_2: business.timeline_description_2 ?? "",
+    timeline_description_3: business.timeline_description_3 ?? "",
+    business_tier: business.business_tier,
+    is_comped: business.is_comped,
+    latitude: business.latitude ?? undefined,
+    longitude: business.longitude ?? undefined,
+    neighborhood: business.neighborhood ?? "",
+  };
+}
+
 export default function AdminBusinessProfilePage() {
   const token = useToken();
   const router = useRouter();
@@ -30,38 +60,16 @@ export default function AdminBusinessProfilePage() {
   const confirm = useConfirm();
 
   const [statusSaving, setStatusSaving] = useState(false);
-  const [form, setForm] = useState<AdminBusinessEditInput>({});
+  const [form, setForm] = useState<AdminBusinessEditInput>(() => buildForm(business));
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    setForm({
-      name: business.name ?? "",
-      description: business.description ?? "",
-      address: business.address ?? "",
-      city: business.city ?? "",
-      state: business.state ?? "",
-      zip: business.zip ?? "",
-      phone: business.phone ?? "",
-      email: business.email ?? "",
-      website_url: business.website_url ?? "",
-      about_owner: business.about_owner ?? "",
-      facebook_url: business.facebook_url ?? "",
-      instagram_url: business.instagram_url ?? "",
-      yelp_url: business.yelp_url ?? "",
-      timeline_year_1: business.timeline_year_1 ?? "",
-      timeline_year_2: business.timeline_year_2 ?? "",
-      timeline_year_3: business.timeline_year_3 ?? "",
-      timeline_description_1: business.timeline_description_1 ?? "",
-      timeline_description_2: business.timeline_description_2 ?? "",
-      timeline_description_3: business.timeline_description_3 ?? "",
-      business_tier: business.business_tier,
-      is_comped: business.is_comped,
-      latitude: business.latitude ?? undefined,
-      longitude: business.longitude ?? undefined,
-      neighborhood: business.neighborhood ?? "",
-    });
-  }, [business]);
+  // Reset the editable form whenever the admin-loaded business changes underneath us.
+  const [prevBusiness, setPrevBusiness] = useState(business);
+  if (business !== prevBusiness) {
+    setPrevBusiness(business);
+    setForm(buildForm(business));
+  }
 
   function set<K extends keyof AdminBusinessEditInput>(key: K, value: AdminBusinessEditInput[K]) {
     setForm((f) => ({ ...f, [key]: value }));

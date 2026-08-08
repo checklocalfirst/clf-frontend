@@ -6,14 +6,12 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { useAuth, accountHomeFor, type AccountType } from "@/lib/auth";
 
-const NAV_LINKS_BEFORE_MEMBERSHIP = [
+// Rendered before the Membership dropdown, which always comes last.
+const NAV_LINKS = [
   { label: "Home", href: "/" },
-  { label: "Businesses", href: "/businesses" },
-];
-
-const NAV_LINKS_AFTER_MEMBERSHIP = [
   { label: "About", href: "/about" },
   { label: "Search", href: "/search" },
+  { label: "Businesses", href: "/businesses" },
 ];
 
 const MEMBERSHIP_LINKS = [
@@ -67,12 +65,15 @@ export default function Header() {
 
   const membershipActive = pathname.startsWith("/membership");
 
-  // Close on route change
-  useEffect(() => {
+  // Close on route change — adjusted during render rather than in an effect,
+  // so the reset lands in the same commit as the navigation instead of one tick later.
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
     setMenuOpen(false);
     setAccountMenuOpen(false);
     setMembershipMenuOpen(false);
-  }, [pathname]);
+  }
 
   // Close the account dropdown on an outside click
   useEffect(() => {
@@ -105,9 +106,11 @@ export default function Header() {
   }, [menuOpen]);
 
   // Collapse the mobile membership accordion whenever the full-screen menu closes
-  useEffect(() => {
+  const [prevMenuOpen, setPrevMenuOpen] = useState(menuOpen);
+  if (menuOpen !== prevMenuOpen) {
+    setPrevMenuOpen(menuOpen);
     if (!menuOpen) setMobileMembershipOpen(false);
-  }, [menuOpen]);
+  }
 
   return (
     <>
@@ -115,12 +118,12 @@ export default function Header() {
         {/* ── Desktop (md+) ── */}
         <div className="hidden md:flex items-center justify-between h-24 pl-16 pr-10 bg-[#faf6e9] border-b border-[#dbe0d9]">
           <Link href="/" className="flex-shrink-0 w-[62px] h-[70px]">
-            <Image src="/clf.png" alt="Check Local First" width={62} height={70} priority className="w-full h-full object-contain" />
+            <Image src="/clfblacklogo.png" alt="Check Local First" width={62} height={70} priority className="w-full h-full object-contain" />
           </Link>
 
           <div className="flex items-center gap-6">
             <nav className="flex items-center gap-5">
-              {NAV_LINKS_BEFORE_MEMBERSHIP.map(({ label, href }) => (
+              {NAV_LINKS.map(({ label, href }) => (
                 <Link
                   key={href}
                   href={href}
@@ -161,17 +164,6 @@ export default function Header() {
                 )}
               </div>
 
-              {NAV_LINKS_AFTER_MEMBERSHIP.map(({ label, href }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className={`font-display font-bold text-[20px] uppercase whitespace-nowrap transition-colors ${
-                    pathname === href ? "text-[#253022]" : "text-[#596155] hover:text-[#253022]"
-                  }`}
-                >
-                  {label}
-                </Link>
-              ))}
             </nav>
 
             {!loading && (
@@ -224,34 +216,32 @@ export default function Header() {
 
         {/* ── Mobile bar (< md) ── */}
         <div className="md:hidden flex items-center justify-between h-[66px] px-5 bg-[#faf6e9] border-b border-[#d9d4cc]">
-          {/* Hamburger / close */}
-          <button
-            onClick={() => setMenuOpen((o) => !o)}
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
-            className="flex flex-col gap-[5px] items-center justify-center w-6 h-6 flex-shrink-0 cursor-pointer"
-          >
-            {menuOpen ? (
-              /* X */
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                <path d="M1 1L17 17M17 1L1 17" stroke="#151814" strokeWidth="1.8" strokeLinecap="round" />
-              </svg>
-            ) : (
-              /* Hamburger */
-              <>
-                <span className="bg-[#151814] block h-[1.5px] w-5" />
-                <span className="bg-[#151814] block h-[1.5px] w-5" />
-                <span className="bg-[#151814] block h-[1.5px] w-3" />
-              </>
-            )}
-          </button>
+          {/* Logo + menu toggle — logo stays top-left, hamburger sits to its right */}
+          <div className="flex items-center gap-4">
+            <Link href="/" className="w-[38px] h-[43px] flex-shrink-0">
+              <Image src="/clfblacklogo.png" alt="Check Local First" width={38} height={43} priority className="w-full h-full object-contain" />
+            </Link>
 
-          {/* Logo — centered */}
-          <Link
-            href="/"
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[38px] h-[43px]"
-          >
-            <Image src="/clf.png" alt="Check Local First" width={38} height={43} priority className="w-full h-full object-contain" />
-          </Link>
+            <button
+              onClick={() => setMenuOpen((o) => !o)}
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              className="flex flex-col gap-[5px] items-center justify-center w-6 h-6 flex-shrink-0 cursor-pointer"
+            >
+              {menuOpen ? (
+                /* X */
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <path d="M1 1L17 17M17 1L1 17" stroke="#151814" strokeWidth="1.8" strokeLinecap="round" />
+                </svg>
+              ) : (
+                /* Hamburger */
+                <>
+                  <span className="bg-[#151814] block h-[1.5px] w-5" />
+                  <span className="bg-[#151814] block h-[1.5px] w-5" />
+                  <span className="bg-[#151814] block h-[1.5px] w-3" />
+                </>
+              )}
+            </button>
+          </div>
 
           {/* Right icons */}
           <div className="flex items-center gap-4 flex-shrink-0">
@@ -296,7 +286,7 @@ export default function Header() {
             </button>
 
             <Link href="/" onClick={() => setMenuOpen(false)} className="w-[38px] h-[43px]">
-              <Image src="/clf.png" alt="Check Local First" width={38} height={43} className="w-full h-full object-contain" />
+              <Image src="/clfblacklogo.png" alt="Check Local First" width={38} height={43} className="w-full h-full object-contain" />
             </Link>
 
             {/* Spacer to balance the X button */}
@@ -305,7 +295,7 @@ export default function Header() {
 
           {/* Nav links */}
           <nav className="flex flex-col px-8 pt-10 gap-1 flex-1 overflow-y-auto">
-            {NAV_LINKS_BEFORE_MEMBERSHIP.map(({ label, href }) => (
+            {NAV_LINKS.map(({ label, href }) => (
               <Link
                 key={href}
                 href={href}
@@ -347,18 +337,6 @@ export default function Header() {
               )}
             </div>
 
-            {NAV_LINKS_AFTER_MEMBERSHIP.map(({ label, href }) => (
-              <Link
-                key={href}
-                href={href}
-                onClick={() => setMenuOpen(false)}
-                className={`font-display font-bold text-[38px] uppercase leading-tight py-3 border-b border-[rgba(250,246,233,0.10)] transition-opacity ${
-                  pathname === href ? "text-[#faf6e9]" : "text-[rgba(250,246,233,0.55)] hover:text-[#faf6e9]"
-                }`}
-              >
-                {label}
-              </Link>
-            ))}
           </nav>
 
           {/* Bottom CTAs */}

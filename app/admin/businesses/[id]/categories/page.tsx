@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useToken } from "@/lib/auth";
 import { useAdminBusiness } from "@/components/dashboard/AdminBusinessContext";
 import { useApiResource } from "@/lib/useApiResource";
@@ -19,9 +19,12 @@ export default function AdminBusinessCategoriesPage() {
   const [categoryIds, setCategoryIds] = useState<number[]>(business.categories.map((c) => c.id));
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
+  // Resync the selection whenever the business's categories change underneath us.
+  const [prevCategories, setPrevCategories] = useState(business.categories);
+  if (business.categories !== prevCategories) {
+    setPrevCategories(business.categories);
     setCategoryIds(business.categories.map((c) => c.id));
-  }, [business.categories]);
+  }
 
   async function handleSave() {
     if (!token) return;

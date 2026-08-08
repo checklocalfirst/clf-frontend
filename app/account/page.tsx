@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useToken } from "@/lib/auth";
 import { useApiResource } from "@/lib/useApiResource";
 import { getMe, updateMe, type UserProfile } from "@/lib/users";
@@ -17,7 +17,11 @@ export default function AccountProfilePage() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
+  // Reset the editable form whenever a freshly-fetched user comes in, adjusted
+  // during render instead of in an effect so it lands in the same commit.
+  const [prevUser, setPrevUser] = useState(user);
+  if (user !== prevUser) {
+    setPrevUser(user);
     if (user) {
       setForm({
         first_name: user.first_name ?? "",
@@ -26,7 +30,7 @@ export default function AccountProfilePage() {
         phone: user.phone ?? "",
       });
     }
-  }, [user]);
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();

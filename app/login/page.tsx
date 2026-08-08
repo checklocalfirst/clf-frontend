@@ -10,7 +10,7 @@ import { ApiError } from "@/lib/api";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { user, loading: authLoading, login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,8 +20,18 @@ export default function LoginPage() {
   const [sessionExpired, setSessionExpired] = useState(false);
   const [next, setNext] = useState<string | null>(null);
 
+  // Already signed in — bounce to the account home rather than showing the form again.
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.replace(accountHomeFor(user.accountType));
+    }
+  }, [authLoading, user, router]);
+
+  // Reading window.location has to happen post-mount (not during render) so the
+  // server-rendered HTML and the client's first paint match before this fills in.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- URL flags are client-only; setting them during render would cause a hydration mismatch
     setJustRegistered(params.has("registered"));
     setSessionExpired(params.has("expired"));
     setNext(params.get("next"));

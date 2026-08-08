@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useToken } from "@/lib/auth";
 import { useBusiness } from "@/components/dashboard/BusinessContext";
 import { useApiResource } from "@/lib/useApiResource";
@@ -30,9 +30,12 @@ export default function ServicesPage() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
+  // Clear the form when switching into "new service" mode.
+  const [prevEditingId, setPrevEditingId] = useState(editingId);
+  if (editingId !== prevEditingId) {
+    setPrevEditingId(editingId);
     if (editingId === "new") setForm(emptyForm);
-  }, [editingId]);
+  }
 
   function startEdit(service: Service) {
     setForm({ name: service.name, description: service.description ?? "", category_id: service.category_id });

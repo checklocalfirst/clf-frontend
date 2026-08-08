@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  build-and-lint:
+    runs-on: ubuntu-latest
+    env:
+      # NEXT_PUBLIC_* vars are bundled into client JS anyway, so none of this is
+      # actually secret — every visitor's browser already has it. The real API URL
+      # is required (not a placeholder): "/" fetches the featured business at build
+      # time to prerender, so the backend has to be reachable during `next build`.
+      NEXT_PUBLIC_API_BASE_URL: https://checklocalfirst.onrender.com
+      NEXT_PUBLIC_SUPABASE_URL: https://lepyyyxwlrekzhcjtsvq.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_CDt04_fFwHSlDCZnXRgjZg_Nr35mluw
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_51TxCbYRwZLVs9vSNmRs1diuzHPvIw3vMOrzIh9Nlcrs88bGZvG2hOimcUfXmg7BdUX9wdMuYdKUkvvjtWRC7q5AY007FpHIsxG
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build

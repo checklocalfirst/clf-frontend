@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import JoinNowLink from "@/components/JoinNowLink";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SearchBar from "@/components/SearchBar";
@@ -12,11 +13,11 @@ import { getEnrichedBusinesses, getFeaturedBusiness, getListingPhotoUrl } from "
    Replace with /public files for production.
 ───────────────────────────────────────────── */
 const IMG = {
-  heroDesktop:     "https://www.figma.com/api/mcp/asset/0ff119f2-28ed-4a2e-b274-ae1b120a003b",
-  wordmarkDesktop: "https://www.figma.com/api/mcp/asset/32d3748f-f938-437a-9218-3c8375382660",
-  heroMobile:      "https://www.figma.com/api/mcp/asset/b1157f7d-5441-4f52-a6d4-855b00c1f5f8",
-  wordmarkMobile:  "https://www.figma.com/api/mcp/asset/d338f53e-a458-48f6-bf2e-ed36c4aa1e68",
-  aboutMobile:     "https://www.figma.com/api/mcp/asset/3f3fcc43-9c32-4a09-b6f6-ee9cd1fdfa26",
+  heroDesktop:     "/placeholder.png",
+  wordmarkDesktop: "/clfheadlogo.png",
+  heroMobile:      "/placeholder.png",
+  wordmarkMobile:  "/clfheadlogo.png",
+  aboutMobile:     "/placeholder.png",
   ig1:             "/breadcompany.JPG",
   ig2:             "/farmers1.JPG",
   ig3:             "/modestmix.JPG",
@@ -317,16 +318,16 @@ export default async function HomePage() {
         </h2>
         {/* Mobile */}
         <p className="md:hidden font-body text-[12px] text-[#e8ebe6] leading-[22px]">
-          Members get real perks: exclusive discounts at local shops, early access to new openings, and a community map built by neighbors, for neighbors.
+          Members get exclusive discounts at local shops, and as our community grows, those perks only multiply. More than that, joining means investing in your neighborhood, keeping your money close to home, and building real connections with the people around you.
         </p>
         {/* Desktop */}
         <p className="hidden md:block font-body text-[20px] text-[#e8ebe6] leading-[1.6]">
-          Members get real perks: exclusive discounts at local shops, early access to markets and pop-ups, and a community map built by neighbors, for neighbors. Every membership also fuels independent local journalism in Northern Nevada — you save money and support the city at the same time.
+          Members get exclusive discounts at local shops, and as our community grows, those perks only multiply. More than that, joining means investing in your neighborhood, keeping your money close to home, and building real connections with the people around you.
         </p>
-        <Link href="/signup" className="bg-[#faf6e9] md:bg-[#faf8f5] text-[#253022] font-display font-bold text-[10px] md:text-[20px] tracking-[1.8px] md:tracking-normal uppercase px-7 md:px-10 py-4 rounded-[2px] md:rounded-[100px] inline-flex items-center gap-2 hover:opacity-90 transition-opacity">
+        <JoinNowLink className="bg-[#faf6e9] md:bg-[#faf8f5] text-[#253022] font-display font-bold text-[10px] md:text-[20px] tracking-[1.8px] md:tracking-normal uppercase px-7 md:px-10 py-4 rounded-[2px] md:rounded-[100px] inline-flex items-center gap-2 hover:opacity-90 transition-opacity">
           Join as a Member
           <span className="hidden md:block"><ChevronRight color="#253022" /></span>
-        </Link>
+        </JoinNowLink>
       </section>
 
       {/* ════════════════════════════════

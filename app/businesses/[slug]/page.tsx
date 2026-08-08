@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import SearchBar from "@/components/SearchBar";
+import Footer from "@/components/Footer";
 import TrackedLink from "@/components/TrackedLink";
 import DiscountRedeemButton from "@/components/DiscountRedeemButton";
 import { getBusinessBySlug, getBusinessPhotos, trackBusinessEvent } from "@/lib/directory";
@@ -11,10 +12,9 @@ import { getPublicDiscounts } from "@/lib/business-dashboard";
 import { ApiError } from "@/lib/api";
 import { getSiteUrl } from "@/lib/site";
 
-// Figma assets — replace with local /public paths when available
-const HERO_IMG = "https://www.figma.com/api/mcp/asset/bd56b993-c2dd-4af0-b36e-bfe6f39a6b28";
-const OWNER_IMG = "https://www.figma.com/api/mcp/asset/a9b5f067-3110-41a8-829f-d20441fca1ce";
-const PILOT_BADGE_IMG = "https://www.figma.com/api/mcp/asset/c74691d5-b634-4596-a6bd-48d2a03b099a";
+const HERO_IMG = "/placeholder.png";
+const OWNER_IMG = "/placeholder.png";
+const PILOT_BADGE_IMG = "/newpilotlogo.png";
 
 // Next automatically dedupes identical `fetch()` calls within one render pass, so this
 // doesn't cost a second network round-trip on top of the page component's own fetch below.
@@ -625,113 +625,7 @@ export default async function BusinessDetailPage({
       </div>
       )}
 
-      {/* ── Desktop Footer ── */}
-      <footer className="hidden md:block bg-[#9ca889] px-[80px] pt-[80px] pb-[40px]">
-        <div className="flex items-start justify-between">
-          <div className="w-[360px]">
-            <p className="font-display font-bold text-[20px] text-white uppercase">
-              Check Local First
-            </p>
-          </div>
-          <div className="flex gap-[80px]">
-            <div className="flex flex-col gap-[16px] w-[160px]">
-              <p className="font-display font-bold text-[20px] text-white uppercase opacity-50">
-                Explore
-              </p>
-              <div className="flex flex-col gap-[10px]">
-                {[
-                  { label: "Home", href: "/" },
-                  { label: "Search", href: "/search" },
-                  { label: "About", href: "/about" },
-                ].map(({ label, href }) => (
-                  <Link
-                    key={label}
-                    href={href}
-                    className="font-display font-bold text-[20px] text-white uppercase whitespace-nowrap hover:opacity-80 transition-opacity"
-                  >
-                    {label}
-                  </Link>
-                ))}
-              </div>
-            </div>
-            <div className="flex flex-col gap-[16px] w-[160px]">
-              <p className="font-display font-bold text-[20px] text-white uppercase opacity-50">
-                For Businesses
-              </p>
-              <div className="flex flex-col gap-[10px]">
-                <Link href="/signup" className="font-display font-bold text-[20px] text-white uppercase whitespace-nowrap hover:opacity-80 transition-opacity">
-                  Add Your Business
-                </Link>
-                <Link href="/login" className="font-display font-bold text-[20px] text-white uppercase whitespace-nowrap hover:opacity-80 transition-opacity">
-                  Business Login
-                </Link>
-                <Link href="/dashboard" className="font-display font-bold text-[20px] text-white uppercase whitespace-nowrap hover:opacity-80 transition-opacity">Dashboard</Link>
-              </div>
-            </div>
-            <div className="flex flex-col gap-[16px] w-[160px]">
-              <p className="font-display font-bold text-[20px] text-white uppercase opacity-50">
-                Other
-              </p>
-              <div className="flex flex-col gap-[10px]">
-                {["Privacy Policy", "Terms of Service"].map((l) => (
-                  <p key={l} className="font-display font-bold text-[20px] text-white uppercase whitespace-nowrap">
-                    {l}
-                  </p>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="border-t border-[#41523d] mt-[64px] pt-[24px]">
-          <p className="font-mono font-normal text-[20px] text-white opacity-40">
-            © 2026 Check Local First. All rights reserved.
-          </p>
-        </div>
-      </footer>
-
-      {/* ── Mobile Footer ── */}
-      <footer className="md:hidden bg-[#9ca889] px-[24px] pt-[40px] pb-[32px]">
-        <p className="font-display font-bold text-[16px] text-[#faf6e9]">CHECK LOCAL FIRST</p>
-
-        <div className="mt-[40px]">
-          <p className="font-display font-bold text-[13px] text-[#faf6e9]">EXPLORE</p>
-          <div className="flex flex-col gap-[16px] mt-[16px]">
-            {["Home", "Search", "About"].map((l) => (
-              <p key={l} className="font-display text-[14px] text-[#faf6e9]">
-                {l}
-              </p>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-[40px]">
-          <p className="font-display font-bold text-[13px] text-[#faf6e9]">FOR BUSINESSES</p>
-          <div className="flex flex-col gap-[16px] mt-[16px]">
-            <Link href="/signup" className="font-display text-[14px] text-[#faf6e9] hover:opacity-80 transition-opacity">
-              Add Your Business
-            </Link>
-            <Link href="/login" className="font-display text-[14px] text-[#faf6e9] hover:opacity-80 transition-opacity">
-              Business Login
-            </Link>
-            <Link href="/dashboard" className="font-display text-[14px] text-[#faf6e9] hover:opacity-80 transition-opacity">Dashboard</Link>
-          </div>
-        </div>
-
-        <div className="mt-[40px]">
-          <p className="font-display font-bold text-[13px] text-[#faf6e9]">OTHER</p>
-          <div className="flex flex-col gap-[16px] mt-[16px]">
-            {["Privacy Policy", "Terms of Service"].map((l) => (
-              <p key={l} className="font-display text-[14px] text-[#faf6e9]">
-                {l}
-              </p>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-[64px] border-t border-[rgba(250,246,233,0.3)] pt-[24px]">
-          <p className="font-display text-[14px] text-[#faf6e9]">© 2026 Check Local First.</p>
-        </div>
-      </footer>
+      <Footer />
     </main>
   );
 }

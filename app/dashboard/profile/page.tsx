@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useToken } from "@/lib/auth";
 import { useBusiness } from "@/components/dashboard/BusinessContext";
 import { useApiResource } from "@/lib/useApiResource";
-import { getCategories, getBusinessCategories, type Category } from "@/lib/directory";
+import { getCategories, getBusinessCategories, type Category, type Business } from "@/lib/directory";
 import {
   updateMyBusiness,
   updateMyCategories,
@@ -41,6 +41,30 @@ const PREMIUM_FIELD_KEYS: (keyof BusinessProfileInput)[] = [
   "timeline_description_3",
 ];
 
+function buildForm(business: Business): BusinessProfileInput {
+  return {
+    name: business.name ?? "",
+    description: business.description ?? "",
+    address: business.address ?? "",
+    city: business.city ?? "",
+    state: business.state ?? "",
+    zip: business.zip ?? "",
+    phone: business.phone ?? "",
+    email: business.email ?? "",
+    website_url: business.website_url ?? "",
+    about_owner: business.about_owner ?? "",
+    facebook_url: business.facebook_url ?? "",
+    instagram_url: business.instagram_url ?? "",
+    yelp_url: business.yelp_url ?? "",
+    timeline_year_1: business.timeline_year_1 ?? "",
+    timeline_year_2: business.timeline_year_2 ?? "",
+    timeline_year_3: business.timeline_year_3 ?? "",
+    timeline_description_1: business.timeline_description_1 ?? "",
+    timeline_description_2: business.timeline_description_2 ?? "",
+    timeline_description_3: business.timeline_description_3 ?? "",
+  };
+}
+
 export default function BusinessProfilePage() {
   const token = useToken();
   const { business, setBusiness } = useBusiness();
@@ -53,40 +77,26 @@ export default function BusinessProfilePage() {
     [business.slug]
   );
 
-  const [form, setForm] = useState<BusinessProfileInput>({});
+  const [form, setForm] = useState<BusinessProfileInput>(() => buildForm(business));
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
   const [categoryIds, setCategoryIds] = useState<number[]>([]);
   const [savingCategories, setSavingCategories] = useState(false);
 
-  useEffect(() => {
-    setForm({
-      name: business.name ?? "",
-      description: business.description ?? "",
-      address: business.address ?? "",
-      city: business.city ?? "",
-      state: business.state ?? "",
-      zip: business.zip ?? "",
-      phone: business.phone ?? "",
-      email: business.email ?? "",
-      website_url: business.website_url ?? "",
-      about_owner: business.about_owner ?? "",
-      facebook_url: business.facebook_url ?? "",
-      instagram_url: business.instagram_url ?? "",
-      yelp_url: business.yelp_url ?? "",
-      timeline_year_1: business.timeline_year_1 ?? "",
-      timeline_year_2: business.timeline_year_2 ?? "",
-      timeline_year_3: business.timeline_year_3 ?? "",
-      timeline_description_1: business.timeline_description_1 ?? "",
-      timeline_description_2: business.timeline_description_2 ?? "",
-      timeline_description_3: business.timeline_description_3 ?? "",
-    });
-  }, [business]);
+  // Reset the editable form whenever the loaded business changes underneath us.
+  const [prevBusiness, setPrevBusiness] = useState(business);
+  if (business !== prevBusiness) {
+    setPrevBusiness(business);
+    setForm(buildForm(business));
+  }
 
-  useEffect(() => {
+  // Sync the category selection once it arrives from its own (async) fetch.
+  const [prevMyCategories, setPrevMyCategories] = useState(myCategories);
+  if (myCategories !== prevMyCategories) {
+    setPrevMyCategories(myCategories);
     if (myCategories) setCategoryIds(myCategories.map((c) => c.id));
-  }, [myCategories]);
+  }
 
   function set<K extends keyof BusinessProfileInput>(key: K, value: string) {
     setForm((f) => ({ ...f, [key]: value }));

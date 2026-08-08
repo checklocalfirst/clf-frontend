@@ -1,5 +1,8 @@
 const BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(/\/$/, "");
 
+// Shared with lib/auth.tsx so both sides agree on where the session lives.
+export const SESSION_STORAGE_KEY = "clf_session";
+
 export interface Pagination {
   page: number;
   limit: number;
@@ -55,6 +58,16 @@ export async function apiFetch<T = unknown>(
   const body = await res.json().catch(() => ({}));
 
   if (!res.ok) {
+    // Authenticated request rejected — there's no refresh-token flow, so the only recovery
+    // is a fresh login. Only fires when this call actually carried a token (an anonymous
+    // 401, e.g. bad login credentials, must fall through and stay on the calling page).
+    if (res.status === 401 && token && typeof window !== "undefined") {
+      localStorage.removeItem(SESSION_STORAGE_KEY);
+      if (!window.location.pathname.startsWith("/login")) {
+        window.location.href = "/login?expired=1";
+      }
+    }
+
     if (res.status === 429) {
       throw new ApiError(429, "Too many requests — please slow down and try again shortly.");
     }

@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import StripeCheckout from "@/components/StripeCheckout";
 import { apiFetch, ApiError } from "@/lib/api";
+import { useAuth, accountHomeFor } from "@/lib/auth";
 
 type AccountType = "personal" | "business";
 
@@ -55,7 +56,15 @@ function Field({
 
 export default function SignupPage() {
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const [accountType, setAccountType] = useState<AccountType>("personal");
+
+  // Already signed in — bounce to the account home rather than showing the form again.
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.replace(accountHomeFor(user.accountType));
+    }
+  }, [authLoading, user, router]);
 
   // personal form state
   const [personalLoading, setPersonalLoading] = useState(false);
