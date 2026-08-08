@@ -1,7 +1,16 @@
+import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SearchBar from "@/components/SearchBar";
+
+export const metadata: Metadata = {
+  title: "About",
+  description:
+    "The story behind Check Local First — why we built a directory dedicated to helping Reno shoppers find and support independently owned businesses.",
+  alternates: { canonical: "/about" },
+};
 
 const IMG = {
   /* Desktop grid photos */
@@ -71,7 +80,7 @@ export default function AboutPage() {
           </div>
         </div>
         <div className="relative overflow-hidden h-[440px]">
-          <img src={IMG.grid1} alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <Image src={IMG.grid1} alt="" fill sizes="33vw" className="object-cover" />
         </div>
         <div className="bg-[#423926] flex flex-col justify-between p-10 h-[440px]">
           <div className="flex flex-col gap-4">
@@ -87,7 +96,7 @@ export default function AboutPage() {
 
         {/* Row 2: photo | dark card | photo */}
         <div className="relative overflow-hidden h-[440px]">
-          <img src={IMG.grid2} alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <Image src={IMG.grid2} alt="" fill sizes="33vw" className="object-cover" />
         </div>
         <div className="bg-[#423926] flex flex-col justify-between p-10 h-[440px]">
           <p className="font-display text-[20px] text-[#f0edd8] leading-[1.3]">
@@ -98,7 +107,7 @@ export default function AboutPage() {
           </div>
         </div>
         <div className="relative overflow-hidden h-[440px]">
-          <img src={IMG.grid3} alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <Image src={IMG.grid3} alt="" fill sizes="33vw" className="object-cover" />
         </div>
 
       </section>
@@ -115,7 +124,7 @@ export default function AboutPage() {
           <p className="font-display font-bold text-[15px] text-[#faf6e9] text-right">→</p>
         </div>
         <div className="relative h-[320px] overflow-hidden">
-          <img src={IMG.mosaic1} alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <Image src={IMG.mosaic1} alt="" fill sizes="100vw" className="object-cover" />
         </div>
 
         <div className="bg-[#423926] flex flex-col gap-5 pt-[48px] pb-[52px] px-[32px]">
@@ -126,7 +135,7 @@ export default function AboutPage() {
           <p className="font-display font-bold text-[15px] text-[#faf6e9] text-right">→</p>
         </div>
         <div className="relative h-[320px] overflow-hidden">
-          <img src={IMG.mosaic2} alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <Image src={IMG.mosaic2} alt="" fill sizes="100vw" className="object-cover" />
         </div>
 
         <div className="bg-[#9ca889] flex flex-col gap-5 pt-[48px] pb-[52px] px-[32px]">
@@ -137,7 +146,7 @@ export default function AboutPage() {
           <p className="font-display font-bold text-[15px] text-[#151814] text-right">→</p>
         </div>
         <div className="relative h-[320px] overflow-hidden">
-          <img src={IMG.mosaic3} alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <Image src={IMG.mosaic3} alt="" fill sizes="100vw" className="object-cover" />
         </div>
       </section>
 
@@ -162,7 +171,7 @@ export default function AboutPage() {
         <div className="flex flex-col gap-8 w-full">
           <p className="font-display font-bold text-[13px] text-[#b7a78c] uppercase tracking-widest">MEET THE FOUNDER</p>
           <div className="relative h-[480px] w-full rounded-[12px] overflow-hidden">
-            <img src={IMG.founder} alt="Tessa Miller, Founder" className="absolute inset-0 w-full h-full object-cover" />
+            <Image src={IMG.founder} alt="Tessa Miller, Founder" fill sizes="100vw" className="object-cover" />
           </div>
           <h2 className="font-display font-bold text-[32px] text-[#151814]">Tessa&apos;s Story</h2>
           <div className="flex flex-col gap-6">
@@ -221,7 +230,7 @@ export default function AboutPage() {
           </p>
         </div>
         <div className="relative h-[380px] w-full flex-shrink-0 overflow-hidden">
-          <img src={IMG.founder} alt="Tessa Miller, Founder" className="absolute inset-0 w-full h-full object-cover" />
+          <Image src={IMG.founder} alt="Tessa Miller, Founder" fill sizes="100vw" className="object-cover" />
         </div>
         <div className="flex flex-col gap-[18px] pt-[36px] pb-[52px] px-[28px]">
           <h2 className="font-display font-bold text-[24px] text-[#253022] uppercase tracking-[0.5px] leading-[30px]">

@@ -1,6 +1,15 @@
+import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import Header from "@/components/Header";
 import SearchBar from "@/components/SearchBar";
+
+export const metadata: Metadata = {
+  title: "For Businesses",
+  description:
+    "List your Reno business on Check Local First — reach shoppers who are already looking to buy local, put a face behind your storefront, and grow your reach in the community.",
+  alternates: { canonical: "/businesses" },
+};
 
 const PHOTOS = {
   intro: "/farmers1.JPG",
@@ -65,12 +74,8 @@ export default function BusinessesPage() {
 
       {/* ── Intro Photo + Text ── */}
       <div className="bg-[#faf6e9] px-[16px] md:px-[64px] pb-[48px] md:pb-[64px] flex flex-col gap-[32px]">
-        <div className="h-[220px] md:h-[360px] bg-[#c9d2cf] rounded-[4px] overflow-hidden">
-          <img
-            src={PHOTOS.intro}
-            alt="Reno local community"
-            className="w-full h-full object-cover"
-          />
+        <div className="relative h-[220px] md:h-[360px] bg-[#c9d2cf] rounded-[4px] overflow-hidden">
+          <Image src={PHOTOS.intro} alt="Reno local community" fill sizes="100vw" className="object-cover" />
         </div>
         <div className="flex flex-col md:flex-row gap-[24px] md:gap-[64px] text-[#423926] text-[15px] font-body">
           <p className="flex-1">
@@ -102,8 +107,8 @@ export default function BusinessesPage() {
             <div key={i}>
               {/* Mobile: photo → heading → body */}
               <div className="md:hidden flex flex-col gap-[20px]">
-                <div className="h-[220px] rounded-[4px] overflow-hidden bg-[#c9d2cf]">
-                  <img src={photo} alt="" className="w-full h-full object-cover" />
+                <div className="relative h-[220px] rounded-[4px] overflow-hidden bg-[#c9d2cf]">
+                  <Image src={photo} alt="" fill sizes="100vw" className="object-cover" />
                 </div>
                 <div className="font-display font-bold text-[22px] text-[#423926] tracking-[-1px]">
                   {heading.map((line, j) => (
@@ -118,8 +123,8 @@ export default function BusinessesPage() {
               {/* Desktop: text + photo, alternating sides */}
               <div className="hidden md:flex h-[620px]">
                 {!photoRight && (
-                  <div className="w-1/2 h-full bg-[#c9d2cf] overflow-hidden flex-shrink-0">
-                    <img src={photo} alt="" className="w-full h-full object-cover" />
+                  <div className="relative w-1/2 h-full bg-[#c9d2cf] overflow-hidden flex-shrink-0">
+                    <Image src={photo} alt="" fill sizes="50vw" className="object-cover" />
                   </div>
                 )}
                 <div className="flex flex-col gap-[20px] justify-center w-1/2 px-[72px]">
@@ -133,8 +138,8 @@ export default function BusinessesPage() {
                   <p className="font-body text-[20px] text-[#423926] leading-[1.6]">{body}</p>
                 </div>
                 {photoRight && (
-                  <div className="w-1/2 h-full bg-[#c9d2cf] overflow-hidden flex-shrink-0">
-                    <img src={photo} alt="" className="w-full h-full object-cover" />
+                  <div className="relative w-1/2 h-full bg-[#c9d2cf] overflow-hidden flex-shrink-0">
+                    <Image src={photo} alt="" fill sizes="50vw" className="object-cover" />
                   </div>
                 )}
               </div>

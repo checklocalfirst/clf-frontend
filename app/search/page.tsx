@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -9,6 +11,13 @@ import {
   isNewBusiness,
   searchBusinesses,
 } from "@/lib/directory";
+
+export const metadata: Metadata = {
+  title: "Browse Local Businesses",
+  description:
+    "Search and browse independently owned businesses in Reno, NV by category — food & drink, shops, home & garden, health & beauty, services, and more.",
+  alternates: { canonical: "/search" },
+};
 
 // Category icon assets from Figma (expire in 7 days — replace with /public SVGs)
 const ICON_FORK_KNIFE = "https://www.figma.com/api/mcp/asset/1d78dbba-5a49-4c0b-acf0-27729a6091d0";
@@ -117,11 +126,7 @@ export default async function SearchPage({
                 className="flex flex-col items-center gap-[10px] w-[150px] group"
               >
                 {icon ? (
-                  <img
-                    src={icon}
-                    alt=""
-                    className="w-[60px] h-[60px] object-contain"
-                  />
+                  <Image src={icon} alt="" width={60} height={60} className="w-[60px] h-[60px] object-contain" />
                 ) : (
                   <div className="h-[60px]" />
                 )}
@@ -148,11 +153,7 @@ export default async function SearchPage({
                 className="flex flex-col items-center gap-2 flex-shrink-0 w-[88px] group"
               >
                 {icon ? (
-                  <img
-                    src={icon}
-                    alt=""
-                    className="w-9 h-9 object-contain"
-                  />
+                  <Image src={icon} alt="" width={36} height={36} className="w-9 h-9 object-contain" />
                 ) : (
                   <div className="w-9 h-9 flex items-center justify-center">
                     <div className="w-5 h-5 rounded-full border-2 border-[#423926]" />
@@ -240,13 +241,7 @@ export default async function SearchPage({
             >
               {/* Photo */}
               <div className="relative h-[220px] w-full bg-[#c9d2cf] flex-shrink-0 rounded-t-[16px] overflow-hidden">
-                {card.photo && (
-                  <img
-                    src={card.photo}
-                    alt={card.name}
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                )}
+                {card.photo && <Image src={card.photo} alt={card.name} fill sizes="360px" className="object-cover" />}
                 {card.isNew && (
                   <div className="absolute top-[14px] left-[14px] bg-[#2c4a34] px-[10px] py-[5px] rounded-[4px]">
                     <span className="font-mono font-semibold text-[11px] text-white uppercase">
@@ -285,13 +280,7 @@ export default async function SearchPage({
             >
               {/* Photo */}
               <div className="relative h-[180px] w-full bg-[#c9d2cf] overflow-hidden">
-                {card.photo && (
-                  <img
-                    src={card.photo}
-                    alt={card.name}
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                )}
+                {card.photo && <Image src={card.photo} alt={card.name} fill sizes="100vw" className="object-cover" />}
                 {card.isNew && (
                   <div className="absolute top-3 left-3 bg-[#2c4a34] px-2 py-1 rounded-[4px]">
                     <span className="font-mono font-semibold text-[10px] text-white uppercase">
@@ -330,13 +319,7 @@ export default async function SearchPage({
               >
                 {/* Thumbnail */}
                 <div className="relative w-[52px] h-[52px] md:w-[72px] md:h-[72px] flex-shrink-0 rounded-[8px] md:rounded-[12px] border border-[#dbe0d9] overflow-hidden bg-[#c9d2cf]">
-                  {item.photo && (
-                    <img
-                      src={item.photo}
-                      alt={item.name}
-                      className="absolute inset-0 w-full h-full object-cover"
-                    />
-                  )}
+                  {item.photo && <Image src={item.photo} alt={item.name} fill sizes="72px" className="object-cover" />}
                 </div>
 
                 {/* Content */}

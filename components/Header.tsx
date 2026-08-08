@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
@@ -114,7 +115,7 @@ export default function Header() {
         {/* ── Desktop (md+) ── */}
         <div className="hidden md:flex items-center justify-between h-24 pl-16 pr-10 bg-[#faf6e9] border-b border-[#dbe0d9]">
           <Link href="/" className="flex-shrink-0 w-[62px] h-[70px]">
-            <img src="/clf.png" alt="Check Local First" className="w-full h-full object-contain" />
+            <Image src="/clf.png" alt="Check Local First" width={62} height={70} priority className="w-full h-full object-contain" />
           </Link>
 
           <div className="flex items-center gap-6">
@@ -249,7 +250,7 @@ export default function Header() {
             href="/"
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[38px] h-[43px]"
           >
-            <img src="/clf.png" alt="Check Local First" className="w-full h-full object-contain" />
+            <Image src="/clf.png" alt="Check Local First" width={38} height={43} priority className="w-full h-full object-contain" />
           </Link>
 
           {/* Right icons */}
@@ -295,7 +296,7 @@ export default function Header() {
             </button>
 
             <Link href="/" onClick={() => setMenuOpen(false)} className="w-[38px] h-[43px]">
-              <img src="/clf.png" alt="Check Local First" className="w-full h-full object-contain" />
+              <Image src="/clf.png" alt="Check Local First" width={38} height={43} className="w-full h-full object-contain" />
             </Link>
 
             {/* Spacer to balance the X button */}

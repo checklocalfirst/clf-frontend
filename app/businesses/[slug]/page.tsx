@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Header from "@/components/Header";
@@ -7,11 +9,55 @@ import DiscountRedeemButton from "@/components/DiscountRedeemButton";
 import { getBusinessBySlug, getBusinessPhotos, trackBusinessEvent } from "@/lib/directory";
 import { getPublicDiscounts } from "@/lib/business-dashboard";
 import { ApiError } from "@/lib/api";
+import { getSiteUrl } from "@/lib/site";
 
 // Figma assets — replace with local /public paths when available
 const HERO_IMG = "https://www.figma.com/api/mcp/asset/bd56b993-c2dd-4af0-b36e-bfe6f39a6b28";
 const OWNER_IMG = "https://www.figma.com/api/mcp/asset/a9b5f067-3110-41a8-829f-d20441fca1ce";
 const PILOT_BADGE_IMG = "https://www.figma.com/api/mcp/asset/c74691d5-b634-4596-a6bd-48d2a03b099a";
+
+// Next automatically dedupes identical `fetch()` calls within one render pass, so this
+// doesn't cost a second network round-trip on top of the page component's own fetch below.
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+
+  try {
+    const business = await getBusinessBySlug(slug);
+    const photos = await getBusinessPhotos(slug).catch(() => []);
+    const listingPhoto = photos
+      .filter((p) => p.approved)
+      .sort((a, b) => a.display_order - b.display_order)
+      .find((p) => p.photo_type === "listing");
+
+    const description =
+      business.description?.trim() ||
+      `${business.name} in ${business.city}, ${business.state} — find hours, contact info, and more on Check Local First.`;
+
+    return {
+      title: business.name,
+      description,
+      alternates: { canonical: `/businesses/${business.slug}` },
+      openGraph: {
+        title: business.name,
+        description,
+        type: "website",
+        images: listingPhoto ? [{ url: listingPhoto.photo_url }] : undefined,
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: business.name,
+        description,
+      },
+    };
+  } catch {
+    // Not found / API error — let the page component's own notFound() handle it.
+    return {};
+  }
+}
 
 export default async function BusinessDetailPage({
   params,
@@ -67,8 +113,33 @@ export default async function BusinessDetailPage({
   const showTimeline = business.business_tier === "premium" && timelineEntries.length > 0;
   const showOwnerSection = !!business.about_owner?.trim() && !!ownerPhoto;
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: business.name,
+    description: business.description ?? undefined,
+    url: `${getSiteUrl()}/businesses/${business.slug}`,
+    telephone: business.phone,
+    email: business.email,
+    image: listingPhoto?.photo_url ?? heroPhotoUrl,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: business.address,
+      addressLocality: business.city,
+      addressRegion: business.state,
+      postalCode: business.zip,
+      addressCountry: "US",
+    },
+    ...(business.website_url ? { sameAs: [business.website_url] } : {}),
+  };
+
   return (
     <main className="bg-[#faf6e9]">
+      {/* Escape `<` so a business name/description can't break out of the script tag */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
+      />
       <Header />
 
       {/* ── Search Row ── */}
@@ -301,13 +372,15 @@ export default async function BusinessDetailPage({
 
       {/* ── Mobile: Hero Photo + Pilot Badge ── */}
       <div className="md:hidden relative mx-[16px] mt-[24px] h-[240px] bg-[#c96f47] rounded-[12px] overflow-hidden">
-        <img src={heroPhotoUrl} alt={`${business.name} storefront`} className="w-full h-full object-cover" />
+        <Image src={heroPhotoUrl} alt={`${business.name} storefront`} fill priority sizes="100vw" className="object-cover" />
         {business.pilot_business && (
           <div className="absolute z-10 bottom-[8px] right-[8px] w-[96px] h-[82px]">
-            <img
+            <Image
               src={PILOT_BADGE_IMG}
               alt="Pilot Business"
-              className="w-full h-full object-contain"
+              fill
+              sizes="96px"
+              className="object-contain"
               style={{ transform: "rotate(2.97deg)" }}
             />
           </div>
@@ -318,10 +391,13 @@ export default async function BusinessDetailPage({
       <div className="hidden md:block relative">
         {/* Hero Photo */}
         <div className="relative h-[700px] bg-[#b7a78c] overflow-hidden">
-          <img
+          <Image
             src={heroPhotoUrl}
             alt={`${business.name} storefront`}
-            className="absolute inset-0 w-full h-full object-cover"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
           />
           <p className="absolute bottom-0 w-full text-center font-display text-[14px] text-[rgba(66,57,38,0.8)] tracking-[0.56px] py-[8px] bg-gradient-to-t from-[#b7a78c]/40 to-transparent">
             {business.name.toUpperCase()} — STOREFRONT PHOTO
@@ -344,10 +420,12 @@ export default async function BusinessDetailPage({
           className="absolute z-10"
           style={{ top: "569px", right: "40px", width: "292px", height: "248px" }}
         >
-          <img
+          <Image
             src={PILOT_BADGE_IMG}
             alt="Pilot Business"
-            className="w-full h-full object-contain"
+            fill
+            sizes="292px"
+            className="object-contain"
             style={{ transform: "rotate(2.97deg)" }}
           />
         </div>
@@ -387,7 +465,7 @@ export default async function BusinessDetailPage({
                 className="absolute rounded-[2px] overflow-hidden"
                 style={{ top: "33px", left: "24px", right: "26px", height: "307px" }}
               >
-                <img src={ownerPhotoUrl} alt="Owner" className="w-full h-full object-cover" />
+                <Image src={ownerPhotoUrl} alt="Owner" fill sizes="330px" className="object-cover" />
               </div>
               <p
                 className="absolute font-display text-[14px] text-[#423926] tracking-[0.56px] whitespace-nowrap"
@@ -417,8 +495,8 @@ export default async function BusinessDetailPage({
         <h2 className="font-display font-bold text-[26px] text-[#253022] tracking-[0.26px] leading-none">
           MEET THE OWNER
         </h2>
-        <div className="mt-[16px] h-[260px] bg-[#c9d2cf] rounded-[12px] overflow-hidden">
-          <img src={ownerPhotoUrl} alt="Owner" className="w-full h-full object-cover" />
+        <div className="relative mt-[16px] h-[260px] bg-[#c9d2cf] rounded-[12px] overflow-hidden">
+          <Image src={ownerPhotoUrl} alt="Owner" fill sizes="100vw" className="object-cover" />
         </div>
         <p className="font-body text-[20px] text-[#666b61] leading-[1.6] mt-[16px]">
           {business.about_owner}
@@ -445,8 +523,8 @@ export default async function BusinessDetailPage({
               {/* Polaroid mount — only when this slot has a photo */}
               {img && (
                 <div className="bg-[#faf6e9] rounded-[4px] shadow-[0px_8px_8px_rgba(0,0,0,0.25)] p-[12px] pb-[24px] w-[240px] h-[240px] flex-shrink-0">
-                  <div className="w-full h-full rounded-[2px] overflow-hidden">
-                    <img src={img} alt={year} className="w-full h-full object-cover" />
+                  <div className="relative w-full h-full rounded-[2px] overflow-hidden">
+                    <Image src={img} alt={year} fill sizes="240px" className="object-cover" />
                   </div>
                 </div>
               )}
@@ -505,8 +583,8 @@ export default async function BusinessDetailPage({
               {/* Polaroid mount — only when this slot has a photo */}
               {img && (
                 <div className="bg-[#faf6e9] rounded-[4px] shadow-[0px_8px_8px_rgba(0,0,0,0.25)] p-[10px] pb-[20px] w-[180px] h-[180px] mx-auto">
-                  <div className="w-full h-full rounded-[2px] overflow-hidden">
-                    <img src={img} alt={year} className="w-full h-full object-cover" />
+                  <div className="relative w-full h-full rounded-[2px] overflow-hidden">
+                    <Image src={img} alt={year} fill sizes="180px" className="object-cover" />
                   </div>
                 </div>
               )}

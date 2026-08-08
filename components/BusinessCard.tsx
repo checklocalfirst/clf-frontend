@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 interface BusinessCardProps {
@@ -23,13 +24,7 @@ export default function BusinessCard({
       <div className="md:hidden flex flex-col gap-3">
         {/* Photo */}
         <div className="relative h-[224px] w-full rounded-[2px] overflow-hidden bg-[#b7a78c]">
-          {imageUrl && (
-            <img
-              src={imageUrl}
-              alt={name}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          )}
+          {imageUrl && <Image src={imageUrl} alt={name} fill sizes="100vw" className="object-cover" />}
         </div>
 
         {/* Text */}
@@ -63,13 +58,7 @@ export default function BusinessCard({
 
         {/* Photo */}
         <div className="relative h-[120px] w-full rounded-[8px] overflow-hidden bg-[#b7a78c] flex-shrink-0">
-          {imageUrl && (
-            <img
-              src={imageUrl}
-              alt={name}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          )}
+          {imageUrl && <Image src={imageUrl} alt={name} fill sizes="360px" className="object-cover" />}
         </div>
 
         {/* Description or neighborhood */}

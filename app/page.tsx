@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -93,12 +94,27 @@ export default async function HomePage() {
 
       {/* Desktop */}
       <section className="hidden md:block relative h-[620px] w-full overflow-hidden bg-[#faf6e9]">
-        <img src={IMG.heroDesktop} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover object-center" />
+        <Image
+          src={IMG.heroDesktop}
+          alt=""
+          aria-hidden
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center"
+        />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/45 pointer-events-none" />
 
         {/* Wordmark */}
         <div className="absolute left-1/2 -translate-x-1/2 top-16 w-[383px] h-[270px]">
-          <img src={IMG.wordmarkDesktop} alt="Check Local First" className="w-full h-full object-contain" />
+          <Image
+            src={IMG.wordmarkDesktop}
+            alt="Check Local First"
+            fill
+            priority
+            sizes="383px"
+            className="object-contain"
+          />
         </div>
 
         {/* Tagline */}
@@ -114,11 +130,26 @@ export default async function HomePage() {
 
       {/* Mobile */}
       <section className="md:hidden relative h-[560px] w-full flex flex-col items-center justify-center gap-7 px-[26px] overflow-hidden">
-        <img src={IMG.heroMobile} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover object-center" />
+        <Image
+          src={IMG.heroMobile}
+          alt=""
+          aria-hidden
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center"
+        />
         <div className="absolute inset-0 bg-[rgba(21,24,20,0.36)] pointer-events-none" />
 
         <div className="relative w-[288px] h-[203px]">
-          <img src={IMG.wordmarkMobile} alt="Check Local First" className="w-full h-full object-contain" />
+          <Image
+            src={IMG.wordmarkMobile}
+            alt="Check Local First"
+            fill
+            priority
+            sizes="288px"
+            className="object-contain"
+          />
         </div>
 
         <div className="relative w-full flex items-center bg-white rounded-[4px] overflow-hidden h-[50px] px-[14px] gap-[10px]">
@@ -188,7 +219,7 @@ export default async function HomePage() {
       {/* Mobile */}
       <section className="md:hidden bg-[#faf6e9] flex flex-col pb-[56px]">
         <div className="relative h-[320px] w-full overflow-hidden">
-          <img src={IMG.aboutMobile} alt="About Check Local First" className="absolute inset-0 w-full h-full object-cover" />
+          <Image src={IMG.aboutMobile} alt="About Check Local First" fill sizes="100vw" className="object-cover" />
         </div>
         <div className="flex flex-col gap-4 items-center text-center pt-11 px-[30px]">
           <p className="font-display font-bold text-[9px] text-[#b7a78c] tracking-[3px] uppercase w-full">About us</p>
@@ -206,7 +237,7 @@ export default async function HomePage() {
       <section className="hidden md:flex items-center gap-20 bg-[#faf6e9] px-20 py-[120px]">
         <div className="shadow-[-4px_12px_16px_rgba(37,48,34,0.08)] rounded-[4px] p-6 flex-shrink-0 w-[440px] overflow-hidden">
           <div className="relative h-[360px] w-full rounded-[2px] overflow-hidden">
-            <img src="/market.JPG" alt="About Check Local First" className="absolute inset-0 w-full h-full object-cover" />
+            <Image src="/market.JPG" alt="About Check Local First" fill sizes="440px" className="object-cover" />
           </div>
         </div>
         <div className="flex flex-col gap-8 flex-1">
@@ -237,7 +268,7 @@ export default async function HomePage() {
         </div>
         <div className="px-5 pt-[10px]">
           <div className="relative h-[300px] w-full rounded-[2px] overflow-hidden bg-[#c9d2cf]">
-            <img src={featuredImg} alt={featured.name} className="absolute inset-0 w-full h-full object-cover" />
+            <Image src={featuredImg} alt={featured.name} fill sizes="100vw" className="object-cover" />
           </div>
         </div>
         <div className="flex flex-col gap-5 items-center text-center pt-7 pb-[56px] px-[30px]">
@@ -260,7 +291,7 @@ export default async function HomePage() {
           <div className="flex gap-20 mt-[48px]">
             {/* Left: photo */}
             <div className="relative h-[340px] w-[560px] flex-shrink-0 rounded-[12px] overflow-hidden bg-[#c9d2cf]">
-              <img src={featuredImg} alt={featured.name} className="absolute inset-0 w-full h-full object-cover" />
+              <Image src={featuredImg} alt={featured.name} fill sizes="560px" className="object-cover" />
             </div>
 
             {/* Right: text */}
@@ -332,24 +363,24 @@ export default async function HomePage() {
         <div className="flex flex-col gap-[2px]">
           <div className="flex gap-[2px] h-[128px]">
             <a href="https://www.instagram.com/checklocalfirstreno/" target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden">
-              <img src={IMG.ig1} alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <Image src={IMG.ig1} alt="" fill sizes="33vw" className="object-cover" />
             </a>
             <a href="https://www.instagram.com/checklocalfirstreno/" target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden">
-              <img src={IMG.ig2} alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <Image src={IMG.ig2} alt="" fill sizes="33vw" className="object-cover" />
             </a>
             <a href="https://www.instagram.com/checklocalfirstreno/" target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden">
-              <img src={IMG.ig3} alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <Image src={IMG.ig3} alt="" fill sizes="33vw" className="object-cover" />
             </a>
           </div>
           <div className="flex gap-[2px] h-[128px]">
             <a href="https://www.instagram.com/checklocalfirstreno/" target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden">
-              <img src={IMG.ig4} alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <Image src={IMG.ig4} alt="" fill sizes="33vw" className="object-cover" />
             </a>
             <a href="https://www.instagram.com/checklocalfirstreno/" target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden">
-              <img src={IMG.ig1} alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <Image src={IMG.ig1} alt="" fill sizes="33vw" className="object-cover" />
             </a>
             <a href="https://www.instagram.com/checklocalfirstreno/" target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden">
-              <img src={IMG.ig2} alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <Image src={IMG.ig2} alt="" fill sizes="33vw" className="object-cover" />
             </a>
           </div>
         </div>

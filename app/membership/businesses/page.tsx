@@ -1,8 +1,17 @@
+import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import Header from "@/components/Header";
 import SearchBar from "@/components/SearchBar";
 import Footer from "@/components/Footer";
 import FeatureAccordion from "@/components/FeatureAccordion";
+
+export const metadata: Metadata = {
+  title: "Business Membership",
+  description:
+    "Compare Check Local First's Community and Premium business membership tiers — directory listing, homepage rotation, featured placement, and more.",
+  alternates: { canonical: "/membership/businesses" },
+};
 
 const COMMUNITY_FEATURES = [
   {
@@ -116,12 +125,8 @@ export default function BusinessMembershipPage() {
       {/* ── 02 Intro Text ── */}
       <section className="bg-[#faf6e9] px-4 pb-12 md:px-[64px] md:pb-[64px]">
         {/* Hero photo */}
-        <div className="h-[200px] md:h-[420px] bg-[#c9d2cf] rounded-[4px] overflow-hidden mb-8">
-          <img
-            src="/market.JPG"
-            alt="Local market scene"
-            className="w-full h-full object-cover"
-          />
+        <div className="relative h-[200px] md:h-[420px] bg-[#c9d2cf] rounded-[4px] overflow-hidden mb-8">
+          <Image src="/market.JPG" alt="Local market scene" fill priority sizes="100vw" className="object-cover" />
         </div>
 
         {/* Two-column text on desktop, stacked on mobile */}
@@ -248,9 +253,9 @@ export default function BusinessMembershipPage() {
               {GALLERY.map((src, i) => (
                 <div
                   key={i}
-                  className="w-[90px] h-[62px] flex-shrink-0 rounded-[6px] overflow-hidden bg-[rgba(240,222,199,0.9)]"
+                  className="relative w-[90px] h-[62px] flex-shrink-0 rounded-[6px] overflow-hidden bg-[rgba(240,222,199,0.9)]"
                 >
-                  <img src={src} alt="" className="w-full h-full object-cover" />
+                  <Image src={src} alt="" fill sizes="90px" className="object-cover" />
                 </div>
               ))}
             </div>

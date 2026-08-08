@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { IBM_Plex_Mono, Fragment_Mono, JetBrains_Mono } from "next/font/google";
 import { AuthProvider } from "@/lib/auth";
 import { ToastProvider } from "@/components/dashboard/ToastProvider";
+import { getSiteUrl } from "@/lib/site";
 import "./globals.css";
 
 const ibmPlexMono = IBM_Plex_Mono({
@@ -23,10 +24,32 @@ const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
 });
 
+const defaultTitle = "Check Local First — Reno's Local Business Directory";
+const defaultDescription =
+  "Discover and support independently owned businesses in Reno, NV. Shop local, stay local.";
+
 export const metadata: Metadata = {
-  title: "Check Local First — Reno's Local Business Directory",
-  description:
-    "Discover and support independently owned businesses in Reno, NV. Shop local, stay local.",
+  metadataBase: new URL(getSiteUrl()),
+  title: {
+    default: defaultTitle,
+    template: "%s — Check Local First",
+  },
+  description: defaultDescription,
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    type: "website",
+    siteName: "Check Local First",
+    title: defaultTitle,
+    description: defaultDescription,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: defaultTitle,
+    description: defaultDescription,
+  },
 };
 
 export default function RootLayout({

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
 
@@ -78,9 +79,7 @@ export default function NeighborsCarousel({ businesses }: { businesses: Business
           {businesses.map((b) => (
             <Link key={b.name} href={b.href} className="flex flex-col gap-[12px] w-[206px] flex-shrink-0">
               <div className="relative h-[224px] rounded-[2px] overflow-hidden bg-[#b7a78c]">
-                {b.img && (
-                  <img src={b.img} alt={b.name} className="absolute inset-0 w-full h-full object-cover" />
-                )}
+                {b.img && <Image src={b.img} alt={b.name} fill sizes="206px" className="object-cover" />}
               </div>
               <div className="flex flex-col gap-[6px]">
                 <p className="font-display font-bold text-[8px] text-[#b7a78c] tracking-[1.8px] uppercase">
@@ -129,9 +128,7 @@ export default function NeighborsCarousel({ businesses }: { businesses: Business
               <p className="font-display font-bold text-[20px] text-[#6b7d67] uppercase">{b.category}</p>
               <p className="font-display font-bold text-[20px] text-[#151814] uppercase">{b.name}</p>
               <div className="relative h-[120px] rounded-[8px] overflow-hidden bg-[#b7a78c] flex-shrink-0">
-                {b.img && (
-                  <img src={b.img} alt={b.name} className="absolute inset-0 w-full h-full object-cover" />
-                )}
+                {b.img && <Image src={b.img} alt={b.name} fill sizes="360px" className="object-cover" />}
               </div>
               <p className="font-body text-[20px] text-[#596155] leading-[1.5] line-clamp-2">
                 {b.description ?? b.neighborhood}

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { useToken } from "@/lib/auth";
 import { useAdminBusiness } from "@/components/dashboard/AdminBusinessContext";
@@ -95,8 +96,13 @@ export default function AdminBusinessPhotosPage() {
         {photos?.map((photo) => (
           <div key={photo.id} className="flex flex-col gap-2 bg-white border border-[#dbe0d9] rounded-[12px] p-3">
             <div className="relative aspect-square rounded-[8px] overflow-hidden bg-[#b7a78c]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={photo.photo_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <Image
+                src={photo.photo_url}
+                alt=""
+                fill
+                sizes="(min-width: 640px) 33vw, 50vw"
+                className="object-cover"
+              />
             </div>
             <p className="font-display font-bold text-[11px] text-[#b7a78c] uppercase">
               {TYPE_LABEL[photo.photo_type]}

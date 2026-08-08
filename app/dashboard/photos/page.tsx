@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useBusiness } from "@/components/dashboard/BusinessContext";
 import { useApiResource } from "@/lib/useApiResource";
 import { getBusinessPhotos, type Photo } from "@/lib/directory";
@@ -40,8 +41,13 @@ export default function PhotosPage() {
         {photos?.map((photo) => (
           <div key={photo.id} className="flex flex-col gap-2">
             <div className="relative aspect-square rounded-[12px] overflow-hidden bg-[#b7a78c]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={photo.photo_url} alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <Image
+                src={photo.photo_url}
+                alt=""
+                fill
+                sizes="(min-width: 768px) 25vw, (min-width: 640px) 33vw, 50vw"
+                className="object-cover"
+              />
             </div>
             <p className="font-display font-bold text-[11px] text-[#b7a78c] uppercase tracking-wide">
               {TYPE_LABEL[photo.photo_type]}

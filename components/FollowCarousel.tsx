@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 
 const PHOTOS = [
@@ -40,7 +41,7 @@ export default function FollowCarousel() {
           rel="noopener noreferrer"
           className="flex-1 h-full relative overflow-hidden"
         >
-          <img src={src} alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <Image src={src} alt="" fill sizes="33vw" className="object-cover" />
         </a>
       ))}
 
