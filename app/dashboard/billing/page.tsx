@@ -73,6 +73,15 @@ export default function BillingPage() {
     <div className="flex flex-col gap-6 max-w-[560px]">
       <h2 className="font-display font-bold text-[24px] text-[#423926]">Billing</h2>
 
+      {!isPremium && (
+        <div className="bg-[#faf6e9] border border-[#b7a78c] rounded-[12px] px-5 py-4">
+          <p className="font-body text-[13px] text-[#423926]">
+            Heads up — the Basic plan is increasing from $19/month to $49/month. Upgrade to Premium now to lock in
+            more features before the change takes effect.
+          </p>
+        </div>
+      )}
+
       <div className="bg-white border border-[#dbe0d9] rounded-[16px] p-6 md:p-8 flex flex-col gap-4">
         <p className="font-display font-bold text-[13px] text-[#9ca889] uppercase tracking-widest">Current Plan</p>
         <p className="font-body text-[16px] text-[#423926]">
@@ -81,14 +90,19 @@ export default function BillingPage() {
         </p>
 
         {!isPremium && (
-          <button
-            type="button"
-            onClick={handleUpgrade}
-            disabled={upgrading}
-            className="self-start bg-[#2c4a34] rounded-[8px] px-6 py-[12px] font-display font-bold text-[14px] text-white uppercase hover:bg-[#253022] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {upgrading ? "Upgrading..." : "Upgrade to Premium"}
-          </button>
+          <>
+            <button
+              type="button"
+              onClick={handleUpgrade}
+              disabled={upgrading}
+              className="self-start bg-[#2c4a34] rounded-[8px] px-6 py-[12px] font-display font-bold text-[14px] text-white uppercase hover:bg-[#253022] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {upgrading ? "Upgrading..." : "Upgrade to Premium"}
+            </button>
+            <p className="font-body text-[12px] text-[#596155]">
+              The prorated difference is charged to your card on file right away — no extra checkout step.
+            </p>
+          </>
         )}
 
         {isPremium && !cancelAt && (

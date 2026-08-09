@@ -147,8 +147,8 @@ export default function PrivacyPolicyPage() {
           <Section heading="Contact Us">
             <p>
               Questions about this policy? Email us at{" "}
-              <a href="mailto:hello@checklocalfirst.com" className="text-[#2c4a34] underline hover:text-[#253022] transition-colors">
-                hello@checklocalfirst.com
+              <a href="mailto:checklocalfirst@gmail.com" className="text-[#2c4a34] underline hover:text-[#253022] transition-colors">
+                checklocalfirst@gmail.com
               </a>
               .
             </p>

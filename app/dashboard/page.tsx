@@ -53,12 +53,19 @@ export default function DashboardOverviewPage() {
       </div>
 
       <div className="flex flex-wrap gap-3">
-        {business.status === "approved" && (
+        {business.status === "approved" ? (
           <Link
             href={`/businesses/${business.slug}`}
             className="border border-[#dbe0d9] rounded-[8px] px-5 py-3 font-display font-bold text-[13px] text-[#423926] uppercase hover:border-[#b7a78c] transition-colors"
           >
             View Public Listing
+          </Link>
+        ) : (
+          <Link
+            href="/dashboard/me"
+            className="border border-[#dbe0d9] rounded-[8px] px-5 py-3 font-display font-bold text-[13px] text-[#423926] uppercase hover:border-[#b7a78c] transition-colors"
+          >
+            Preview My Listing
           </Link>
         )}
         <Link

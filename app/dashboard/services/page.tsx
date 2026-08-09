@@ -4,8 +4,14 @@ import { useState, type FormEvent } from "react";
 import { useToken } from "@/lib/auth";
 import { useBusiness } from "@/components/dashboard/BusinessContext";
 import { useApiResource } from "@/lib/useApiResource";
-import { getBusinessServices, getCategories, type Service, type Category } from "@/lib/directory";
-import { createService, updateService, deleteService, type ServiceInput } from "@/lib/business-dashboard";
+import { getCategories, type Service, type Category } from "@/lib/directory";
+import {
+  getMyServices,
+  createService,
+  updateService,
+  deleteService,
+  type ServiceInput,
+} from "@/lib/business-dashboard";
 import FormField from "@/components/FormField";
 import { useConfirm } from "@/components/dashboard/ConfirmDialog";
 import { useToast } from "@/components/dashboard/ToastProvider";
@@ -20,7 +26,7 @@ export default function ServicesPage() {
   const confirm = useConfirm();
 
   const { data: services, loading, error, setData: setServices } = useApiResource<Service[]>(
-    () => getBusinessServices(business.slug),
+    (token) => getMyServices(token, business.slug),
     [business.slug]
   );
   const { data: categories } = useApiResource<Category[]>(() => getCategories());
@@ -56,14 +62,15 @@ export default function ServicesPage() {
     setSaving(true);
     try {
       if (editingId === "new") {
-        const created = await createService(token, business.slug, form);
-        setServices((prev) => [...(prev ?? []), created]);
+        await createService(token, business.slug, form);
         toast.success("Service added.");
       } else if (typeof editingId === "number") {
-        const updated = await updateService(token, business.slug, editingId, form);
-        setServices((prev) => prev?.map((s) => (s.id === editingId ? updated : s)) ?? null);
+        await updateService(token, business.slug, editingId, form);
         toast.success("Service updated.");
       }
+      // Don't trust the create/update response's shape for the list — same reasoning
+      // as the profile form: re-fetch the canonical list from the owner GET route.
+      setServices(await getMyServices(token, business.slug));
       setEditingId(null);
     } catch (err) {
       if (err instanceof ApiError && err.fieldErrors) {

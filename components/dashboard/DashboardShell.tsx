@@ -7,6 +7,7 @@ import SidebarNav from "@/components/dashboard/SidebarNav";
 
 const LINKS = [
   { label: "Overview", href: "/dashboard" },
+  { label: "Preview Listing", href: "/dashboard/me" },
   { label: "Profile", href: "/dashboard/profile" },
   { label: "Services", href: "/dashboard/services" },
   { label: "Photos", href: "/dashboard/photos" },

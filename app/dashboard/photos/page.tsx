@@ -3,7 +3,8 @@
 import Image from "next/image";
 import { useBusiness } from "@/components/dashboard/BusinessContext";
 import { useApiResource } from "@/lib/useApiResource";
-import { getBusinessPhotos, type Photo } from "@/lib/directory";
+import type { Photo } from "@/lib/directory";
+import { getMyPhotos } from "@/lib/business-dashboard";
 
 const TYPE_LABEL: Record<Photo["photo_type"], string> = {
   listing: "Listing",
@@ -14,9 +15,10 @@ const TYPE_LABEL: Record<Photo["photo_type"], string> = {
 
 export default function PhotosPage() {
   const { business } = useBusiness();
-  const { data: photos, loading, error } = useApiResource<Photo[]>(() => getBusinessPhotos(business.slug), [
-    business.slug,
-  ]);
+  const { data: photos, loading, error } = useApiResource<Photo[]>(
+    (token) => getMyPhotos(token, business.slug),
+    [business.slug]
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -51,6 +53,7 @@ export default function PhotosPage() {
             </div>
             <p className="font-display font-bold text-[11px] text-[#b7a78c] uppercase tracking-wide">
               {TYPE_LABEL[photo.photo_type]}
+              {!photo.approved && <span className="text-amber-600"> · Pending review</span>}
             </p>
           </div>
         ))}

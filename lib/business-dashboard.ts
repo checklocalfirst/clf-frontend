@@ -1,5 +1,5 @@
 import { apiFetch } from "./api";
-import type { Business, Category, Service } from "./directory";
+import type { Business, Category, Photo, Service } from "./directory";
 
 export interface BusinessProfileInput {
   name?: string;
@@ -53,10 +53,41 @@ export function updateMyCategories(
   });
 }
 
+// The public read routes below (categories/photos/discounts/services) go through the
+// anon-key client, which has an RLS policy restricting it to `status = 'approved'`
+// businesses — so they fail for a business that's still `pending`, even where the
+// route code has no explicit status filter (e.g. this used to 500 the Services tab
+// with "Cannot coerce the result to a single JSON object"). The `/owner/...` routes
+// below read through the service role instead, gated by ownership rather than RLS, so
+// they work regardless of status. Use these (not the public ones) anywhere in the
+// dashboard.
+
+// Owner-scoped replacement for GET /businesses/:slug/categories.
+export function getMyCategories(token: string, slug: string): Promise<Category[]> {
+  return apiFetch<Category[]>(`/businesses/${encodeURIComponent(slug)}/owner/categories`, {
+    token,
+  });
+}
+
+// Owner-scoped replacement for GET /businesses/:slug/photos. Also, unlike the public
+// route, not filtered to `approved = true` — includes photos still pending admin review.
+export function getMyPhotos(token: string, slug: string): Promise<Photo[]> {
+  return apiFetch<Photo[]>(`/businesses/${encodeURIComponent(slug)}/owner/photos`, {
+    token,
+  });
+}
+
 export interface ServiceInput {
   name: string;
   description?: string;
   category_id: number;
+}
+
+// Owner-scoped replacement for GET /businesses/:slug/services.
+export function getMyServices(token: string, slug: string): Promise<Service[]> {
+  return apiFetch<Service[]>(`/businesses/${encodeURIComponent(slug)}/owner/services`, {
+    token,
+  });
 }
 
 export function createService(token: string, slug: string, input: ServiceInput): Promise<Service> {
@@ -103,9 +134,7 @@ export interface Discount {
   updated_at: string;
 }
 
-// Public discount cards omit `code` and only ever show active, in-window discounts —
-// this is what the business dashboard falls back to for its own listing (see note in
-// app/dashboard/discounts/page.tsx: there's no owner-scoped GET route documented yet).
+// Public discount cards omit `code` and only ever show active, in-window discounts.
 export interface PublicDiscount {
   id: number;
   description: string;
@@ -118,6 +147,16 @@ export interface PublicDiscount {
 
 export function getPublicDiscounts(slug: string): Promise<PublicDiscount[]> {
   return apiFetch<PublicDiscount[]>(`/businesses/${encodeURIComponent(slug)}/discounts`);
+}
+
+// Owner-scoped replacement for the public GET /businesses/:slug/discounts route — works
+// while the business is still `pending`, includes the `code` column the public route
+// strips, and returns every discount (not just active/in-window ones) so the dashboard
+// can list and manage inactive/expired discounts too.
+export function getMyDiscounts(token: string, slug: string): Promise<Discount[]> {
+  return apiFetch<Discount[]>(`/businesses/${encodeURIComponent(slug)}/owner/discounts`, {
+    token,
+  });
 }
 
 // The "reveal code" button on a business's public page. Gated on the requesting

@@ -8,21 +8,46 @@ const PHOTOS = [
   "/farmers1.JPG",
   "/modestmix.JPG",
   "/sasquatchsnacks.jpg",
+  "/market.JPG",
 ];
 
-const VISIBLE = 3;
+const VISIBLE = 5;
+const TOTAL = PHOTOS.length;
+
+// Three copies back-to-back so sliding past either edge always reveals more real
+// photos instead of jump-cutting the whole row at once. Once the slide settles past
+// the middle copy, we snap back into it with the transition off (see
+// handleTransitionEnd) — invisible to the eye since every copy is identical.
+const TRACK = [...PHOTOS, ...PHOTOS, ...PHOTOS];
 
 export default function FollowCarousel() {
-  const [start, setStart] = useState(0);
-  const total = PHOTOS.length;
+  const [index, setIndex] = useState(TOTAL);
+  const [animate, setAnimate] = useState(true);
 
-  const prev = () => setStart((s) => (s - 1 + total) % total);
-  const next = () => setStart((s) => (s + 1) % total);
+  const prev = () => {
+    setAnimate(true);
+    setIndex((i) => i - 1);
+  };
+  const next = () => {
+    setAnimate(true);
+    setIndex((i) => i + 1);
+  };
 
-  const visible = Array.from({ length: VISIBLE }, (_, i) => PHOTOS[(start + i) % total]);
+  function handleTransitionEnd() {
+    if (index >= TOTAL * 2) {
+      setAnimate(false);
+      setIndex((i) => i - TOTAL);
+    } else if (index < TOTAL) {
+      setAnimate(false);
+      setIndex((i) => i + TOTAL);
+    }
+  }
+
+  const trackWidthPercent = (TRACK.length / VISIBLE) * 100;
+  const offsetPercent = (index * 100) / TRACK.length;
 
   return (
-    <div className="relative h-[320px] mt-8 flex overflow-hidden">
+    <div className="relative h-[320px] mt-8 overflow-hidden">
       <button
         onClick={prev}
         aria-label="Previous"
@@ -33,17 +58,24 @@ export default function FollowCarousel() {
         </svg>
       </button>
 
-      {visible.map((src, i) => (
-        <a
-          key={`${start}-${i}`}
-          href="https://www.instagram.com/checklocalfirstreno/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex-1 h-full relative overflow-hidden"
-        >
-          <Image src={src} alt="" fill sizes="33vw" className="object-cover" />
-        </a>
-      ))}
+      <div
+        onTransitionEnd={handleTransitionEnd}
+        className={`flex h-full ${animate ? "transition-transform duration-500 ease-out" : ""}`}
+        style={{ width: `${trackWidthPercent}%`, transform: `translateX(-${offsetPercent}%)` }}
+      >
+        {TRACK.map((src, i) => (
+          <a
+            key={i}
+            href="https://www.instagram.com/checklocalfirstreno/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="h-full relative overflow-hidden flex-shrink-0"
+            style={{ width: `${100 / TRACK.length}%` }}
+          >
+            <Image src={src} alt="" fill sizes="20vw" className="object-cover" />
+          </a>
+        ))}
+      </div>
 
       <button
         onClick={next}

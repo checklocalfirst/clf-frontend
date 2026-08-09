@@ -5,11 +5,11 @@ import { useToken } from "@/lib/auth";
 import { useBusiness } from "@/components/dashboard/BusinessContext";
 import { useApiResource } from "@/lib/useApiResource";
 import {
-  getPublicDiscounts,
+  getMyDiscounts,
   createDiscount,
   updateDiscount,
   deleteDiscount,
-  type PublicDiscount,
+  type Discount,
   type DiscountInput,
 } from "@/lib/business-dashboard";
 import FormField from "@/components/FormField";
@@ -34,8 +34,8 @@ export default function DiscountsPage() {
   const toast = useToast();
   const confirm = useConfirm();
 
-  const { data: discounts, loading, error, refetch } = useApiResource<PublicDiscount[]>(
-    () => getPublicDiscounts(business.slug),
+  const { data: discounts, loading, error, refetch } = useApiResource<Discount[]>(
+    (token) => getMyDiscounts(token, business.slug),
     [business.slug]
   );
 
@@ -44,7 +44,7 @@ export default function DiscountsPage() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
-  function startEdit(d: PublicDiscount) {
+  function startEdit(d: Discount) {
     setForm({
       code: "",
       description: d.description,
@@ -75,8 +75,7 @@ export default function DiscountsPage() {
         await createDiscount(token, business.slug, form);
         toast.success("Discount created.");
       } else if (typeof editingId === "number") {
-        // Leave code blank on edit to keep the current one — the owner-facing
-        // list never returns the actual code (see the note above the table).
+        // Leave code blank on edit to keep the current one.
         const patch: Partial<DiscountInput> = { ...form };
         if (!patch.code) delete patch.code;
         await updateDiscount(token, business.slug, editingId, patch);
@@ -99,7 +98,7 @@ export default function DiscountsPage() {
     }
   }
 
-  function handleDelete(d: PublicDiscount) {
+  function handleDelete(d: Discount) {
     confirm.ask({
       title: "Delete this discount?",
       body: "Customers will no longer be able to redeem it. This can't be undone.",
@@ -130,8 +129,8 @@ export default function DiscountsPage() {
 
       <div className="bg-[#faf6e9] border border-[#b7a78c] rounded-[12px] px-5 py-4">
         <p className="font-body text-[12px] text-[#423926]">
-          This list only shows currently active discounts (Note only one discount will appear at a time, to show a
-          new one delete the old one), and editing a discount without entering a new code keeps the existing one.
+          This list shows all of your discounts, including inactive/expired ones. Editing a discount without
+          entering a new code keeps the existing one.
         </p>
       </div>
 
@@ -241,15 +240,17 @@ export default function DiscountsPage() {
 
       <div className="flex flex-col gap-3">
         {discounts?.length === 0 && editingId === null && (
-          <p className="font-body text-[14px] text-[#596155]">No active discounts right now.</p>
+          <p className="font-body text-[14px] text-[#596155]">No discounts yet.</p>
         )}
         {discounts?.map((d) => (
           <div key={d.id} className="flex items-center justify-between gap-4 bg-white border border-[#dbe0d9] rounded-[12px] p-4">
             <div className="min-w-0">
               <p className="font-display font-bold text-[15px] text-[#253022]">
                 {d.discount_type === "percent" ? `${d.value}% off` : `$${d.value} off`}
+                {!d.active && <span className="text-[#b7a78c] font-normal"> · Inactive</span>}
               </p>
               <p className="font-body text-[13px] text-[#596155] mt-1">{d.description}</p>
+              <p className="font-body text-[12px] text-[#b7a78c] mt-1">Code: {d.code}</p>
             </div>
             <div className="flex-shrink-0 flex gap-3">
               <button

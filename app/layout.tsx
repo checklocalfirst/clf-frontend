@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { IBM_Plex_Mono, Fragment_Mono, JetBrains_Mono } from "next/font/google";
 import { AuthProvider } from "@/lib/auth";
 import { ToastProvider } from "@/components/dashboard/ToastProvider";
+import ScrollToTop from "@/components/ScrollToTop";
 import { getSiteUrl } from "@/lib/site";
 import "./globals.css";
 
@@ -61,6 +62,7 @@ export default function RootLayout({
       className={`${ibmPlexMono.variable} ${fragmentMono.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-[#faf8f5]">
+          <ScrollToTop />
           <AuthProvider>
             <ToastProvider>{children}</ToastProvider>
           </AuthProvider>

@@ -4,10 +4,12 @@ import { useState, type FormEvent } from "react";
 import { useToken } from "@/lib/auth";
 import { useBusiness } from "@/components/dashboard/BusinessContext";
 import { useApiResource } from "@/lib/useApiResource";
-import { getCategories, getBusinessCategories, type Category, type Business } from "@/lib/directory";
+import { getCategories, type Category, type Business } from "@/lib/directory";
 import {
+  getMyBusiness,
   updateMyBusiness,
   updateMyCategories,
+  getMyCategories,
   type BusinessProfileInput,
 } from "@/lib/business-dashboard";
 import FormField from "@/components/FormField";
@@ -73,7 +75,7 @@ export default function BusinessProfilePage() {
 
   const { data: allCategories } = useApiResource<Category[]>(() => getCategories());
   const { data: myCategories, refetch: refetchMyCategories } = useApiResource<Category[]>(
-    () => getBusinessCategories(business.slug),
+    (token) => getMyCategories(token, business.slug),
     [business.slug]
   );
 
@@ -116,8 +118,11 @@ export default function BusinessProfilePage() {
         // backend validates url/number fields whenever they're present at all.
         if (value !== undefined && value !== "") (patch as Record<string, string>)[key] = value;
       }
-      const updated = await updateMyBusiness(token, business.slug, patch);
-      setBusiness(updated);
+      await updateMyBusiness(token, business.slug, patch);
+      // Don't trust the PUT response's shape for the form — same reasoning as
+      // handleSaveCategories below: re-fetch the canonical row from GET /businesses/me
+      // instead so every field (not just what we just patched) is correct.
+      setBusiness(await getMyBusiness(token));
       toast.success("Business profile updated.");
     } catch (err) {
       if (err instanceof ApiError && err.fieldErrors) {

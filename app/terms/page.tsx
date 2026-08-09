@@ -136,8 +136,8 @@ export default function TermsOfServicePage() {
           <Section heading="12. Contact Us">
             <p>
               Questions about these terms? Email us at{" "}
-              <a href="mailto:hello@checklocalfirst.com" className="text-[#2c4a34] underline hover:text-[#253022] transition-colors">
-                hello@checklocalfirst.com
+              <a href="mailto:checklocalfirst@gmail.com" className="text-[#2c4a34] underline hover:text-[#253022] transition-colors">
+                checklocalfirst@gmail.com
               </a>
               .
             </p>
