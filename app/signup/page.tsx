@@ -399,6 +399,7 @@ export default function SignupPage() {
                     }`}
                   >
                     <p className="font-display font-bold text-[14px] text-[#423926]">BASIC</p>
+                    <p className="font-body text-[12px] text-[#596155] mt-1">$19/month</p>
                   </button>
                   <button
                     type="button"
@@ -410,6 +411,7 @@ export default function SignupPage() {
                     }`}
                   >
                     <p className="font-display font-bold text-[14px] text-[#423926]">PREMIUM</p>
+                    <p className="font-body text-[12px] text-[#596155] mt-1">$49/month</p>
                   </button>
                 </div>
                 {businessFieldErrors.business_tier && (

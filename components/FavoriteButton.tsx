@@ -27,6 +27,7 @@ export default function FavoriteButton({ businessId, slug, className = "" }: Fav
 
   useEffect(() => {
     if (!user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- no fetch to run when signed out, just settling the initial "checking" state
       setChecking(false);
       return;
     }

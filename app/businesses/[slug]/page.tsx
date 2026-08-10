@@ -412,9 +412,6 @@ export default async function BusinessDetailPage({
             sizes="100vw"
             className="object-cover"
           />
-          <p className="absolute bottom-0 w-full text-center font-display text-[14px] text-[rgba(66,57,38,0.8)] tracking-[0.56px] py-[8px] bg-gradient-to-t from-[#b7a78c]/40 to-transparent">
-            {business.name.toUpperCase()} — STOREFRONT PHOTO
-          </p>
         </div>
 
         {/* About Section */}
