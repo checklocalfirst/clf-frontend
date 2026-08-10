@@ -7,6 +7,7 @@ import SearchBar from "@/components/SearchBar";
 import Footer from "@/components/Footer";
 import TrackedLink from "@/components/TrackedLink";
 import DiscountRedeemButton from "@/components/DiscountRedeemButton";
+import FavoriteButton from "@/components/FavoriteButton";
 import { getBusinessBySlug, getBusinessPhotos, trackBusinessEvent } from "@/lib/directory";
 import { getPublicDiscounts } from "@/lib/business-dashboard";
 import { ApiError } from "@/lib/api";
@@ -255,6 +256,11 @@ export default async function BusinessDetailPage({
             </TrackedLink>
           )}
           <div className="flex items-center gap-[12px]">
+            <FavoriteButton
+              businessId={business.id}
+              slug={business.slug}
+              className="bg-[#2c4a34] w-[36px] h-[36px] rounded-full flex items-center justify-center hover:bg-[#253022] transition-colors cursor-pointer disabled:opacity-60"
+            />
             {business.instagram_url && (
               <TrackedLink
                 slug={business.slug}
@@ -314,12 +320,19 @@ export default async function BusinessDetailPage({
 
       {/* ── Mobile: Business Info ── */}
       <div className="md:hidden bg-[#faf6e9] px-[16px]">
-        <Link
-          href="/search"
-          className="block font-body text-[20px] text-[rgba(66,57,38,0.8)] mt-[24px] hover:opacity-70 transition-opacity"
-        >
-          ← All Businesses
-        </Link>
+        <div className="flex items-start justify-between gap-[12px] mt-[24px]">
+          <Link
+            href="/search"
+            className="font-body text-[20px] text-[rgba(66,57,38,0.8)] hover:opacity-70 transition-opacity"
+          >
+            ← All Businesses
+          </Link>
+          <FavoriteButton
+            businessId={business.id}
+            slug={business.slug}
+            className="flex-shrink-0 bg-[#2c4a34] w-[36px] h-[36px] rounded-full flex items-center justify-center hover:bg-[#253022] transition-colors cursor-pointer disabled:opacity-60"
+          />
+        </div>
         <h1 className="font-display font-bold text-[30px] text-[#423926] tracking-[-0.15px] leading-tight mt-[12px]">
           {business.name.toUpperCase()}
         </h1>
