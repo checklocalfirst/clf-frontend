@@ -106,4 +106,4 @@ Differences from the public route:
   deleting the business) already go through `verifyBusinessOwnership` with
   `supabaseAdmin`, so they were never RLS-blocked — no changes needed there.
   It was specifically the *read* routes reused from the public page that hit
-  RLS for pending businesses.
+  RLS for pending businesses!
