@@ -78,8 +78,11 @@ export default function AdminBusinessProfilePage() {
     if (!token) return;
     setStatusSaving(true);
     try {
-      const updated = await updateBusinessStatus(token, business.id, status);
-      setBusiness({ ...business, ...updated });
+      // Don't trust the PATCH response's shape for the flag — apply the value we
+      // already know we just sent, same reasoning as the other mutation responses
+      // in this codebase (categories, business profile, services).
+      await updateBusinessStatus(token, business.id, status);
+      setBusiness({ ...business, status });
       toast.success(`Status set to ${status}.`);
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "Couldn't update status.");
