@@ -97,6 +97,7 @@ export default function MembershipPage() {
         </div>
       ) : (
         <div className="bg-white border border-[#dbe0d9] rounded-[16px] p-6 md:p-8 flex flex-col gap-5">
+          <p className="font-display font-bold text-[20px] text-[#423926]">$10/month</p>
           <ul className="flex flex-col gap-2">
             {PERKS.map((perk) => (
               <li key={perk} className="font-body text-[14px] text-[#596155] flex gap-2">
