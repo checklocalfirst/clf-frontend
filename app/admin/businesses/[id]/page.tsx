@@ -45,7 +45,6 @@ function buildForm(business: BusinessFull): AdminBusinessEditInput {
     timeline_description_2: business.timeline_description_2 ?? "",
     timeline_description_3: business.timeline_description_3 ?? "",
     business_tier: business.business_tier,
-    is_comped: business.is_comped,
     latitude: business.latitude ?? undefined,
     longitude: business.longitude ?? undefined,
     neighborhood: business.neighborhood ?? "",
@@ -128,8 +127,11 @@ export default function AdminBusinessProfilePage() {
   async function handlePilotToggle(next: boolean) {
     if (!token) return;
     try {
-      const updated = await setPilot(token, business.id, next);
-      setBusiness({ ...business, ...updated });
+      // Don't trust the PATCH response's shape for the flag — apply the value we
+      // already know we just sent, same reasoning as the other mutation responses
+      // in this codebase (categories, business profile, services).
+      await setPilot(token, business.id, next);
+      setBusiness({ ...business, pilot_business: next });
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "Couldn't update pilot status.");
     }
@@ -139,7 +141,7 @@ export default function AdminBusinessProfilePage() {
     if (!token) return;
     if (!next) {
       setFeatured(token, business.id, false)
-        .then((updated) => setBusiness({ ...business, ...updated }))
+        .then(() => setBusiness({ ...business, is_featured: false }))
         .catch((err) => toast.error(err instanceof ApiError ? err.message : "Couldn't update."));
       return;
     }
@@ -149,8 +151,8 @@ export default function AdminBusinessProfilePage() {
       danger: false,
       confirmLabel: "Feature This Business",
       onConfirm: async () => {
-        const updated = await setFeatured(token, business.id, true);
-        setBusiness({ ...business, ...updated });
+        await setFeatured(token, business.id, true);
+        setBusiness({ ...business, is_featured: true });
         toast.success("Business featured.");
       },
     });
@@ -159,8 +161,8 @@ export default function AdminBusinessProfilePage() {
   async function handleCarouselToggle(next: boolean) {
     if (!token) return;
     try {
-      const updated = await setCarousel(token, business.id, next);
-      setBusiness({ ...business, ...updated });
+      await setCarousel(token, business.id, next);
+      setBusiness({ ...business, in_carousel: next });
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : "Couldn't update carousel status.");
     }
@@ -233,27 +235,16 @@ export default function AdminBusinessProfilePage() {
       >
         <p className="font-display font-bold text-[13px] text-[#b7a78c] uppercase tracking-widest">Full Editor</p>
 
-        <div className="flex gap-3 items-end">
-          <FormField
-            label="Tier"
-            id="business_tier"
-            as="select"
-            value={form.business_tier ?? "basic"}
-            onChange={(e) => set("business_tier", e.target.value as BusinessTier)}
-            className="flex-1"
-          >
-            <option value="basic">Basic</option>
-            <option value="premium">Premium</option>
-          </FormField>
-          <label className="flex-1 flex items-center gap-2 font-body text-[13px] text-[#423926] pb-3">
-            <input
-              type="checkbox"
-              checked={!!form.is_comped}
-              onChange={(e) => set("is_comped", e.target.checked)}
-            />
-            Comped (free premium)
-          </label>
-        </div>
+        <FormField
+          label="Tier"
+          id="business_tier"
+          as="select"
+          value={form.business_tier ?? "basic"}
+          onChange={(e) => set("business_tier", e.target.value as BusinessTier)}
+        >
+          <option value="basic">Basic</option>
+          <option value="premium">Premium</option>
+        </FormField>
 
         <FormField label="Business Name" id="admin_name" value={form.name ?? ""} onChange={(e) => set("name", e.target.value)} error={fieldErrors.name} />
         <FormField label="Description" id="admin_description" as="textarea" value={form.description ?? ""} onChange={(e) => set("description", e.target.value)} error={fieldErrors.description} />

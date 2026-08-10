@@ -63,7 +63,7 @@ export default function FileUpload({
           type="file"
           accept="image/jpeg,image/png,image/webp,image/gif"
           onChange={handleFileChange}
-          className="font-body text-[13px]"
+          className="font-body text-[13px] file:mr-3 file:cursor-pointer file:rounded-[6px] file:border file:border-[#dbe0d9] file:bg-white file:px-3 file:py-[6px] file:font-display file:font-bold file:text-[12px] file:text-[#423926] file:uppercase hover:file:border-[#b7a78c] file:transition-colors"
         />
         <p className="font-body text-[12px] text-[#b7a78c]">JPEG, PNG, WebP, or GIF only.</p>
         {fileError && <p className="font-body text-[12px] text-red-600">{fileError}</p>}

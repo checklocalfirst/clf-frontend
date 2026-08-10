@@ -76,8 +76,7 @@ export default function BillingPage() {
       {!isPremium && (
         <div className="bg-[#faf6e9] border border-[#b7a78c] rounded-[12px] px-5 py-4">
           <p className="font-body text-[13px] text-[#423926]">
-            Heads up — the Basic plan is increasing from $19/month to $49/month. Upgrade to Premium now to lock in
-            more features before the change takes effect.
+            The upgrade from Basic to Premium is a $30 difference.
           </p>
         </div>
       )}
@@ -100,7 +99,7 @@ export default function BillingPage() {
               {upgrading ? "Upgrading..." : "Upgrade to Premium"}
             </button>
             <p className="font-body text-[12px] text-[#596155]">
-              The prorated difference is charged to your card on file right away — no extra checkout step.
+              The prorated difference is charged to your card right away — $30.
             </p>
           </>
         )}
