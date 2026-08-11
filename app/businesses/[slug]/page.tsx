@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import TrackedLink from "@/components/TrackedLink";
 import DiscountRedeemButton from "@/components/DiscountRedeemButton";
 import FavoriteButton from "@/components/FavoriteButton";
+import BusinessGallery from "@/components/BusinessGallery";
 import { getBusinessBySlug, getBusinessPhotos, trackBusinessEvent } from "@/lib/directory";
 import { getPublicDiscounts } from "@/lib/business-dashboard";
 import { ApiError } from "@/lib/api";
@@ -92,6 +93,9 @@ export default async function BusinessDetailPage({
   const listingPhoto = approvedPhotos.find((p) => p.photo_type === "listing");
   const ownerPhoto = approvedPhotos.find((p) => p.photo_type === "owner");
   const timelinePhotos = approvedPhotos.filter((p) => p.photo_type === "timeline");
+  const galleryPhotos = approvedPhotos
+    .filter((p) => p.photo_type === "gallery")
+    .map((p) => ({ id: p.id, url: p.photo_url }));
   const heroPhotoUrl = listingPhoto?.photo_url ?? HERO_IMG;
   const ownerPhotoUrl = ownerPhoto?.photo_url ?? OWNER_IMG;
 
@@ -451,6 +455,9 @@ export default async function BusinessDetailPage({
           {business.description ?? "No description provided yet."}
         </p>
       </div>
+
+      {/* ── Gallery ── */}
+      <BusinessGallery photos={galleryPhotos} businessName={business.name} />
 
       {/* ── Desktop: Meet the Owner ── */}
       {showOwnerSection && (
