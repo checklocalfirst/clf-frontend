@@ -179,11 +179,10 @@ export async function getEnrichedBusinesses(): Promise<EnrichedBusiness[]> {
     businesses.map((b) => getBusinessCategories(b.slug).catch(() => [] as Category[]))
   );
 
-  return businesses
-    .map((business, i) => ({
-      ...business,
-      categoryNames: categoryLists[i].map((c) => c.name),
-      isNew: isNewBusiness(business.created_at),
-    }))
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  // Preserve GET /businesses's own ordering (premium-first) — don't re-sort by date here.
+  return businesses.map((business, i) => ({
+    ...business,
+    categoryNames: categoryLists[i].map((c) => c.name),
+    isNew: isNewBusiness(business.created_at),
+  }));
 }
