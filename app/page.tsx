@@ -52,6 +52,8 @@ function ChevronRight({ color = "currentColor" }: { color?: string }) {
   );
 }
 
+export const revalidate = 60;
+
 export default async function HomePage() {
   const businesses = await getEnrichedBusinesses();
 
