@@ -485,10 +485,10 @@ export default async function BusinessDetailPage({
                 <Image src={ownerPhotoUrl} alt="Owner" fill sizes="330px" className="object-cover" />
               </div>
               <p
-                className="absolute font-display text-[14px] text-[#423926] tracking-[0.56px] whitespace-nowrap"
-                style={{ left: "141px", top: "380px" }}
+                className="absolute font-display text-[14px] text-[#423926] tracking-[0.56px] whitespace-nowrap overflow-hidden text-ellipsis"
+                style={{ left: "24px", right: "26px", top: "380px", textAlign: "center" }}
               >
-                MEET BLANK
+                MEET {business.name.toUpperCase()}
               </p>
             </div>
           </div>

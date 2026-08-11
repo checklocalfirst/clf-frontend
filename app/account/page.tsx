@@ -90,14 +90,6 @@ export default function AccountProfilePage() {
           />
         </div>
         <FormField
-          label="Email"
-          id="email"
-          type="email"
-          value={form.email}
-          onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-          error={fieldErrors.email}
-        />
-        <FormField
           label="Phone"
           id="phone"
           type="tel"

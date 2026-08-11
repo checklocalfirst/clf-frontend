@@ -184,10 +184,7 @@ export default function BusinessProfilePage() {
           <FormField label="State" id="state" value={form.state ?? ""} onChange={(e) => set("state", e.target.value)} error={fieldErrors.state} className="w-24" />
           <FormField label="Zip" id="zip" value={form.zip ?? ""} onChange={(e) => set("zip", e.target.value)} error={fieldErrors.zip} className="w-28" />
         </div>
-        <div className="flex flex-col gap-4 sm:flex-row">
-          <FormField label="Phone" id="phone" type="tel" value={form.phone ?? ""} onChange={(e) => set("phone", e.target.value)} error={fieldErrors.phone} className="flex-1" />
-          <FormField label="Email" id="email" type="email" value={form.email ?? ""} onChange={(e) => set("email", e.target.value)} error={fieldErrors.email} className="flex-1" />
-        </div>
+        <FormField label="Phone" id="phone" type="tel" value={form.phone ?? ""} onChange={(e) => set("phone", e.target.value)} error={fieldErrors.phone} />
 
         <p className="font-display font-bold text-[11px] text-[#b7a78c] uppercase tracking-widest pt-2">
           Links &amp; About
