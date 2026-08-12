@@ -94,7 +94,7 @@ const PRICING_CARDS = {
     features: ["Directory listing", "Meet the Owner", "Contact & hours"],
   },
   premium: {
-    price: "$50",
+    price: "$49",
     tier: COPY.premium.tier,
     features: [
       "Everything in Community",
