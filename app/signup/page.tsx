@@ -19,6 +19,38 @@ const inputErrCls =
 
 const labelCls = "font-body font-semibold text-[13px] text-[#423926]";
 
+const COPY = {
+  backToHome: "← Back to home",
+  heading: "CREATE YOUR ACCOUNT",
+  subheading: "Join the Check Local First community.",
+  personalToggle: "PERSONAL ACCOUNT",
+  businessToggle: "BUSINESS ACCOUNT",
+  passwordMismatch: "Passwords do not match.",
+  genericError: "Something went wrong. Please try again.",
+  personal: {
+    submitIdle: "CREATE ACCOUNT",
+    submitLoading: "Creating account...",
+  },
+  business: {
+    ownerSection: "ACCOUNT OWNER",
+    infoSection: "BUSINESS INFO",
+    descriptionLabel: "Description",
+    planLabel: "Plan",
+    basicTier: "BASIC",
+    basicPrice: "$19/month",
+    premiumTier: "PREMIUM",
+    premiumPrice: "$49/month",
+    submitIdle: "CONTINUE TO PAYMENT",
+    submitLoading: "Submitting...",
+    paymentIntro: "Your business info is saved — enter payment details to finish signing up.",
+    paymentSubmitLabel: "COMPLETE SIGNUP",
+    successHeading: "Payment received!",
+    successBody: "Check your email for a link to set up your login and finish activating your business account.",
+  },
+  alreadyHaveAccount: "Already have an account?",
+  logIn: "Log in",
+};
+
 function Field({
   label,
   id,
@@ -89,7 +121,7 @@ export default function SignupPage() {
     const confirmPassword = fd.get("confirmPassword") as string;
 
     if (password !== confirmPassword) {
-      setPersonalFieldErrors({ confirmPassword: "Passwords do not match." });
+      setPersonalFieldErrors({ confirmPassword: COPY.passwordMismatch });
       return;
     }
 
@@ -118,7 +150,7 @@ export default function SignupPage() {
           setPersonalError(err.message);
         }
       } else {
-        setPersonalError("Something went wrong. Please try again.");
+        setPersonalError(COPY.genericError);
       }
     } finally {
       setPersonalLoading(false);
@@ -163,7 +195,7 @@ export default function SignupPage() {
           setBusinessError(err.message);
         }
       } else {
-        setBusinessError("Something went wrong. Please try again.");
+        setBusinessError(COPY.genericError);
       }
     } finally {
       setBusinessLoading(false);
@@ -181,15 +213,15 @@ export default function SignupPage() {
             href="/"
             className="font-body text-[13px] text-[#b7a78c] hover:text-[#423926] transition-colors"
           >
-            ← Back to home
+            {COPY.backToHome}
           </Link>
 
           <h1 className="font-display font-bold text-[32px] text-[#423926] leading-none">
-            CREATE YOUR ACCOUNT
+            {COPY.heading}
           </h1>
 
           <p className="font-body text-[14px] text-[#b7a78c]">
-            Join the Check Local First community.
+            {COPY.subheading}
           </p>
 
           {/* Toggle */}
@@ -203,7 +235,7 @@ export default function SignupPage() {
                   : "bg-white border border-[#dbe0d9] text-[#423926]"
               }`}
             >
-              PERSONAL ACCOUNT
+              {COPY.personalToggle}
             </button>
             <button
               type="button"
@@ -214,7 +246,7 @@ export default function SignupPage() {
                   : "bg-white border border-[#dbe0d9] text-[#423926]"
               }`}
             >
-              BUSINESS ACCOUNT
+              {COPY.businessToggle}
             </button>
           </div>
 
@@ -281,7 +313,7 @@ export default function SignupPage() {
                 disabled={personalLoading}
                 className="w-full bg-[#2c4a34] rounded-[8px] py-[14px] font-display font-bold text-[16px] text-white uppercase hover:bg-[#253022] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {personalLoading ? "Creating account..." : "CREATE ACCOUNT"}
+                {personalLoading ? COPY.personal.submitLoading : COPY.personal.submitIdle}
               </button>
             </form>
           )}
@@ -296,7 +328,7 @@ export default function SignupPage() {
               )}
 
               <p className="font-display font-bold text-[11px] text-[#b7a78c] uppercase tracking-widest">
-                ACCOUNT OWNER
+                {COPY.business.ownerSection}
               </p>
               <div className="flex flex-col gap-4 sm:flex-row sm:gap-4">
                 <Field
@@ -316,7 +348,7 @@ export default function SignupPage() {
               </div>
 
               <p className="font-display font-bold text-[11px] text-[#b7a78c] uppercase tracking-widest">
-                BUSINESS INFO
+                {COPY.business.infoSection}
               </p>
               <Field
                 label="Business Name"
@@ -346,7 +378,7 @@ export default function SignupPage() {
 
               <div className="flex flex-col gap-2">
                 <label htmlFor="description" className={labelCls}>
-                  Description
+                  {COPY.business.descriptionLabel}
                 </label>
                 <textarea
                   id="description"
@@ -387,7 +419,7 @@ export default function SignupPage() {
               </div>
 
               <div className="flex flex-col gap-2">
-                <p className={labelCls}>Plan</p>
+                <p className={labelCls}>{COPY.business.planLabel}</p>
                 <div className="flex gap-3">
                   <button
                     type="button"
@@ -398,8 +430,8 @@ export default function SignupPage() {
                         : "border-[#dbe0d9] bg-white hover:border-[#b7a78c]"
                     }`}
                   >
-                    <p className="font-display font-bold text-[14px] text-[#423926]">BASIC</p>
-                    <p className="font-body text-[12px] text-[#596155] mt-1">$19/month</p>
+                    <p className="font-display font-bold text-[14px] text-[#423926]">{COPY.business.basicTier}</p>
+                    <p className="font-body text-[12px] text-[#596155] mt-1">{COPY.business.basicPrice}</p>
                   </button>
                   <button
                     type="button"
@@ -410,8 +442,8 @@ export default function SignupPage() {
                         : "border-[#dbe0d9] bg-white hover:border-[#b7a78c]"
                     }`}
                   >
-                    <p className="font-display font-bold text-[14px] text-[#423926]">PREMIUM</p>
-                    <p className="font-body text-[12px] text-[#596155] mt-1">$49/month</p>
+                    <p className="font-display font-bold text-[14px] text-[#423926]">{COPY.business.premiumTier}</p>
+                    <p className="font-body text-[12px] text-[#596155] mt-1">{COPY.business.premiumPrice}</p>
                   </button>
                 </div>
                 {businessFieldErrors.business_tier && (
@@ -424,7 +456,7 @@ export default function SignupPage() {
                 disabled={businessLoading}
                 className="w-full bg-[#2c4a34] rounded-[8px] py-[14px] font-display font-bold text-[16px] text-white uppercase hover:bg-[#253022] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {businessLoading ? "Submitting..." : "CONTINUE TO PAYMENT"}
+                {businessLoading ? COPY.business.submitLoading : COPY.business.submitIdle}
               </button>
             </form>
           )}
@@ -433,12 +465,12 @@ export default function SignupPage() {
           {accountType === "business" && businessStep === "payment" && (
             <div className="flex flex-col gap-5 w-full">
               <p className="font-body text-[13px] text-[#596155]">
-                Your business info is saved — enter payment details to finish signing up.
+                {COPY.business.paymentIntro}
               </p>
               <StripeCheckout
                 clientSecret={businessClientSecret}
                 returnPath="/signup"
-                submitLabel="COMPLETE SIGNUP"
+                submitLabel={COPY.business.paymentSubmitLabel}
                 onSuccess={() => setBusinessStep("success")}
               />
             </div>
@@ -453,21 +485,21 @@ export default function SignupPage() {
                 </svg>
               </div>
               <h2 className="font-display font-bold text-[20px] text-[#423926]">
-                Payment received!
+                {COPY.business.successHeading}
               </h2>
               <p className="font-body text-[14px] text-[#596155]">
-                Check your email for a link to set up your login and finish activating your business account.
+                {COPY.business.successBody}
               </p>
             </div>
           )}
 
           <p className="font-body text-[13px] text-[#b7a78c]">
-            Already have an account?{" "}
+            {COPY.alreadyHaveAccount}{" "}
             <Link
               href="/login"
               className="text-[#2c4a34] underline hover:text-[#253022] transition-colors"
             >
-              Log in
+              {COPY.logIn}
             </Link>
           </p>
         </div>

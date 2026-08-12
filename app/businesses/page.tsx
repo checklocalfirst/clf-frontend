@@ -47,6 +47,41 @@ const REASONS = [
   },
 ];
 
+const COPY = {
+  heroHeading: "JOIN RENO'S LOCAL-FIRST MOVEMENT",
+  heroSubheading: "Become part of the community people trust.",
+  introPhotoAlt: "Reno local community",
+  whyHeading: "WHY DO BUSINESSES JOIN?",
+  whySubheading: "A few reasons local business owners say yes.",
+  pricingHeading: "FOUNDING MEMBER PRICING",
+  perkFreeMonths: "✓ 3 months free to start — get listed and get seen before you pay a thing.",
+  perkFoundingRate:
+    "✓ Founding businesses are grandfathered in at 25% off whatever the going rate is, for as long as you stay a member.",
+  disclaimer: "Pricing and program details shown here are not final and may change before launch.",
+  community: {
+    tier: "FOUNDING MEMBER",
+    price: "FREE",
+    priceSuffix: "for 3 months",
+    afterPrice: "Then $19/month — locked in as your founding rate.",
+    perk1: "✓ Directory listing — be found by people looking to shop local",
+    perk2: "✓ “Meet the Owner” feature — let customers see who they're supporting",
+    perk3: "✓ Contact & hours — links to your socials, website, and hours of operation",
+  },
+  premium: {
+    tier: "PREMIUM",
+    price: "$49",
+    priceSuffix: "/ Month",
+    afterPrice: "Everything in Community, plus:",
+    perk1: "✓ Featured Business on homepage",
+    perk2: "✓ Featured Business post on social media",
+    perk3: "✓ A free consumer account for the owner",
+    perk4: "✓ Expanded scrolling photo gallery on your listing",
+  },
+  ctaText: "Starting small, so we can grow the right way. Become a founding business.",
+  ctaButtonDesktop: "Become a Founding Business →",
+  ctaButtonMobile: "BECOME A FOUNDING BUSINESS →",
+};
+
 export default function BusinessesPage() {
   return (
     <main className="bg-[#faf6e9]">
@@ -65,10 +100,10 @@ export default function BusinessesPage() {
       {/* ── Hero ── */}
       <div className="bg-[#faf6e9] px-[16px] md:px-[64px] pt-[24px] md:pt-[56px] pb-[24px] md:pb-[40px] flex flex-col gap-[24px]">
         <h1 className="font-display font-bold text-[30px] md:text-[52px] text-[#423926] tracking-[-1px] leading-tight md:leading-none">
-          JOIN RENO&apos;S LOCAL-FIRST MOVEMENT
+          {COPY.heroHeading}
         </h1>
         <p className="font-body text-[20px] text-[#423926]">
-          Become part of the community people trust.
+          {COPY.heroSubheading}
         </p>
         <div className="hidden md:block bg-[#b7a78c] h-[3px] w-full" />
       </div>
@@ -76,7 +111,7 @@ export default function BusinessesPage() {
       {/* ── Intro Photo ── */}
       <div className="bg-[#faf6e9] px-[16px] md:px-[64px] pb-[48px] md:pb-[64px]">
         <div className="relative h-[220px] md:h-[360px] bg-[#c9d2cf] rounded-[4px] overflow-hidden">
-          <Image src={PHOTOS.intro} alt="Reno local community" fill sizes="100vw" className="object-cover" />
+          <Image src={PHOTOS.intro} alt={COPY.introPhotoAlt} fill sizes="100vw" className="object-cover" />
         </div>
       </div>
 
@@ -85,10 +120,10 @@ export default function BusinessesPage() {
         {/* Section header */}
         <div className="px-[16px] md:px-[64px] pt-[40px] md:pt-[56px] pb-[24px] flex flex-col items-start md:items-center gap-[12px]">
           <h2 className="font-display font-bold text-[24px] md:text-[40px] text-[#423926]">
-            WHY DO BUSINESSES JOIN?
+            {COPY.whyHeading}
           </h2>
           <p className="font-body text-[20px] text-[#423926]">
-            A few reasons local business owners say yes.
+            {COPY.whySubheading}
           </p>
         </div>
 
@@ -142,17 +177,16 @@ export default function BusinessesPage() {
       {/* ── Founding Member Pricing (Desktop) ── */}
       <div className="hidden md:flex flex-col items-center gap-[32px] bg-[#faf6e9] px-[64px] pt-[16px] pb-[64px]">
         <h2 className="font-display font-bold text-[40px] text-[#423926] text-center">
-          FOUNDING MEMBER PRICING
+          {COPY.pricingHeading}
         </h2>
 
         {/* Perks banner */}
         <div className="bg-[#c9d2cf] rounded-[12px] px-[28px] py-[24px] w-full flex flex-col gap-[10px]">
           <p className="font-display font-bold text-[15px] text-[#423926]">
-            ✓ 3 months free to start — get listed and get seen before you pay a thing.
+            {COPY.perkFreeMonths}
           </p>
           <p className="font-display font-bold text-[15px] text-[#423926]">
-            ✓ Founding businesses are grandfathered in at 25% off whatever the going rate is, for as
-            long as you stay a member.
+            {COPY.perkFoundingRate}
           </p>
         </div>
 
@@ -160,119 +194,118 @@ export default function BusinessesPage() {
         <div className="flex gap-[40px] w-full max-w-[900px]">
           {/* Community Card */}
           <div className="bg-white rounded-[16px] flex-1 p-[32px] flex flex-col min-h-[328px]">
-            <p className="font-display font-bold text-[14px] text-[#b7a78c]">FOUNDING MEMBER</p>
+            <p className="font-display font-bold text-[14px] text-[#b7a78c]">{COPY.community.tier}</p>
             <div className="flex items-baseline gap-[12px] mt-[32px]">
-              <p className="font-display font-bold text-[40px] text-[#151814] leading-none">FREE</p>
-              <p className="font-display text-[16px] text-[#b7a78c]">for 3 months</p>
+              <p className="font-display font-bold text-[40px] text-[#151814] leading-none">{COPY.community.price}</p>
+              <p className="font-display text-[16px] text-[#b7a78c]">{COPY.community.priceSuffix}</p>
             </div>
             <p className="font-display text-[13px] text-[#b7a78c] mt-[12px]">
-              Then $19/month — locked in as your founding rate.
+              {COPY.community.afterPrice}
             </p>
             <div className="mt-[20px] flex flex-col gap-[12px]">
               <p className="font-display text-[14px] text-[#151814]">
-                ✓ Directory listing — be found by people looking to shop local
+                {COPY.community.perk1}
               </p>
               <p className="font-display text-[14px] text-[#151814]">
-                ✓ &ldquo;Meet the Owner&rdquo; feature — let customers see who they&apos;re supporting
+                {COPY.community.perk2}
               </p>
               <p className="font-display text-[14px] text-[#151814]">
-                ✓ Contact &amp; hours — links to your socials, website, and hours of operation
+                {COPY.community.perk3}
               </p>
             </div>
           </div>
 
           {/* Premium Card */}
           <div className="bg-[#2c4a34] rounded-[16px] flex-1 p-[32px] flex flex-col min-h-[319px]">
-            <p className="font-display font-bold text-[14px] text-[#e8ebe6]">PREMIUM</p>
+            <p className="font-display font-bold text-[14px] text-[#e8ebe6]">{COPY.premium.tier}</p>
             <div className="flex items-baseline gap-[12px] mt-[32px]">
-              <p className="font-display font-bold text-[40px] text-white leading-none">$49</p>
-              <p className="font-display text-[16px] text-[#e8ebe6]">/ Month</p>
+              <p className="font-display font-bold text-[40px] text-white leading-none">{COPY.premium.price}</p>
+              <p className="font-display text-[16px] text-[#e8ebe6]">{COPY.premium.priceSuffix}</p>
             </div>
             <p className="font-display font-bold text-[13px] text-white mt-[16px]">
-              Everything in Community, plus:
+              {COPY.premium.afterPrice}
             </p>
             <div className="mt-[12px] flex flex-col gap-[10px]">
-              <p className="font-display text-[14px] text-white">✓ Featured Business on homepage</p>
+              <p className="font-display text-[14px] text-white">{COPY.premium.perk1}</p>
               <p className="font-display text-[14px] text-white">
-                ✓ Featured Business post on social media
+                {COPY.premium.perk2}
               </p>
               <p className="font-display text-[14px] text-white">
-                ✓ A free consumer account for the owner
+                {COPY.premium.perk3}
               </p>
               <p className="font-display text-[14px] text-white">
-                ✓ Expanded scrolling photo gallery on your listing
+                {COPY.premium.perk4}
               </p>
             </div>
           </div>
         </div>
 
         <p className="font-body text-[13px] text-[#b7a78c] text-center max-w-[516px]">
-          Pricing and program details shown here are not final and may change before launch.
+          {COPY.disclaimer}
         </p>
       </div>
 
       {/* ── Founding Member Pricing (Mobile) ── */}
       <div className="md:hidden bg-[#faf6e9] px-[16px] pt-[40px] pb-[32px] flex flex-col gap-[20px]">
         <h2 className="font-display font-bold text-[24px] text-[#423926]">
-          FOUNDING MEMBER PRICING
+          {COPY.pricingHeading}
         </h2>
         <p className="font-body font-bold text-[15px] text-[#423926]">
-          ✓ 3 months free to start — get listed and get seen before you pay a thing.
+          {COPY.perkFreeMonths}
         </p>
         <p className="font-body font-bold text-[15px] text-[#423926]">
-          ✓ Founding businesses are grandfathered in at 25% off whatever the going rate is, for as long
-          as you stay a member.
+          {COPY.perkFoundingRate}
         </p>
 
         {/* Community Card Mobile */}
         <div className="bg-[#253022] rounded-[16px] p-[24px] flex flex-col gap-[12px]">
-          <p className="font-display font-bold text-[14px] text-[#faf6e9]">FOUNDING MEMBER</p>
+          <p className="font-display font-bold text-[14px] text-[#faf6e9]">{COPY.community.tier}</p>
           <div className="flex items-baseline gap-[10px]">
-            <p className="font-display font-bold text-[30px] text-[#faf6e9] leading-none">FREE</p>
-            <p className="font-body text-[16px] text-[#faf6e9] opacity-70">for 3 months</p>
+            <p className="font-display font-bold text-[30px] text-[#faf6e9] leading-none">{COPY.community.price}</p>
+            <p className="font-body text-[16px] text-[#faf6e9] opacity-70">{COPY.community.priceSuffix}</p>
           </div>
           <p className="font-body text-[13px] text-[#faf6e9] opacity-60">
-            Then $19/month — locked in as your founding rate.
+            {COPY.community.afterPrice}
           </p>
           <div className="flex flex-col gap-[10px] mt-[4px]">
             <p className="font-body text-[14px] text-[#faf6e9]">
-              ✓ Directory listing — be found by people looking to shop local
+              {COPY.community.perk1}
             </p>
             <p className="font-body text-[14px] text-[#faf6e9]">
-              ✓ &ldquo;Meet the Owner&rdquo; feature — let customers see who they&apos;re supporting
+              {COPY.community.perk2}
             </p>
             <p className="font-body text-[14px] text-[#faf6e9]">
-              ✓ Contact &amp; hours — links to your socials, website, and hours of operation
+              {COPY.community.perk3}
             </p>
           </div>
         </div>
 
         {/* Premium Card Mobile */}
         <div className="bg-[#c96f47] rounded-[16px] p-[24px] flex flex-col gap-[12px]">
-          <p className="font-display font-bold text-[14px] text-[#faf6e9]">PREMIUM</p>
+          <p className="font-display font-bold text-[14px] text-[#faf6e9]">{COPY.premium.tier}</p>
           <div className="flex items-baseline gap-[10px]">
-            <p className="font-display font-bold text-[30px] text-[#faf6e9] leading-none">$49</p>
-            <p className="font-body text-[16px] text-[#faf6e9] opacity-70">/ Month</p>
+            <p className="font-display font-bold text-[30px] text-[#faf6e9] leading-none">{COPY.premium.price}</p>
+            <p className="font-body text-[16px] text-[#faf6e9] opacity-70">{COPY.premium.priceSuffix}</p>
           </div>
           <p className="font-body text-[13px] text-[#faf6e9] opacity-60">
-            Everything in Community, plus:
+            {COPY.premium.afterPrice}
           </p>
           <div className="flex flex-col gap-[10px] mt-[4px]">
-            <p className="font-body text-[14px] text-[#faf6e9]">✓ Featured Business on homepage</p>
+            <p className="font-body text-[14px] text-[#faf6e9]">{COPY.premium.perk1}</p>
             <p className="font-body text-[14px] text-[#faf6e9]">
-              ✓ Featured Business post on social media
+              {COPY.premium.perk2}
             </p>
             <p className="font-body text-[14px] text-[#faf6e9]">
-              ✓ A free consumer account for the owner
+              {COPY.premium.perk3}
             </p>
             <p className="font-body text-[14px] text-[#faf6e9]">
-              ✓ Expanded scrolling photo gallery on your listing
+              {COPY.premium.perk4}
             </p>
           </div>
         </div>
 
         <p className="font-body text-[13px] text-[#b7a78c]">
-          Pricing and program details shown here are not final and may change before launch.
+          {COPY.disclaimer}
         </p>
       </div>
 
@@ -280,26 +313,26 @@ export default function BusinessesPage() {
       {/* Desktop */}
       <div className="hidden md:flex flex-col items-center justify-center gap-[24px] bg-[#2c4a34] p-[64px]">
         <p className="font-display font-bold text-[32px] text-[#faf6e9] text-center max-w-[900px] leading-tight">
-          Starting small, so we can grow the right way. Become a founding business.
+          {COPY.ctaText}
         </p>
         <Link
           href="/signup"
           className="bg-[#bc6239] rounded-full px-[32px] py-[16px] font-body font-bold text-[16px] text-[#faf6e9] hover:opacity-90 transition-opacity"
         >
-          Become a Founding Business →
+          {COPY.ctaButtonDesktop}
         </Link>
       </div>
       {/* Mobile */}
       <div className="md:hidden bg-[#2c4a34] px-[16px] py-[48px] flex flex-col items-center gap-[24px]">
         <p className="font-display font-bold text-[20px] text-[#faf6e9] text-center">
-          Starting small, so we can grow the right way. Become a founding business.
+          {COPY.ctaText}
         </p>
         <Link
           href="/signup"
           className="bg-[#253022] rounded-[8px] h-[52px] w-full flex items-center justify-center hover:opacity-90 transition-opacity"
         >
           <span className="font-display font-bold text-[14px] text-[#faf6e9]">
-            BECOME A FOUNDING BUSINESS →
+            {COPY.ctaButtonMobile}
           </span>
         </Link>
       </div>

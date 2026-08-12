@@ -60,6 +60,51 @@ const GALLERY = [
   "/thenest.jpg",
 ];
 
+const IMG = {
+  hero: "/market.JPG",
+};
+
+const COPY = {
+  heroHeading: "JOIN THE CLUB",
+  heroPhotoAlt: "Local market scene",
+  introLeft:
+    "Membership at Check Local First means real support for your business — a listing that actually gets seen by Reno neighbors who are ready to buy local.",
+  introRight:
+    "Every tier includes a free profile on the directory. Upgrade for homepage features, unlimited photos, and priority placement in local search.",
+  pricingHeading: "PRICING & PACKAGES",
+  pricingSubheading:
+    "Every membership includes a free directory profile. Choose a tier that fits how visible you want your business to be.",
+  pricingCta: "Join Now →",
+  community: {
+    tier: "COMMUNITY",
+    blurb: "Perfect for businesses just getting started with an online presence.",
+  },
+  premium: {
+    tier: "PREMIUM",
+    blurb:
+      "Maximum visibility for businesses who want to be everyone's first stop — plus a personal account so the owner can shop local too.",
+    galleryLabel: "Photo Gallery (Scroll for more)",
+  },
+};
+
+const PRICING_CARDS = {
+  community: {
+    price: "$19",
+    tier: COPY.community.tier,
+    features: ["Directory listing", "Meet the Owner", "Contact & hours"],
+  },
+  premium: {
+    price: "$50",
+    tier: COPY.premium.tier,
+    features: [
+      "Everything in Community",
+      "Homepage rotation",
+      "Featured business placement",
+      "Personal shopper account for you",
+    ],
+  },
+};
+
 function PricingCard({
   bg,
   price,
@@ -95,7 +140,7 @@ function PricingCard({
 
       {/* CTA */}
       <JoinNowLink className="mt-auto bg-[#2c4a34] rounded-full flex items-center justify-center px-7 py-3 text-[#faf6e9] font-body font-semibold text-[15px] hover:bg-[#253022] transition-colors">
-        Join Now →
+        {COPY.pricingCta}
       </JoinNowLink>
     </div>
   );
@@ -114,7 +159,7 @@ export default function BusinessMembershipPage() {
       {/* ── 01 Hero ── */}
       <section className="bg-[#faf6e9] px-4 pt-10 pb-6 md:px-[64px]">
         <h1 className="font-display font-bold text-[32px] md:text-[88px] text-[#423926] tracking-[-1px] leading-none">
-          JOIN THE CLUB
+          {COPY.heroHeading}
         </h1>
         <div className="h-[3px] bg-[#b7a78c] mt-4" />
       </section>
@@ -123,18 +168,16 @@ export default function BusinessMembershipPage() {
       <section className="bg-[#faf6e9] px-4 pb-12 md:px-[64px] md:pb-[64px]">
         {/* Hero photo */}
         <div className="relative h-[200px] md:h-[420px] bg-[#c9d2cf] rounded-[4px] overflow-hidden mb-8">
-          <Image src="/market.JPG" alt="Local market scene" fill priority sizes="100vw" className="object-cover" />
+          <Image src={IMG.hero} alt={COPY.heroPhotoAlt} fill priority sizes="100vw" className="object-cover" />
         </div>
 
         {/* Two-column text on desktop, stacked on mobile */}
         <div className="flex flex-col gap-4 md:flex-row md:gap-16">
           <p className="font-body text-[15px] text-[#423926] leading-[1.5] md:flex-1">
-            Membership at Check Local First means real support for your business — a listing
-            that actually gets seen by Reno neighbors who are ready to buy local.
+            {COPY.introLeft}
           </p>
           <p className="font-body text-[15px] text-[#423926] leading-[1.5] md:flex-1">
-            Every tier includes a free profile on the directory. Upgrade for homepage features,
-            unlimited photos, and priority placement in local search.
+            {COPY.introRight}
           </p>
         </div>
       </section>
@@ -144,33 +187,17 @@ export default function BusinessMembershipPage() {
         {/* Heading */}
         <div className="flex flex-col items-center gap-3 text-center mb-8 md:mb-12">
           <h2 className="font-display font-bold text-[26px] md:text-[64px] text-[#423926] leading-none">
-            PRICING &amp; PACKAGES
+            {COPY.pricingHeading}
           </h2>
           <p className="font-body text-[15px] md:text-[16px] text-[#423926] max-w-[620px] leading-snug">
-            Every membership includes a free directory profile. Choose a tier that fits how
-            visible you want your business to be.
+            {COPY.pricingSubheading}
           </p>
         </div>
 
         {/* Cards */}
         <div className="flex flex-col gap-4 md:flex-row md:gap-7 md:justify-center">
-          <PricingCard
-            bg="bg-[#9ca889]"
-            price="$19"
-            tier="COMMUNITY"
-            features={["Directory listing", "Meet the Owner", "Contact & hours"]}
-          />
-          <PricingCard
-            bg="bg-[#bc6239]"
-            price="$50"
-            tier="PREMIUM"
-            features={[
-              "Everything in Community",
-              "Homepage rotation",
-              "Featured business placement",
-              "Personal shopper account for you",
-            ]}
-          />
+          <PricingCard bg="bg-[#9ca889]" {...PRICING_CARDS.community} />
+          <PricingCard bg="bg-[#bc6239]" {...PRICING_CARDS.premium} />
         </div>
       </section>
 
@@ -182,10 +209,10 @@ export default function BusinessMembershipPage() {
         <div className="hidden md:flex bg-[#423926] rounded-[20px] p-[56px] gap-16 items-center">
           <div className="flex-1 flex flex-col gap-3 min-w-0">
             <h3 className="font-display font-bold text-[64px] text-[#faf6e9] leading-none">
-              COMMUNITY
+              {COPY.community.tier}
             </h3>
             <p className="font-body text-[14px] text-[#b7a78c]">
-              Perfect for businesses just getting started with an online presence.
+              {COPY.community.blurb}
             </p>
           </div>
           <div className="flex-1 flex flex-col min-w-0">
@@ -202,10 +229,10 @@ export default function BusinessMembershipPage() {
         {/* Mobile */}
         <div className="md:hidden bg-[#253022] rounded-[16px] p-6">
           <h3 className="font-display font-bold text-[30px] text-[#faf6e9] leading-none mb-3">
-            COMMUNITY
+            {COPY.community.tier}
           </h3>
           <p className="font-body text-[14px] text-[#d9d9cc] mb-5">
-            Perfect for businesses just getting started with an online presence.
+            {COPY.community.blurb}
           </p>
           <FeatureAccordion
             features={COMMUNITY_FEATURES}
@@ -223,11 +250,10 @@ export default function BusinessMembershipPage() {
           <div className="flex gap-16">
             <div className="flex flex-col gap-3 min-w-0" style={{ width: "568px" }}>
               <h3 className="font-display font-bold text-[64px] text-[#423926] leading-none">
-                PREMIUM
+                {COPY.premium.tier}
               </h3>
               <p className="font-body text-[14px] text-[#423926]">
-                Maximum visibility for businesses who want to be everyone&apos;s first stop —
-                plus a personal account so the owner can shop local too.
+                {COPY.premium.blurb}
               </p>
             </div>
             <div className="flex-1 flex flex-col min-w-0">
@@ -244,7 +270,7 @@ export default function BusinessMembershipPage() {
           {/* Gallery strip */}
           <div className="flex flex-col gap-2">
             <p className="font-body font-semibold text-[12px] text-white uppercase tracking-[0.6px]">
-              Photo Gallery (Scroll for more)
+              {COPY.premium.galleryLabel}
             </p>
             <div className="flex gap-3 overflow-x-auto pb-1">
               {GALLERY.map((src, i) => (
@@ -262,11 +288,10 @@ export default function BusinessMembershipPage() {
         {/* Mobile */}
         <div className="md:hidden bg-[#c9d2cf] rounded-[16px] p-6">
           <h3 className="font-display font-bold text-[30px] text-[#253022] leading-none mb-3">
-            PREMIUM
+            {COPY.premium.tier}
           </h3>
           <p className="font-body text-[14px] text-[#595e5c] mb-5">
-            Maximum visibility for businesses who want to be everyone&apos;s first stop —
-            plus a personal account so the owner can shop local too.
+            {COPY.premium.blurb}
           </p>
           <FeatureAccordion
             features={PREMIUM_FEATURES}

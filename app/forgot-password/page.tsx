@@ -6,6 +6,21 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { supabase } from "@/lib/supabaseClient";
 
+const COPY = {
+  heading: "FORGOT PASSWORD",
+  subheading: "Enter your email and we'll send you a link to reset your password.",
+  emailLabel: "Email",
+  submitIdle: "SEND RESET LINK",
+  submitLoading: "Sending...",
+  rememberedPrompt: "Remembered it?",
+  logIn: "Log in",
+  genericError: "Something went wrong. Please try again.",
+  sentHeading: "Check Your Email",
+  sentBodyPrefix: "If an account exists for ",
+  sentBodySuffix: ", we've sent a link to reset your password.",
+  backToLogin: "Back to Log In",
+};
+
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
@@ -23,7 +38,7 @@ export default function ForgotPasswordPage() {
       if (resetError) throw resetError;
       setSent(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      setError(err instanceof Error ? err.message : COPY.genericError);
     } finally {
       setLoading(false);
     }
@@ -44,10 +59,10 @@ export default function ForgotPasswordPage() {
               <>
                 <div className="flex flex-col items-center gap-3">
                   <h1 className="font-display font-bold text-[32px] text-[#423926] leading-none text-center">
-                    FORGOT PASSWORD
+                    {COPY.heading}
                   </h1>
                   <p className="font-body text-[14px] text-[#b7a78c] text-center">
-                    Enter your email and we&apos;ll send you a link to reset your password.
+                    {COPY.subheading}
                   </p>
                 </div>
 
@@ -60,7 +75,7 @@ export default function ForgotPasswordPage() {
                 <form onSubmit={handleSubmit} className="flex flex-col gap-6 w-full">
                   <div className="flex flex-col gap-2">
                     <label htmlFor="email" className="font-body font-semibold text-[13px] text-[#423926]">
-                      Email
+                      {COPY.emailLabel}
                     </label>
                     <input
                       id="email"
@@ -78,17 +93,17 @@ export default function ForgotPasswordPage() {
                     disabled={loading}
                     className="w-full bg-[#2c4a34] rounded-[8px] py-[14px] font-display font-bold text-[16px] text-white uppercase hover:bg-[#253022] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    {loading ? "Sending..." : "SEND RESET LINK"}
+                    {loading ? COPY.submitLoading : COPY.submitIdle}
                   </button>
                 </form>
 
                 <p className="font-body text-[13px] text-[#b7a78c] text-center">
-                  Remembered it?{" "}
+                  {COPY.rememberedPrompt}{" "}
                   <Link
                     href="/login"
                     className="text-[#2c4a34] underline hover:text-[#253022] transition-colors"
                   >
-                    Log in
+                    {COPY.logIn}
                   </Link>
                 </p>
               </>
@@ -100,16 +115,16 @@ export default function ForgotPasswordPage() {
                   </svg>
                 </div>
                 <h2 className="font-display font-bold text-[24px] text-[#423926]">
-                  Check Your Email
+                  {COPY.sentHeading}
                 </h2>
                 <p className="font-body text-[14px] text-[#596155]">
-                  If an account exists for {email}, we&apos;ve sent a link to reset your password.
+                  {COPY.sentBodyPrefix}{email}{COPY.sentBodySuffix}
                 </p>
                 <Link
                   href="/login"
                   className="w-full bg-[#2c4a34] rounded-[8px] py-[14px] font-display font-bold text-[16px] text-white uppercase text-center hover:bg-[#253022] transition-colors"
                 >
-                  Back to Log In
+                  {COPY.backToLogin}
                 </Link>
               </div>
             )}

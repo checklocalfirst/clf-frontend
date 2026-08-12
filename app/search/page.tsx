@@ -50,6 +50,16 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
 };
 const DEFAULT_CATEGORY_ICON = Tag;
 
+const COPY = {
+  allBusinessesLabel: "All Businesses",
+  browseByCategoryHeading: "BROWSE BY CATEGORY",
+  nearYouHeading: "Businesses Near You",
+  allBusinessesHeading: "All Businesses",
+  resultsSuffix: "results",
+  uncategorizedLabel: "Uncategorized",
+  noDescriptionFallback: "No description yet.",
+};
+
 interface CategoryTile {
   label: string;
   Icon: LucideIcon;
@@ -58,7 +68,7 @@ interface CategoryTile {
 
 function buildCategoryTiles(categories: Category[]): CategoryTile[] {
   return [
-    { label: "All Businesses", Icon: Store, href: "/search" },
+    { label: COPY.allBusinessesLabel, Icon: Store, href: "/search" },
     ...categories.map((c) => ({
       label: c.name,
       Icon: CATEGORY_ICONS[c.slug] ?? DEFAULT_CATEGORY_ICON,
@@ -103,7 +113,7 @@ async function getResultCards(
 
     const cards = results.map(({ business, bestMatch, distance_miles }, i) => ({
       name: business.name,
-      category: categoryLists[i][0]?.name ?? "Uncategorized",
+      category: categoryLists[i][0]?.name ?? COPY.uncategorizedLabel,
       location: `${business.city}, ${business.state}`,
       description: business.description ?? bestMatch.name,
       photo: photos[i],
@@ -122,9 +132,9 @@ async function getResultCards(
   const photos = await Promise.all(businesses.map((b) => getListingPhotoUrl(b.slug)));
   return businesses.map((b, i) => ({
     name: b.name,
-    category: b.categoryNames[0] ?? "Uncategorized",
+    category: b.categoryNames[0] ?? COPY.uncategorizedLabel,
     location: `${b.city}, ${b.state}`,
-    description: b.description ?? "No description yet.",
+    description: b.description ?? COPY.noDescriptionFallback,
     photo: photos[i],
     isNew: b.isNew,
     href: `/businesses/${b.slug}`,
@@ -181,7 +191,7 @@ export default async function SearchPage({
         {/* Desktop */}
         <div className="hidden md:flex flex-col pt-[56px] pb-[32px]">
           <h2 className="font-display font-bold text-[56px] text-[#423926] leading-none mb-3">
-            BROWSE BY CATEGORY
+            {COPY.browseByCategoryHeading}
           </h2>
           <div className="h-px bg-[#dbe0d9] w-full mb-3" />
           <div className="flex gap-6 overflow-x-auto py-2 scrollbar-none">
@@ -204,7 +214,7 @@ export default async function SearchPage({
         {/* Mobile */}
         <div className="md:hidden flex flex-col pt-7 pb-4">
           <h2 className="font-display font-bold text-[28px] text-[#423926] mb-3 leading-none">
-            BROWSE BY CATEGORY
+            {COPY.browseByCategoryHeading}
           </h2>
           <div className="h-px bg-[#dbe0d9] mb-4" />
           <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none">
@@ -234,16 +244,16 @@ export default async function SearchPage({
             </h1>
           ) : coords ? (
             <h1 className="font-display font-bold text-[20px] md:text-[24px] text-[#423926] uppercase">
-              Businesses Near You
+              {COPY.nearYouHeading}
             </h1>
           ) : (
             <h1 className="font-display font-bold text-[20px] md:text-[24px] text-[#423926] uppercase">
-              All Businesses
+              {COPY.allBusinessesHeading}
             </h1>
           )}
           <div className="bg-[#c9d2cf] rounded-full px-[10px] py-[5px]">
             <span className="font-mono font-bold text-[11px] md:text-[13px] text-[#423926] uppercase whitespace-nowrap">
-              {resultCount} results
+              {resultCount} {COPY.resultsSuffix}
             </span>
           </div>
         </div>

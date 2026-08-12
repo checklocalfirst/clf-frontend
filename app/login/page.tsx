@@ -8,6 +8,22 @@ import Footer from "@/components/Footer";
 import { useAuth, accountHomeFor } from "@/lib/auth";
 import { ApiError } from "@/lib/api";
 
+const COPY = {
+  heading: "LOG IN",
+  subheading: "Welcome back to Check Local First.",
+  registeredMessage: "Account created! Log in below.",
+  expiredMessage: "Your session expired — log back in to continue.",
+  emailLabel: "Email",
+  passwordLabel: "Password",
+  forgotPassword: "Forgot password?",
+  submitIdle: "LOG IN",
+  submitLoading: "Logging in...",
+  noAccountPrompt: "Don't have an account?",
+  signUpLink: "Sign up",
+  invalidCredentials: "Invalid email or password.",
+  genericError: "Something went wrong. Please try again.",
+};
+
 export default function LoginPage() {
   const router = useRouter();
   const { user, loading: authLoading, login } = useAuth();
@@ -47,8 +63,8 @@ export default function LoginPage() {
     } catch (err) {
       setError(
         err instanceof ApiError
-          ? err.message || "Invalid email or password."
-          : "Something went wrong. Please try again."
+          ? err.message || COPY.invalidCredentials
+          : COPY.genericError
       );
     } finally {
       setLoading(false);
@@ -65,17 +81,17 @@ export default function LoginPage() {
 
             <div className="flex flex-col items-center gap-3">
               <h1 className="font-display font-bold text-[32px] text-[#423926] leading-none text-center">
-                LOG IN
+                {COPY.heading}
               </h1>
               <p className="font-body text-[14px] text-[#b7a78c] text-center">
-                Welcome back to Check Local First.
+                {COPY.subheading}
               </p>
             </div>
 
             {justRegistered && (
               <div className="bg-[#f0f5ee] border border-[#9ca889] rounded-[8px] px-4 py-3">
                 <p className="font-body text-[13px] text-[#2c4a34]">
-                  Account created! Log in below.
+                  {COPY.registeredMessage}
                 </p>
               </div>
             )}
@@ -83,7 +99,7 @@ export default function LoginPage() {
             {sessionExpired && (
               <div className="bg-[#faf6e9] border border-[#b7a78c] rounded-[8px] px-4 py-3">
                 <p className="font-body text-[13px] text-[#423926]">
-                  Your session expired — log back in to continue.
+                  {COPY.expiredMessage}
                 </p>
               </div>
             )}
@@ -97,7 +113,7 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit} className="flex flex-col gap-6 w-full">
               <div className="flex flex-col gap-2">
                 <label htmlFor="email" className="font-body font-semibold text-[13px] text-[#423926]">
-                  Email
+                  {COPY.emailLabel}
                 </label>
                 <input
                   id="email"
@@ -113,13 +129,13 @@ export default function LoginPage() {
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between">
                   <label htmlFor="password" className="font-body font-semibold text-[13px] text-[#423926]">
-                    Password
+                    {COPY.passwordLabel}
                   </label>
                   <Link
                     href="/forgot-password"
                     className="font-body text-[12px] text-[#b7a78c] hover:text-[#2c4a34] transition-colors"
                   >
-                    Forgot password?
+                    {COPY.forgotPassword}
                   </Link>
                 </div>
                 <input
@@ -138,17 +154,17 @@ export default function LoginPage() {
                 disabled={loading}
                 className="w-full bg-[#2c4a34] rounded-[8px] py-[14px] font-display font-bold text-[16px] text-white uppercase hover:bg-[#253022] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {loading ? "Logging in..." : "LOG IN"}
+                {loading ? COPY.submitLoading : COPY.submitIdle}
               </button>
             </form>
 
             <p className="font-body text-[13px] text-[#b7a78c] text-center">
-              Don&apos;t have an account?{" "}
+              {COPY.noAccountPrompt}{" "}
               <Link
                 href="/signup"
                 className="text-[#2c4a34] underline hover:text-[#253022] transition-colors"
               >
-                Sign up
+                {COPY.signUpLink}
               </Link>
             </p>
           </div>

@@ -9,6 +9,24 @@ import { supabase } from "@/lib/supabaseClient";
 
 type PageState = "waiting" | "form" | "success" | "expired";
 
+const COPY = {
+  verifying: "Verifying your reset link…",
+  expiredHeading: "Link Expired",
+  expiredBody: "This password reset link has expired or is invalid. Request a new one from the login page.",
+  backToLogin: "Back to Log In",
+  heading: "NEW PASSWORD",
+  subheading: "Choose a strong password for your account.",
+  passwordMismatch: "Passwords do not match.",
+  passwordTooShort: "Password must be at least 8 characters.",
+  genericError: "Something went wrong. Please try again.",
+  newPasswordLabel: "New Password",
+  confirmPasswordLabel: "Confirm Password",
+  submitIdle: "SET NEW PASSWORD",
+  submitLoading: "Saving...",
+  successHeading: "Password Updated",
+  successBody: "You're all set. Redirecting you to log in…",
+};
+
 export default function ResetPasswordPage() {
   const router = useRouter();
   const [pageState, setPageState] = useState<PageState>("waiting");
@@ -41,11 +59,11 @@ export default function ResetPasswordPage() {
     setError("");
 
     if (password !== confirm) {
-      setError("Passwords do not match.");
+      setError(COPY.passwordMismatch);
       return;
     }
     if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
+      setError(COPY.passwordTooShort);
       return;
     }
 
@@ -56,7 +74,7 @@ export default function ResetPasswordPage() {
       setPageState("success");
       setTimeout(() => router.push("/login"), 2500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      setError(err instanceof Error ? err.message : COPY.genericError);
     } finally {
       setLoading(false);
     }
@@ -78,7 +96,7 @@ export default function ResetPasswordPage() {
               <div className="flex flex-col items-center gap-4 py-4">
                 <div className="w-8 h-8 border-2 border-[#2c4a34] border-t-transparent rounded-full animate-spin" />
                 <p className="font-body text-[14px] text-[#b7a78c] text-center">
-                  Verifying your reset link…
+                  {COPY.verifying}
                 </p>
               </div>
             )}
@@ -87,16 +105,16 @@ export default function ResetPasswordPage() {
             {pageState === "expired" && (
               <div className="flex flex-col items-center gap-4 text-center">
                 <h1 className="font-display font-bold text-[28px] text-[#423926]">
-                  Link Expired
+                  {COPY.expiredHeading}
                 </h1>
                 <p className="font-body text-[14px] text-[#596155]">
-                  This password reset link has expired or is invalid. Request a new one from the login page.
+                  {COPY.expiredBody}
                 </p>
                 <Link
                   href="/login"
                   className="w-full bg-[#2c4a34] rounded-[8px] py-[14px] font-display font-bold text-[16px] text-white uppercase text-center hover:bg-[#253022] transition-colors"
                 >
-                  Back to Log In
+                  {COPY.backToLogin}
                 </Link>
               </div>
             )}
@@ -106,10 +124,10 @@ export default function ResetPasswordPage() {
               <>
                 <div className="flex flex-col items-center gap-3">
                   <h1 className="font-display font-bold text-[32px] text-[#423926] leading-none text-center">
-                    NEW PASSWORD
+                    {COPY.heading}
                   </h1>
                   <p className="font-body text-[14px] text-[#b7a78c] text-center">
-                    Choose a strong password for your account.
+                    {COPY.subheading}
                   </p>
                 </div>
 
@@ -122,7 +140,7 @@ export default function ResetPasswordPage() {
                 <form onSubmit={handleSubmit} className="flex flex-col gap-6 w-full">
                   <div className="flex flex-col gap-2">
                     <label htmlFor="password" className="font-body font-semibold text-[13px] text-[#423926]">
-                      New Password
+                      {COPY.newPasswordLabel}
                     </label>
                     <input
                       id="password"
@@ -138,7 +156,7 @@ export default function ResetPasswordPage() {
 
                   <div className="flex flex-col gap-2">
                     <label htmlFor="confirm" className="font-body font-semibold text-[13px] text-[#423926]">
-                      Confirm Password
+                      {COPY.confirmPasswordLabel}
                     </label>
                     <input
                       id="confirm"
@@ -156,7 +174,7 @@ export default function ResetPasswordPage() {
                     disabled={loading}
                     className="w-full bg-[#2c4a34] rounded-[8px] py-[14px] font-display font-bold text-[16px] text-white uppercase hover:bg-[#253022] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    {loading ? "Saving..." : "SET NEW PASSWORD"}
+                    {loading ? COPY.submitLoading : COPY.submitIdle}
                   </button>
                 </form>
               </>
@@ -171,10 +189,10 @@ export default function ResetPasswordPage() {
                   </svg>
                 </div>
                 <h2 className="font-display font-bold text-[24px] text-[#423926]">
-                  Password Updated
+                  {COPY.successHeading}
                 </h2>
                 <p className="font-body text-[14px] text-[#596155]">
-                  You&apos;re all set. Redirecting you to log in…
+                  {COPY.successBody}
                 </p>
               </div>
             )}

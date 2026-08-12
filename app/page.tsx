@@ -18,10 +18,67 @@ const IMG = {
   heroMobile:      "/placeholder.png",
   wordmarkMobile:  "/clfheadlogo.png",
   aboutMobile:     "/placeholder.png",
+  aboutDesktop:    "/market.JPG",
   ig1:             "/breadcompany.JPG",
   ig2:             "/farmers1.JPG",
   ig3:             "/modestmix.JPG",
   ig4:             "/sasquatchsnacks.jpg",
+};
+
+const INSTAGRAM_URL = "https://www.instagram.com/checklocalfirstreno/";
+
+// User-facing copy, kept together so wording can be edited without touching layout/markup below.
+const COPY = {
+  heroTagline: "Your guide to local shopping in Reno, NV",
+  heroSearchPlaceholder: "Search businesses, food & more...",
+  aboutPhotoAlt: "About Check Local First",
+  startExploring: {
+    heading: "Start Exploring",
+    mobileBody:
+      "Check Local First is Reno's local directory. Browse by category or search for exactly what you need, then save the places you want to come back to.",
+    desktopBody1:
+      "Check Local First is Reno's local directory, browse by category or search for exactly what you need, save the places you love, and discover the independently owned shops that make this city what it is.",
+    desktopBody2:
+      "Sign up to join a community that keeps Reno's money in Reno, while unlocking exclusive member discounts along the way.",
+  },
+  aboutUs: {
+    eyebrow: "About us",
+    mobileHeading: "Every dollar is a vote",
+    mobileBody:
+      "Check Local First started with a simple idea: every dollar spent at a local business is a vote for the kind of city you want to live in. Every listing here is here because someone who loves this place vouched for it.",
+    mobileLink: "Learn more about our story",
+    desktopHeading: "About Us",
+    desktopBody:
+      "Check Local First started with a simple idea: every dollar spent at a local business is a vote for the kind of community we want to live in. We built this directory to make it effortless to find, support, and celebrate the small businesses that make Reno the Biggest Little City — and to keep neighbors connected to the people behind the counter.",
+    desktopLink: "Learn More About Our Story",
+  },
+  featured: {
+    mobileEyebrow: "Featured business",
+    desktopEyebrow: "FEATURED BUSINESS",
+    mobileCta: "View full profile",
+    desktopCta: "VIEW FULL PROFILE",
+    fallbackDescription: "No description provided yet.",
+  },
+  becomeMember: {
+    eyebrow: "Membership",
+    heading: "Become a Member",
+    body:
+      "Members get exclusive discounts at local shops, and as our community grows, those perks only multiply. More than that, joining means investing in your neighborhood, keeping your money close to home, and building real connections with the people around you.",
+    cta: "Join as a Member",
+  },
+  beFound: {
+    heading: "Get Found by Local Customers",
+    mobileBody:
+      "Own an independent business in the Reno–Tahoe area? List your business and get connected with shoppers who are actively looking to buy local — a community that already loves where they shop.",
+    desktopBody:
+      "Own an independent business in the Reno–Tahoe area? List your business and get connected with shoppers who are actively looking to buy local — a community that already cares where their money goes. Share your hours, upload photos, and let neighbors discover the heart of your trade.",
+    cta: "List your business",
+  },
+  followCommunity: {
+    mobileHeading: "Follow the community",
+    desktopHeading: "Follow THE COMMUNITY",
+    handle: "@checklocalfirst",
+  },
 };
 
 // Shown only when GET /businesses/featured has nothing set, or the featured
@@ -122,7 +179,7 @@ export default async function HomePage() {
 
         {/* Tagline */}
         <p className="absolute bottom-24 left-1/2 -translate-x-1/2 w-[1029px] text-center font-display font-bold text-[40px] text-[#faf6e9]">
-          Your guide to local shopping in Reno, NV
+          {COPY.heroTagline}
         </p>
 
         {/* Search bar */}
@@ -160,7 +217,7 @@ export default async function HomePage() {
             <circle cx="7" cy="7" r="5.5" stroke="#596155" strokeWidth="1.4" />
             <path d="M11 11L14.5 14.5" stroke="#596155" strokeWidth="1.4" strokeLinecap="round" />
           </svg>
-          <span className="flex-1 font-body text-[11px] text-[#596155]">Search businesses, food &amp; more...</span>
+          <span className="flex-1 font-body text-[11px] text-[#596155]">{COPY.heroSearchPlaceholder}</span>
           <button className="bg-[#2c4a34] flex items-center justify-center rounded-[3px] w-[38px] h-[38px] flex-shrink-0">
             <svg width="14" height="14" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="8" cy="8" r="6" stroke="white" strokeWidth="1.6" />
@@ -170,7 +227,7 @@ export default async function HomePage() {
         </div>
 
         <p className="relative font-body text-[12px] text-[#f0edd8] text-center leading-5">
-          Your guide to local shopping in Reno, NV
+          {COPY.heroTagline}
         </p>
       </section>
 
@@ -195,17 +252,17 @@ export default async function HomePage() {
       ════════════════════════════════ */}
       <section className="bg-[#faf6e9] flex flex-col items-center text-center gap-[18px] md:gap-10 px-[30px] md:px-[240px] pt-[60px] md:pt-20 pb-12 md:pb-[120px]">
         <h2 className="font-display font-bold text-[26px] md:text-[64px] leading-tight text-[#253022] uppercase w-full">
-          Start Exploring
+          {COPY.startExploring.heading}
         </h2>
         {/* Mobile */}
         <p className="md:hidden font-body text-[12px] text-[#596155] leading-[22px] w-full">
-          Check Local First is Reno&apos;s local directory. Browse by category or search for exactly what you need, then save the places you want to come back to.
+          {COPY.startExploring.mobileBody}
         </p>
         {/* Desktop */}
         <p className="hidden md:block font-body text-[20px] text-[#596155] leading-[1.6] w-full">
-          Check Local First is Reno&apos;s local directory, browse by category or search for exactly what you need, save the places you love, and discover the independently owned shops that make this city what it is.
+          {COPY.startExploring.desktopBody1}
           <br /><br />
-          Sign up to join a community that keeps Reno&apos;s money in Reno, while unlocking exclusive member discounts along the way.
+          {COPY.startExploring.desktopBody2}
         </p>
       </section>
 
@@ -222,16 +279,16 @@ export default async function HomePage() {
       {/* Mobile */}
       <section className="md:hidden bg-[#faf6e9] flex flex-col pb-[56px]">
         <div className="relative h-[320px] w-full overflow-hidden">
-          <Image src={IMG.aboutMobile} alt="About Check Local First" fill sizes="100vw" className="object-cover" />
+          <Image src={IMG.aboutMobile} alt={COPY.aboutPhotoAlt} fill sizes="100vw" className="object-cover" />
         </div>
         <div className="flex flex-col gap-4 items-center text-center pt-11 px-[30px]">
-          <p className="font-display font-bold text-[9px] text-[#b7a78c] tracking-[3px] uppercase w-full">About us</p>
-          <h2 className="font-display font-bold text-[24px] text-[#253022] leading-[32px] w-full">Every dollar is a vote</h2>
+          <p className="font-display font-bold text-[9px] text-[#b7a78c] tracking-[3px] uppercase w-full">{COPY.aboutUs.eyebrow}</p>
+          <h2 className="font-display font-bold text-[24px] text-[#253022] leading-[32px] w-full">{COPY.aboutUs.mobileHeading}</h2>
           <p className="font-body text-[12px] text-[#596155] leading-[22px] w-full">
-            Check Local First started with a simple idea: every dollar spent at a local business is a vote for the kind of city you want to live in. Every listing here is here because someone who loves this place vouched for it.
+            {COPY.aboutUs.mobileBody}
           </p>
           <Link href="/about" className="font-display font-bold text-[10px] text-[#253022] tracking-[1.6px] uppercase underline w-full">
-            Learn more about our story
+            {COPY.aboutUs.mobileLink}
           </Link>
         </div>
       </section>
@@ -240,17 +297,17 @@ export default async function HomePage() {
       <section className="hidden md:flex items-center gap-20 bg-[#faf6e9] px-20 py-[120px]">
         <div className="shadow-[-4px_12px_16px_rgba(37,48,34,0.08)] rounded-[4px] p-6 flex-shrink-0 w-[440px] overflow-hidden">
           <div className="relative h-[360px] w-full rounded-[2px] overflow-hidden">
-            <Image src="/market.JPG" alt="About Check Local First" fill sizes="440px" className="object-cover" />
+            <Image src={IMG.aboutDesktop} alt={COPY.aboutPhotoAlt} fill sizes="440px" className="object-cover" />
           </div>
         </div>
         <div className="flex flex-col gap-8 flex-1">
-          <h2 className="font-display font-bold text-[64px] text-[#151814] uppercase leading-none">About Us</h2>
+          <h2 className="font-display font-bold text-[64px] text-[#151814] uppercase leading-none">{COPY.aboutUs.desktopHeading}</h2>
           <div className="bg-[#f4f3ee] border border-[#dbe0d9] rounded-[16px] p-10 flex flex-col gap-6">
             <p className="font-body text-[20px] text-[#151814] leading-[1.6]">
-              Check Local First started with a simple idea: every dollar spent at a local business is a vote for the kind of community we want to live in. We built this directory to make it effortless to find, support, and celebrate the small businesses that make Reno the Biggest Little City — and to keep neighbors connected to the people behind the counter.
+              {COPY.aboutUs.desktopBody}
             </p>
             <Link href="/about" className="font-display font-bold text-[20px] text-[#253022] uppercase underline flex items-center gap-2 hover:opacity-70 transition-opacity">
-              Learn More About Our Story <ChevronRight color="#253022" />
+              {COPY.aboutUs.desktopLink} <ChevronRight color="#253022" />
             </Link>
           </div>
         </div>
@@ -263,7 +320,7 @@ export default async function HomePage() {
       {/* Mobile */}
       <section className="md:hidden bg-[#d9d1c7] flex flex-col">
         <div className="flex flex-col gap-[14px] items-center text-center pt-[56px] pb-6 px-[30px]">
-          <p className="font-display font-bold text-[9px] text-[#6b7d67] tracking-[3px] uppercase w-full">Featured business</p>
+          <p className="font-display font-bold text-[9px] text-[#6b7d67] tracking-[3px] uppercase w-full">{COPY.featured.mobileEyebrow}</p>
           <h2 className="font-display font-bold text-[30px] text-[#253022] leading-[38px] w-full">{featured.name}</h2>
           <p className="font-display font-bold text-[9px] text-[#423926] tracking-[1.8px] uppercase w-full">
             {featuredCategory}
@@ -276,10 +333,10 @@ export default async function HomePage() {
         </div>
         <div className="flex flex-col gap-5 items-center text-center pt-7 pb-[56px] px-[30px]">
           <p className="font-body text-[12px] text-[#423926] leading-[22px]">
-            {featured.description ?? "No description provided yet."}
+            {featured.description ?? COPY.featured.fallbackDescription}
           </p>
           <Link href={`/businesses/${featured.slug}`} className="bg-[#2c4a34] text-[#faf6e9] font-display font-bold text-[10px] tracking-[1.8px] uppercase px-7 py-4 rounded-[2px] hover:bg-[#253022] transition-colors">
-            View full profile
+            {COPY.featured.mobileCta}
           </Link>
         </div>
       </section>
@@ -287,7 +344,7 @@ export default async function HomePage() {
       {/* Desktop */}
       <section className="hidden md:block relative bg-[#faf6e9] py-24 overflow-hidden">
         <div className="px-20">
-          <p className="font-display font-bold text-[13px] text-[#b7a78c] uppercase tracking-wider">FEATURED BUSINESS</p>
+          <p className="font-display font-bold text-[13px] text-[#b7a78c] uppercase tracking-wider">{COPY.featured.desktopEyebrow}</p>
           <p className="font-display font-bold text-[40px] text-[#151814] mt-[6px]">{featured.name.toUpperCase()}</p>
           <p className="font-display font-bold text-[13px] text-[#596155] uppercase mt-1">{featuredCategory}</p>
 
@@ -300,10 +357,10 @@ export default async function HomePage() {
             {/* Right: text */}
             <div className="flex flex-col gap-7 flex-1">
               <p className="font-display text-[17px] text-[#151814] leading-relaxed">
-                {featured.description ?? "No description provided yet."}
+                {featured.description ?? COPY.featured.fallbackDescription}
               </p>
               <Link href={`/businesses/${featured.slug}`} className="inline-flex items-center gap-3 bg-[#2c4a34] text-white font-display font-bold text-[16px] uppercase px-6 h-12 rounded-[8px] w-fit hover:bg-[#253022] transition-colors">
-                VIEW FULL PROFILE <ChevronRight color="white" />
+                {COPY.featured.desktopCta} <ChevronRight color="white" />
               </Link>
             </div>
           </div>
@@ -314,20 +371,20 @@ export default async function HomePage() {
           BECOME A MEMBER
       ════════════════════════════════ */}
       <section className="flex flex-col items-center text-center gap-[18px] md:gap-8 px-8 md:px-[240px] py-16 md:py-[100px] bg-[#2c4a34] md:bg-[#423926]">
-        <p className="md:hidden font-display font-bold text-[9px] text-[#b5c98a] tracking-[3px] uppercase">Membership</p>
+        <p className="md:hidden font-display font-bold text-[9px] text-[#b5c98a] tracking-[3px] uppercase">{COPY.becomeMember.eyebrow}</p>
         <h2 className="font-display font-bold text-[24px] md:text-[64px] text-[#faf6e9] uppercase tracking-[0.5px] md:tracking-normal leading-[30px] md:leading-none">
-          Become a Member
+          {COPY.becomeMember.heading}
         </h2>
         {/* Mobile */}
         <p className="md:hidden font-body text-[12px] text-[#e8ebe6] leading-[22px]">
-          Members get exclusive discounts at local shops, and as our community grows, those perks only multiply. More than that, joining means investing in your neighborhood, keeping your money close to home, and building real connections with the people around you.
+          {COPY.becomeMember.body}
         </p>
         {/* Desktop */}
         <p className="hidden md:block font-body text-[20px] text-[#e8ebe6] leading-[1.6]">
-          Members get exclusive discounts at local shops, and as our community grows, those perks only multiply. More than that, joining means investing in your neighborhood, keeping your money close to home, and building real connections with the people around you.
+          {COPY.becomeMember.body}
         </p>
         <JoinNowLink className="bg-[#faf6e9] md:bg-[#faf8f5] text-[#253022] font-display font-bold text-[10px] md:text-[20px] tracking-[1.8px] md:tracking-normal uppercase px-7 md:px-10 py-4 rounded-[2px] md:rounded-[100px] inline-flex items-center gap-2 hover:opacity-90 transition-opacity">
-          Join as a Member
+          {COPY.becomeMember.cta}
           <span className="hidden md:block"><ChevronRight color="#253022" /></span>
         </JoinNowLink>
       </section>
@@ -337,18 +394,18 @@ export default async function HomePage() {
       ════════════════════════════════ */}
       <section className="flex flex-col items-center text-center gap-[18px] md:gap-8 px-7 md:px-[240px] pt-[60px] md:py-[100px] pb-[56px] bg-[#faf6e9] border-b border-[#dbe0d9]">
         <h2 className="font-display font-bold text-[22px] md:text-[64px] text-[#253022] uppercase tracking-[0.5px] md:tracking-normal leading-[30px] md:leading-none">
-          Get Found by Local Customers
+          {COPY.beFound.heading}
         </h2>
         {/* Mobile */}
         <p className="md:hidden font-body text-[12px] text-[#596155] leading-[22px]">
-          Own an independent business in the Reno–Tahoe area? List your business and get connected with shoppers who are actively looking to buy local — a community that already loves where they shop.
+          {COPY.beFound.mobileBody}
         </p>
         {/* Desktop */}
         <p className="hidden md:block font-body text-[20px] text-[#596155] leading-[1.6]">
-          Own an independent business in the Reno–Tahoe area? List your business and get connected with shoppers who are actively looking to buy local — a community that already cares where their money goes. Share your hours, upload photos, and let neighbors discover the heart of your trade.
+          {COPY.beFound.desktopBody}
         </p>
         <Link href="/signup" className="border border-[#253022] md:bg-[#253022] md:border-transparent md:text-white text-[#253022] font-display font-bold text-[10px] md:text-[20px] tracking-[1.8px] md:tracking-normal uppercase px-7 md:px-10 py-[15px] md:py-4 rounded-[2px] md:rounded-[100px] inline-flex items-center gap-2 hover:opacity-80 transition-opacity">
-          List your business
+          {COPY.beFound.cta}
           <span className="hidden md:block"><ChevronRight color="white" /></span>
         </Link>
       </section>
@@ -360,29 +417,29 @@ export default async function HomePage() {
       {/* Mobile */}
       <section className="md:hidden bg-[#faf6e9] flex flex-col gap-5 pb-[56px]">
         <div className="flex flex-col gap-2 items-center text-center px-7 pt-[56px]">
-          <h2 className="font-display font-bold text-[17px] text-[#253022] tracking-[0.5px] uppercase w-full">Follow the community</h2>
-          <p className="font-body text-[11px] text-[#596155] w-full">@checklocalfirst</p>
+          <h2 className="font-display font-bold text-[17px] text-[#253022] tracking-[0.5px] uppercase w-full">{COPY.followCommunity.mobileHeading}</h2>
+          <p className="font-body text-[11px] text-[#596155] w-full">{COPY.followCommunity.handle}</p>
         </div>
         <div className="flex flex-col gap-[2px]">
           <div className="flex gap-[2px] h-[128px]">
-            <a href="https://www.instagram.com/checklocalfirstreno/" target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden">
+            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden">
               <Image src={IMG.ig1} alt="" fill sizes="33vw" className="object-cover" />
             </a>
-            <a href="https://www.instagram.com/checklocalfirstreno/" target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden">
+            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden">
               <Image src={IMG.ig2} alt="" fill sizes="33vw" className="object-cover" />
             </a>
-            <a href="https://www.instagram.com/checklocalfirstreno/" target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden">
+            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden">
               <Image src={IMG.ig3} alt="" fill sizes="33vw" className="object-cover" />
             </a>
           </div>
           <div className="flex gap-[2px] h-[128px]">
-            <a href="https://www.instagram.com/checklocalfirstreno/" target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden">
+            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden">
               <Image src={IMG.ig4} alt="" fill sizes="33vw" className="object-cover" />
             </a>
-            <a href="https://www.instagram.com/checklocalfirstreno/" target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden">
+            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden">
               <Image src={IMG.ig1} alt="" fill sizes="33vw" className="object-cover" />
             </a>
-            <a href="https://www.instagram.com/checklocalfirstreno/" target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden">
+            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden">
               <Image src={IMG.ig2} alt="" fill sizes="33vw" className="object-cover" />
             </a>
           </div>
@@ -392,10 +449,10 @@ export default async function HomePage() {
       {/* Desktop */}
       <section className="hidden md:flex flex-col bg-[#faf6e9]">
         <div className="px-20 pt-16">
-          <h2 className="font-display font-bold text-[64px] text-[#151814] uppercase">Follow THE COMMUNITY</h2>
+          <h2 className="font-display font-bold text-[64px] text-[#151814] uppercase">{COPY.followCommunity.desktopHeading}</h2>
         </div>
         <FollowCarousel />
-        <p className="font-body text-[20px] text-[#6b7d67] text-center py-6">@checklocalfirst</p>
+        <p className="font-body text-[20px] text-[#6b7d67] text-center py-6">{COPY.followCommunity.handle}</p>
       </section>
 
       <Footer />
