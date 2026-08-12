@@ -57,7 +57,7 @@ const COPY = {
     desktopEyebrow: "FEATURED BUSINESS",
     mobileCta: "View full profile",
     desktopCta: "VIEW FULL PROFILE",
-    fallbackDescription: "No description provided yet.",
+    fallbackDescription: "No description provided yet..",
   },
   becomeMember: {
     eyebrow: "Membership",
