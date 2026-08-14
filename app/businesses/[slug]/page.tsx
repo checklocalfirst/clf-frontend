@@ -14,8 +14,8 @@ import { getPublicDiscounts } from "@/lib/business-dashboard";
 import { ApiError } from "@/lib/api";
 import { getSiteUrl } from "@/lib/site";
 
-const HERO_IMG = "/placeholder.png";
-const OWNER_IMG = "/placeholder.png";
+const HERO_IMG = "/mainpage3.JPG";
+const OWNER_IMG = "/people.JPG";
 const PILOT_BADGE_IMG = "/newpilotlogo.png";
 
 const COPY = {

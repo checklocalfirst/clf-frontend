@@ -50,14 +50,13 @@ const PREMIUM_FEATURES = [
 ];
 
 const GALLERY = [
-  "/farmers1.JPG",
-  "/thenest.jpg",
-  "/market.JPG",
-  "/breadcompany.JPG",
-  "/modestmix.JPG",
-  "/sasquatchsnacks.jpg",
-  "/farmers1.JPG",
-  "/thenest.jpg",
+  "/mainpage1.JPG",
+  "/picnic.JPG",
+  "/basket.JPG",
+  "/sierra-water-gardens.jpg",
+  "/people.JPG",
+  "/picnic2.JPG",
+  "/renomarket.JPG",
 ];
 
 const IMG = {
@@ -83,7 +82,7 @@ const COPY = {
     tier: "PREMIUM",
     blurb:
       "Maximum visibility for businesses who want to be everyone's first stop — plus a personal account so the owner can shop local too.",
-    galleryLabel: "Photo Gallery (Scroll for more)",
+    galleryLabel: "Photo Gallery",
   },
 };
 

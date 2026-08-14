@@ -14,10 +14,10 @@ export const metadata: Metadata = {
 
 // Same five placeholders used on both breakpoints — desktop lays them out in a row,
 // mobile in a horizontally-scrolling strip.
-const STORY_PHOTOS = ["/placeholder.png", "/placeholder.png", "/placeholder.png", "/placeholder.png", "/placeholder.png"];
+const STORY_PHOTOS = ["/community.JPG", "/people.JPG", "/mainpage3.JPG", "/basket.JPG", "/renomarket.JPG"];
 
 const IMG = {
-  founder: "/market.JPG",
+  founder: "/thenest.jpg",
 };
 
 const STORY_PARAGRAPHS = [

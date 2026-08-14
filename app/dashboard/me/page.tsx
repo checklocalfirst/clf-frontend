@@ -6,8 +6,8 @@ import { useApiResource } from "@/lib/useApiResource";
 import { getMyPhotos, getMyDiscounts, type Discount } from "@/lib/business-dashboard";
 import type { Photo } from "@/lib/directory";
 
-const HERO_IMG = "/placeholder.png";
-const OWNER_IMG = "/placeholder.png";
+const HERO_IMG = "/mainpage3.JPG";
+const OWNER_IMG = "/people.JPG";
 const PILOT_BADGE_IMG = "/newpilotlogo.png";
 
 function isCurrentlyActive(d: Discount, now: Date): boolean {

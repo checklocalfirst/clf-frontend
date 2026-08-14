@@ -13,11 +13,11 @@ import { getEnrichedBusinesses, getFeaturedBusiness, getListingPhotoUrl } from "
    Replace with /public files for production.
 ───────────────────────────────────────────── */
 const IMG = {
-  heroDesktop:     "/placeholder.png",
+  heroDesktop:     "/mainpage2.JPG",
   wordmarkDesktop: "/clfheadlogo.png",
-  heroMobile:      "/placeholder.png",
+  heroMobile:      "/mainpage2.JPG",
   wordmarkMobile:  "/clfheadlogo.png",
-  aboutMobile:     "/placeholder.png",
+  aboutMobile:     "/mainpage1.JPG",
   aboutDesktop:    "/market.JPG",
   ig1:             "/breadcompany.JPG",
   ig2:             "/farmers1.JPG",

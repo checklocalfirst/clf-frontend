@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/membership/locals" },
 };
 
-const PLACEHOLDER_IMG = "/placeholder.png";
+const HERO_IMG = "/renomarket.JPG";
 
 const COPY = {
   heroTagline: "Shopping local, made easy",
@@ -44,21 +44,25 @@ const REASONS = [
     heading: ["KEEP YOUR", "MONEY CLOSE", "TO HOME"],
     body: "You have the power to create change with every dollar you spend. When you spend locally, not only are you supporting your community, but you are reinvesting in a brighter future for Reno.",
     photoRight: true,
+    photo: "/community.JPG",
   },
   {
     heading: ["CARE ABOUT CRAFTSMANSHIP"],
     body: "Behind every listing is someone who has spent years getting good at what they do — a baker who wakes before the sun, a shop owner who remembers your name, a farmer whose family has been growing for generations.",
     photoRight: false,
+    photo: "/basket.JPG",
   },
   {
     heading: ["CHOOSE", "CONNECTION OVER", "CONVENIENCE"],
     body: "We've traded in the everyday joy of a meaningful exchange for free two-day shipping. Human connection is invaluable. Choose intentional moments with real people, and you'll see the difference.",
     photoRight: true,
+    photo: "/picnic.JPG",
   },
   {
     heading: ["WE ARE REAL PEOPLE"],
     body: "Your choice to support a neighbor puts food on the table for their families, pays their rent, and keeps the lights on in their shop. These are the people that keep Reno unique.",
     photoRight: false,
+    photo: "/people.JPG",
   },
 ];
 
@@ -74,7 +78,7 @@ export default function LocalsMembershipPage() {
 
       {/* ── Hero ── */}
       <section className="relative h-[420px] md:h-[640px] w-full overflow-hidden">
-        <Image src={PLACEHOLDER_IMG} alt="" fill priority sizes="100vw" className="object-cover" />
+        <Image src={HERO_IMG} alt="" fill priority sizes="100vw" className="object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/55" />
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 px-6 text-center">
           <p className="font-display font-bold text-[28px] md:text-[48px] text-[#faf6e9] leading-tight md:leading-none max-w-[900px]">
@@ -113,12 +117,12 @@ export default function LocalsMembershipPage() {
 
       {/* ── Reason Splits ── */}
       <section className="flex flex-col gap-10 md:gap-0 px-5 md:px-0">
-        {REASONS.map(({ heading, body, photoRight }, i) => (
+        {REASONS.map(({ heading, body, photoRight, photo }, i) => (
           <div key={i}>
             {/* Mobile: photo → heading → body */}
             <div className="md:hidden flex flex-col gap-5">
               <div className="relative h-[220px] rounded-[4px] overflow-hidden bg-[#c9d2cf]">
-                <Image src={PLACEHOLDER_IMG} alt="" fill sizes="100vw" className="object-cover" />
+                <Image src={photo} alt="" fill sizes="100vw" className="object-cover" />
               </div>
               <div className="font-display font-bold text-[22px] text-[#423926] tracking-[-1px]">
                 {heading.map((line, j) => (
@@ -134,7 +138,7 @@ export default function LocalsMembershipPage() {
             <div className="hidden md:flex h-[620px]">
               {!photoRight && (
                 <div className="relative w-1/2 h-full bg-[#c9d2cf] overflow-hidden flex-shrink-0">
-                  <Image src={PLACEHOLDER_IMG} alt="" fill sizes="50vw" className="object-cover" />
+                  <Image src={photo} alt="" fill sizes="50vw" className="object-cover" />
                 </div>
               )}
               <div className="flex flex-col gap-5 justify-center w-1/2 px-[72px]">
@@ -149,7 +153,7 @@ export default function LocalsMembershipPage() {
               </div>
               {photoRight && (
                 <div className="relative w-1/2 h-full bg-[#c9d2cf] overflow-hidden flex-shrink-0">
-                  <Image src={PLACEHOLDER_IMG} alt="" fill sizes="50vw" className="object-cover" />
+                  <Image src={photo} alt="" fill sizes="50vw" className="object-cover" />
                 </div>
               )}
             </div>
