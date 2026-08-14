@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface GalleryPhoto {
   id: number;
@@ -37,8 +37,12 @@ function ArrowButton({
 }
 
 // 1-2 photos lay out full-size side by side (no point scrolling what already fits);
-// 3+ switches to a fixed-tile horizontal scroller with arrow controls.
+// 3+ switches to a fixed-tile horizontal scroller with arrow controls and autoscroll.
 const SCROLL_THRESHOLD = 3;
+
+const AUTOSCROLL_PX_PER_TICK = 1;
+const AUTOSCROLL_INTERVAL_MS = 30;
+const AUTOSCROLL_RESUME_DELAY_MS = 2500;
 
 export default function BusinessGallery({
   photos,
@@ -49,12 +53,45 @@ export default function BusinessGallery({
 }) {
   const desktopRef = useRef<HTMLDivElement>(null);
   const mobileRef = useRef<HTMLDivElement>(null);
-
-  if (photos.length === 0) return null;
+  const [paused, setPaused] = useState(false);
+  const resumeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const scrollable = photos.length >= SCROLL_THRESHOLD;
 
+  // Creeps both scrollers rightward and loops back to the start — only kicks
+  // in once there are enough photos that scrolling is actually possible.
+  useEffect(() => {
+    if (!scrollable || paused) return;
+    const interval = setInterval(() => {
+      for (const ref of [desktopRef, mobileRef]) {
+        const el = ref.current;
+        if (!el) continue;
+        const maxScroll = el.scrollWidth - el.clientWidth;
+        if (maxScroll <= 0) continue;
+        el.scrollLeft = el.scrollLeft >= maxScroll - 1 ? 0 : el.scrollLeft + AUTOSCROLL_PX_PER_TICK;
+      }
+    }, AUTOSCROLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [scrollable, paused]);
+
+  useEffect(() => {
+    return () => {
+      if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
+    };
+  }, []);
+
+  // Manual interaction (arrow click, touch drag) pauses autoscroll briefly
+  // instead of fighting the user's own scroll.
+  function pauseThenResume() {
+    setPaused(true);
+    if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
+    resumeTimeoutRef.current = setTimeout(() => setPaused(false), AUTOSCROLL_RESUME_DELAY_MS);
+  }
+
+  if (photos.length === 0) return null;
+
   function scrollBy(ref: { current: HTMLDivElement | null }, dir: "left" | "right", amount: number) {
+    pauseThenResume();
     ref.current?.scrollBy({ left: dir === "right" ? amount : -amount, behavior: "smooth" });
   }
 
@@ -75,6 +112,8 @@ export default function BusinessGallery({
         </div>
         <div
           ref={desktopRef}
+          onMouseEnter={() => scrollable && setPaused(true)}
+          onMouseLeave={() => scrollable && setPaused(false)}
           className={
             scrollable
               ? "flex gap-6 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
@@ -119,6 +158,7 @@ export default function BusinessGallery({
         </div>
         <div
           ref={mobileRef}
+          onTouchStart={() => scrollable && pauseThenResume()}
           className={
             scrollable
               ? "flex gap-3 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
