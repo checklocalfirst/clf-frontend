@@ -45,6 +45,7 @@ const COPY = {
     submitIdle: "CONTINUE TO PAYMENT",
     submitLoading: "Submitting...",
     paymentIntro: "Your business info is saved — enter payment details to finish signing up.",
+    noChargeNotice: "No charge today — your card will be saved and billing starts automatically once your free period ends.",
     discountApplied: "Coupon applied — your discount is reflected below.",
     paymentSubmitLabel: "COMPLETE SIGNUP",
     successHeading: "Payment received!",
@@ -114,6 +115,7 @@ export default function SignupPage() {
   const [businessClientSecret, setBusinessClientSecret] = useState("");
   const [businessTier, setBusinessTier] = useState<"basic" | "premium">("basic");
   const [businessDiscountApplied, setBusinessDiscountApplied] = useState(false);
+  const [businessMode, setBusinessMode] = useState<"payment" | "setup">("payment");
 
   async function handlePersonalSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -170,7 +172,11 @@ export default function SignupPage() {
     const fd = new FormData(e.currentTarget);
     const couponCode = (fd.get("couponCode") as string).trim();
     try {
-      const data = await apiFetch<{ client_secret: string; discount_applied?: boolean }>(
+      const data = await apiFetch<{
+        client_secret: string;
+        mode: "payment" | "setup";
+        discount_applied?: boolean;
+      }>(
         "/stripe/signup/business/checkout",
         {
           method: "POST",
@@ -192,6 +198,7 @@ export default function SignupPage() {
       );
       setBusinessDiscountApplied(Boolean(data.discount_applied));
       setBusinessClientSecret(data.client_secret);
+      setBusinessMode(data.mode);
       setBusinessStep("payment");
     } catch (err) {
       if (err instanceof ApiError) {
@@ -486,13 +493,16 @@ export default function SignupPage() {
               </p>
               {businessDiscountApplied && (
                 <div className="bg-[#f0f5ee] border border-[#9ca889] rounded-[8px] px-4 py-3">
-                  <p className="font-body text-[13px] text-[#2c4a34]">{COPY.business.discountApplied}</p>
+                  <p className="font-body text-[13px] text-[#2c4a34]">
+                    {businessMode === "setup" ? COPY.business.noChargeNotice : COPY.business.discountApplied}
+                  </p>
                 </div>
               )}
               <StripeCheckout
                 clientSecret={businessClientSecret}
                 returnPath="/signup"
                 submitLabel={COPY.business.paymentSubmitLabel}
+                mode={businessMode}
                 onSuccess={() => setBusinessStep("success")}
               />
             </div>

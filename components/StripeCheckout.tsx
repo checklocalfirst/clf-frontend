@@ -49,10 +49,12 @@ function CheckoutForm({
   onSuccess,
   returnPath,
   submitLabel = "PAY NOW",
+  mode = "payment",
 }: {
   onSuccess: () => void;
   returnPath: string;
   submitLabel?: string;
+  mode?: "payment" | "setup";
 }) {
   const stripe = useStripe();
   const elements = useElements();
@@ -66,13 +68,24 @@ function CheckoutForm({
     setLoading(true);
     setError("");
 
-    const { error: confirmError, paymentIntent } = await stripe.confirmPayment({
+    const confirmParams = {
       elements,
       confirmParams: {
         return_url: `${window.location.origin}${returnPath}`,
       },
-      redirect: "if_required",
-    });
+      redirect: "if_required" as const,
+    };
+
+    let confirmError, status;
+    if (mode === "setup") {
+      const result = await stripe.confirmSetup(confirmParams);
+      confirmError = result.error;
+      status = result.setupIntent?.status;
+    } else {
+      const result = await stripe.confirmPayment(confirmParams);
+      confirmError = result.error;
+      status = result.paymentIntent?.status;
+    }
 
     if (confirmError) {
       setError(confirmError.message ?? "Payment failed. Please try again.");
@@ -80,7 +93,7 @@ function CheckoutForm({
       return;
     }
 
-    if (paymentIntent?.status === "succeeded" || paymentIntent?.status === "processing") {
+    if (status === "succeeded" || status === "processing") {
       onSuccess();
     } else {
       setError("Payment could not be completed. Please try again.");
@@ -102,25 +115,29 @@ function CheckoutForm({
 }
 
 /**
- * Mounts a Stripe Payment Element for the given PaymentIntent client_secret.
- * Shared by business signup checkout and (later) the premium-user upgrade flow.
+ * Mounts a Stripe Payment Element for the given client_secret.
+ * `mode: "setup"` confirms a SetupIntent (card saved, not charged) instead of
+ * a PaymentIntent — used when a coupon fully discounts the first invoice.
+ * Shared by business signup checkout and the premium-user upgrade flow.
  */
 export default function StripeCheckout({
   clientSecret,
   onSuccess,
   returnPath,
   submitLabel,
+  mode,
 }: {
   clientSecret: string;
   onSuccess: () => void;
   returnPath: string;
   submitLabel?: string;
+  mode?: "payment" | "setup";
 }) {
   const options: StripeElementsOptions = { clientSecret, appearance, fonts };
 
   return (
     <Elements stripe={getStripe()} options={options}>
-      <CheckoutForm onSuccess={onSuccess} returnPath={returnPath} submitLabel={submitLabel} />
+      <CheckoutForm onSuccess={onSuccess} returnPath={returnPath} submitLabel={submitLabel} mode={mode} />
     </Elements>
   );
 }
