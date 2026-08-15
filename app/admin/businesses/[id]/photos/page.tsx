@@ -1,13 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useToken } from "@/lib/auth";
 import { useAdminBusiness } from "@/components/dashboard/AdminBusinessContext";
 import { useApiResource } from "@/lib/useApiResource";
-import { listAdminPhotos, uploadPhoto, approvePhoto, deletePhoto } from "@/lib/admin/photos";
+import { listAdminPhotos, uploadPhoto, approvePhoto, updatePhoto, deletePhoto } from "@/lib/admin/photos";
 import type { Photo, PhotoType } from "@/lib/directory";
 import FileUpload from "@/components/dashboard/FileUpload";
+import FormField from "@/components/FormField";
 import Toggle from "@/components/dashboard/Toggle";
 import { useConfirm } from "@/components/dashboard/ConfirmDialog";
 import { useToast } from "@/components/dashboard/ToastProvider";
@@ -19,6 +20,96 @@ const TYPE_LABEL: Record<PhotoType, string> = {
   gallery: "Gallery",
   timeline: "Timeline",
 };
+
+function PhotoTypeEditor({
+  photo,
+  allPhotos,
+  onSave,
+}: {
+  photo: Photo;
+  allPhotos: Photo[];
+  onSave: (photo: Photo, newType: PhotoType, newSlot: 1 | 2 | 3 | null) => Promise<void>;
+}) {
+  const [pendingType, setPendingType] = useState<PhotoType>(photo.photo_type);
+  const [pendingSlot, setPendingSlot] = useState<1 | 2 | 3>(photo.timeline_slot ?? 1);
+  const [saving, setSaving] = useState(false);
+
+  // Keep local selection in sync once a save round-trips and the saved row changes underneath us
+  useEffect(() => {
+    setPendingType(photo.photo_type);
+    setPendingSlot(photo.timeline_slot ?? 1);
+  }, [photo.photo_type, photo.timeline_slot]);
+
+  const isTimeline = pendingType === "timeline";
+  const changed = pendingType !== photo.photo_type || (isTimeline && pendingSlot !== photo.timeline_slot);
+  const occupant = isTimeline
+    ? allPhotos.find((p) => p.id !== photo.id && p.photo_type === "timeline" && p.timeline_slot === pendingSlot)
+    : undefined;
+
+  async function handleSave() {
+    setSaving(true);
+    try {
+      await onSave(photo, pendingType, isTimeline ? pendingSlot : null);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex gap-2">
+        <FormField
+          label="Type"
+          id={`photo-type-${photo.id}`}
+          as="select"
+          value={pendingType}
+          onChange={(e) => setPendingType(e.target.value as PhotoType)}
+          className="flex-1"
+        >
+          {Object.entries(TYPE_LABEL).map(([value, label]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </FormField>
+        {isTimeline && (
+          <FormField
+            label="Slot"
+            id={`photo-slot-${photo.id}`}
+            as="select"
+            value={pendingSlot}
+            onChange={(e) => setPendingSlot(Number(e.target.value) as 1 | 2 | 3)}
+            className="flex-1"
+          >
+            {([1, 2, 3] as const).map((slot) => (
+              <option key={slot} value={slot}>
+                Slot {slot}
+                {allPhotos.some((p) => p.id !== photo.id && p.photo_type === "timeline" && p.timeline_slot === slot)
+                  ? " (occupied)"
+                  : ""}
+              </option>
+            ))}
+          </FormField>
+        )}
+      </div>
+      {occupant && (
+        <p className="font-body text-[11px] text-amber-700">
+          Slot {pendingSlot} is already used by another photo — saving will replace it.
+        </p>
+      )}
+      {changed && (
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={saving}
+          className="self-start font-display font-bold text-[11px] text-[#2c4a34] uppercase hover:text-[#253022] transition-colors cursor-pointer disabled:opacity-60"
+        >
+          {saving ? "Saving..." : "Save"}
+        </button>
+      )}
+    </div>
+  );
+}
 
 export default function AdminBusinessPhotosPage() {
   const token = useToken();
@@ -56,6 +147,46 @@ export default function AdminBusinessPhotosPage() {
       toast.error(err instanceof ApiError ? err.message : "Upload failed.");
     } finally {
       setUploading(false);
+    }
+  }
+
+  async function handleTypeChange(photo: Photo, newType: PhotoType, newSlot: 1 | 2 | 3 | null) {
+    if (!token) return;
+
+    const patch: { photo_type?: PhotoType; timeline_slot?: 1 | 2 | 3 } = { photo_type: newType };
+    if (newType === "timeline" && newSlot) patch.timeline_slot = newSlot;
+
+    // Moving into an occupied timeline slot silently deletes the photo already there server-side —
+    // confirm with the admin first so they aren't surprised, then drop it from local state too.
+    const occupant =
+      newType === "timeline"
+        ? (photos ?? []).find((p) => p.id !== photo.id && p.photo_type === "timeline" && p.timeline_slot === newSlot)
+        : undefined;
+
+    const commit = async () => {
+      const updated = await updatePhoto(token, photo.id, patch);
+      setPhotos((prev) =>
+        (prev ?? [])
+          .filter((p) => !(occupant && p.id === occupant.id))
+          .map((p) => (p.id === photo.id ? updated : p))
+      );
+      toast.success("Photo type updated.");
+    };
+
+    if (occupant) {
+      confirm.ask({
+        title: `Replace photo in Slot ${newSlot}?`,
+        body: `Slot ${newSlot} is currently used by another photo. Moving this photo there will delete the existing one — this can't be undone.`,
+        confirmLabel: "Replace",
+        onConfirm: commit,
+      });
+      return;
+    }
+
+    try {
+      await commit();
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : "Couldn't update photo.");
     }
   }
 
@@ -104,10 +235,7 @@ export default function AdminBusinessPhotosPage() {
                 className="object-cover"
               />
             </div>
-            <p className="font-display font-bold text-[11px] text-[#b7a78c] uppercase">
-              {TYPE_LABEL[photo.photo_type]}
-              {photo.photo_type === "timeline" && photo.timeline_slot ? ` · Slot ${photo.timeline_slot}` : ""}
-            </p>
+            <PhotoTypeEditor photo={photo} allPhotos={photos ?? []} onSave={handleTypeChange} />
             <div className="flex items-center justify-between">
               <span className="font-body text-[12px] text-[#596155]">Approved</span>
               <Toggle checked={photo.approved} onChange={(next) => handleApproveToggle(photo, next)} />
