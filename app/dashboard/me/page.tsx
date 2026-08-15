@@ -5,6 +5,7 @@ import { useBusiness } from "@/components/dashboard/BusinessContext";
 import { useApiResource } from "@/lib/useApiResource";
 import { getMyPhotos, getMyDiscounts, type Discount } from "@/lib/business-dashboard";
 import type { Photo } from "@/lib/directory";
+import TextWithBreaks from "@/components/TextWithBreaks";
 
 const HERO_IMG = "/mainpage3.JPG";
 const OWNER_IMG = "/people.JPG";
@@ -196,7 +197,7 @@ export default function MyListingPreviewPage() {
                 ABOUT
               </h2>
               <p className="font-body text-[15px] text-[rgba(66,57,38,0.8)] leading-[1.6] mt-3 max-w-[640px]">
-                {business.description ?? "No description provided yet."}
+                <TextWithBreaks text={business.description ?? "No description provided yet."} />
               </p>
             </div>
           </div>

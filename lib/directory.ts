@@ -41,6 +41,8 @@ export interface Business {
   neighborhood?: string | null;
   created_at: string;
   updated_at: string;
+  // Only present on GET /businesses/:slug (single approved business by slug)
+  users?: { first_name: string } | null;
 }
 
 export interface Service {

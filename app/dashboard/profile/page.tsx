@@ -177,6 +177,7 @@ export default function BusinessProfilePage() {
           value={form.description ?? ""}
           onChange={(e) => set("description", e.target.value)}
           error={fieldErrors.description}
+          hint="Type <br> for a linebreak"
         />
         <FormField label="Street Address" id="address" value={form.address ?? ""} onChange={(e) => set("address", e.target.value)} error={fieldErrors.address} />
         <div className="flex gap-3">

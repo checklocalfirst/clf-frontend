@@ -9,6 +9,7 @@ import TrackedLink from "@/components/TrackedLink";
 import DiscountRedeemButton from "@/components/DiscountRedeemButton";
 import FavoriteButton from "@/components/FavoriteButton";
 import BusinessGallery from "@/components/BusinessGallery";
+import TextWithBreaks from "@/components/TextWithBreaks";
 import { getBusinessBySlug, getBusinessPhotos, trackBusinessEvent } from "@/lib/directory";
 import { getPublicDiscounts } from "@/lib/business-dashboard";
 import { ApiError } from "@/lib/api";
@@ -442,7 +443,7 @@ export default async function BusinessDetailPage({
             {COPY.aboutHeading}
           </h2>
           <p className="font-body text-[20px] text-[rgba(66,57,38,0.8)] leading-[1.6] mt-[16px] max-w-[760px]">
-            {business.description ?? COPY.noDescriptionFallback}
+            <TextWithBreaks text={business.description ?? COPY.noDescriptionFallback} />
           </p>
         </div>
 
@@ -506,7 +507,7 @@ export default async function BusinessDetailPage({
                 className="absolute font-display text-[14px] text-[#423926] tracking-[0.56px] whitespace-nowrap overflow-hidden text-ellipsis"
                 style={{ left: "24px", right: "26px", top: "380px", textAlign: "center" }}
               >
-                {COPY.meetPrefix} {business.name.toUpperCase()}
+                {COPY.meetPrefix} {(business.users?.first_name ?? business.name).toUpperCase()}
               </p>
             </div>
           </div>
