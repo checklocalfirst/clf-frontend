@@ -19,6 +19,7 @@ export default function AdminBusinessLayout({
   const tabs = [
     { label: "Profile", href: `/admin/businesses/${id}` },
     { label: "Categories", href: `/admin/businesses/${id}/categories` },
+    { label: "Services", href: `/admin/businesses/${id}/services` },
     { label: "Photos", href: `/admin/businesses/${id}/photos` },
     { label: "Discounts", href: `/admin/businesses/${id}/discounts` },
     { label: "Analytics", href: `/admin/businesses/${id}/analytics` },

@@ -16,6 +16,18 @@ export function getAdminService(token: string, id: number): Promise<ServiceWithB
   return apiFetch<ServiceWithBusiness>(`/admin/services/${id}`, { token });
 }
 
+export function createAdminService(
+  token: string,
+  businessId: number,
+  input: { name: string; description?: string; category_id: number }
+): Promise<Service> {
+  return apiFetch<Service>(`/admin/businesses/${businessId}/services`, {
+    method: "POST",
+    token,
+    body: JSON.stringify(input),
+  });
+}
+
 export function updateAdminService(
   token: string,
   id: number,
