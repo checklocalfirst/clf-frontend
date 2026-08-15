@@ -3,6 +3,7 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import type { Photo, PhotoType } from "@/lib/directory";
 import FormField from "@/components/FormField";
+import { compressImageIfNeeded, MAX_UPLOAD_BYTES } from "@/lib/compressImage";
 
 // Must match the backend's multer fileFilter allowlist (api/middleware/upload.js)
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
@@ -24,24 +25,53 @@ export default function FileUpload({
   const [displayOrder, setDisplayOrder] = useState("");
   const [timelineSlot, setTimelineSlot] = useState<1 | 2 | 3>(1);
   const [fileError, setFileError] = useState<string | null>(null);
+  const [compressing, setCompressing] = useState(false);
+  const [wasCompressed, setWasCompressed] = useState(false);
 
   const isTimeline = photoType === "timeline";
   const slotHasPhoto = isTimeline
     ? (existingPhotos ?? []).some((p) => p.photo_type === "timeline" && p.timeline_slot === timelineSlot)
     : false;
 
-  function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
+  async function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0] ?? null;
-    if (f && !ALLOWED_TYPES.includes(f.type)) {
+    setFileError(null);
+    setWasCompressed(false);
+
+    if (!f) {
+      setFile(null);
+      setPreviewUrl(null);
+      return;
+    }
+
+    if (!ALLOWED_TYPES.includes(f.type)) {
       setFile(null);
       setPreviewUrl(null);
       setFileError("Unsupported file type. Please choose a JPEG, PNG, WebP, or GIF image.");
       e.target.value = "";
       return;
     }
-    setFileError(null);
-    setFile(f);
-    setPreviewUrl(f ? URL.createObjectURL(f) : null);
+
+    if (f.size <= MAX_UPLOAD_BYTES) {
+      setFile(f);
+      setPreviewUrl(URL.createObjectURL(f));
+      return;
+    }
+
+    setCompressing(true);
+    try {
+      const compressed = await compressImageIfNeeded(f);
+      setFile(compressed);
+      setPreviewUrl(URL.createObjectURL(compressed));
+      setWasCompressed(true);
+    } catch (err) {
+      setFile(null);
+      setPreviewUrl(null);
+      setFileError(err instanceof Error ? err.message : "Couldn't compress this image.");
+      e.target.value = "";
+    } finally {
+      setCompressing(false);
+    }
   }
 
   function handleSubmit(e: FormEvent) {
@@ -66,6 +96,14 @@ export default function FileUpload({
           className="font-body text-[13px] file:mr-3 file:cursor-pointer file:rounded-[6px] file:border file:border-[#dbe0d9] file:bg-white file:px-3 file:py-[6px] file:font-display file:font-bold file:text-[12px] file:text-[#423926] file:uppercase hover:file:border-[#b7a78c] file:transition-colors"
         />
         <p className="font-body text-[12px] text-[#b7a78c]">JPEG, PNG, WebP, or GIF only.</p>
+        {compressing && (
+          <p className="font-body text-[12px] text-[#596155]">Compressing image to fit the 5MB limit…</p>
+        )}
+        {wasCompressed && !compressing && (
+          <p className="font-body text-[12px] text-[#2c4a34]">
+            Image was over 5MB, so it was automatically compressed.
+          </p>
+        )}
         {fileError && <p className="font-body text-[12px] text-red-600">{fileError}</p>}
       </div>
       {previewUrl && (
@@ -114,10 +152,10 @@ export default function FileUpload({
       </div>
       <button
         type="submit"
-        disabled={!file || uploading}
+        disabled={!file || uploading || compressing}
         className="self-start bg-[#2c4a34] rounded-[8px] px-6 py-[10px] font-display font-bold text-[13px] text-white uppercase hover:bg-[#253022] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        {uploading ? "Uploading..." : slotHasPhoto ? "Replace Photo" : "Upload Photo"}
+        {compressing ? "Compressing..." : uploading ? "Uploading..." : slotHasPhoto ? "Replace Photo" : "Upload Photo"}
       </button>
     </form>
   );
