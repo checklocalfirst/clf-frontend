@@ -1,4 +1,8 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
+import { apiFetch, ApiError } from "@/lib/api";
 
 const EXPLORE = [
   { label: "Home", href: "/" },
@@ -71,6 +75,67 @@ function MobileNavSection({
   );
 }
 
+function NewsletterForm() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
+  const [error, setError] = useState("");
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError("");
+    setStatus("loading");
+    try {
+      await apiFetch("/newsletter", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+      setStatus("success");
+      setEmail("");
+    } catch (err) {
+      setStatus("idle");
+      if (err instanceof ApiError) {
+        setError(err.fieldErrors?.email?.[0] ?? err.message);
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+    }
+  }
+
+  if (status === "success") {
+    return (
+      <p className="font-body text-[11px] text-[#faf6e9] pb-3">
+        You&apos;re subscribed — thanks for joining!
+      </p>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-2 pb-3">
+      <div className="border-b border-[#6b7d67] flex items-center justify-between pb-3">
+        <input
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email address"
+          className="font-body text-[11px] text-[#faf6e9] placeholder:text-[#8c9c81] bg-transparent outline-none flex-1"
+        />
+        <button
+          type="submit"
+          disabled={status === "loading"}
+          aria-label="Subscribe"
+          className="font-display font-bold text-[13px] text-[#faf6e9] ml-2 disabled:opacity-50"
+        >
+          →
+        </button>
+      </div>
+      {error && (
+        <p className="font-body text-[10px] text-red-300">{error}</p>
+      )}
+    </form>
+  );
+}
+
 export default function Footer() {
   return (
     <footer>
@@ -113,20 +178,7 @@ export default function Footer() {
           <p className="font-body text-[11px] text-[#b7a78c] leading-5">
             Be the first to know about new local finds, member perks, and what&apos;s opening around town.
           </p>
-          <div className="border-b border-[#6b7d67] flex items-center justify-between pb-3">
-            <input
-              type="email"
-              placeholder="Email address"
-              className="font-body text-[11px] text-[#faf6e9] placeholder:text-[#8c9c81] bg-transparent outline-none flex-1"
-            />
-            <button
-              type="submit"
-              aria-label="Subscribe"
-              className="font-display font-bold text-[13px] text-[#faf6e9] ml-2"
-            >
-              →
-            </button>
-          </div>
+          <NewsletterForm />
         </div>
 
         {/* Nav sections */}
