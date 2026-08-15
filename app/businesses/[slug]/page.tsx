@@ -404,6 +404,63 @@ export default async function BusinessDetailPage({
             </svg>
           </TrackedLink>
         )}
+        {(business.instagram_url || business.facebook_url || business.yelp_url) && (
+          <div className="flex items-center gap-[12px] mt-[16px]">
+            {business.instagram_url && (
+              <TrackedLink
+                slug={business.slug}
+                event="instagram_click"
+                href={business.instagram_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={COPY.instagramLabel}
+                className="bg-[#2c4a34] w-[36px] h-[36px] rounded-full flex items-center justify-center hover:bg-[#253022] transition-colors"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <rect x="2" y="2" width="12" height="12" rx="3" stroke="white" strokeWidth="1.2" />
+                  <circle cx="8" cy="8" r="2.5" stroke="white" strokeWidth="1.2" />
+                  <circle cx="11.5" cy="4.5" r="0.75" fill="white" />
+                </svg>
+              </TrackedLink>
+            )}
+            {business.facebook_url && (
+              <TrackedLink
+                slug={business.slug}
+                event="facebook_click"
+                href={business.facebook_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={COPY.facebookLabel}
+                className="bg-[#2c4a34] w-[36px] h-[36px] rounded-full flex items-center justify-center hover:bg-[#253022] transition-colors"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path
+                    d="M10 2H8.5C7.4 2 7 2.9 7 4V6H5V8.5H7V14H9.5V8.5H11.5L12 6H9.5V4.5C9.5 3.9 9.7 3.5 10 3.5H12V2H10Z"
+                    fill="white"
+                  />
+                </svg>
+              </TrackedLink>
+            )}
+            {business.yelp_url && (
+              <TrackedLink
+                slug={business.slug}
+                event="yelp_click"
+                href={business.yelp_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={COPY.yelpLabel}
+                className="bg-[#2c4a34] w-[36px] h-[36px] rounded-full flex items-center justify-center hover:bg-[#253022] transition-colors"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path
+                    d="M8 1L9.8 5.6L14.5 5.9L10.9 9L12 13.6L8 11.1L4 13.6L5.1 9L1.5 5.9L6.2 5.6L8 1Z"
+                    fill="white"
+                  />
+                </svg>
+              </TrackedLink>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ── Mobile: Hero Photo + Pilot Badge ── */}

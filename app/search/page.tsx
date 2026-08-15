@@ -296,7 +296,7 @@ export default async function SearchPage({
                   {card.location}
                   {card.distanceMiles != null && ` · ${card.distanceMiles.toFixed(1)} mi`}
                 </p>
-                <p className="font-mono text-[14px] text-[#423926] leading-snug">
+                <p className="font-mono text-[14px] text-[#423926] leading-snug line-clamp-3">
                   {card.description}
                 </p>
               </div>
@@ -338,7 +338,7 @@ export default async function SearchPage({
                   {card.location}
                   {card.distanceMiles != null && ` · ${card.distanceMiles.toFixed(1)} mi`}
                 </p>
-                <p className="font-mono text-[13px] text-[#423926] leading-snug">
+                <p className="font-mono text-[13px] text-[#423926] leading-snug line-clamp-3">
                   {card.description}
                 </p>
               </div>
