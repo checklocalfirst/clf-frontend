@@ -215,7 +215,7 @@ export default function Header() {
         </div>
 
         {/* ── Mobile bar (< md) ── */}
-        <div className="md:hidden flex items-center justify-between h-[66px] px-5 bg-[#faf6e9] border-b border-[#d9d4cc]">
+        <div className="md:hidden sticky top-0 z-50 flex items-center justify-between h-[66px] px-5 bg-[#faf6e9] border-b border-[#d9d4cc]">
           {/* Logo + menu toggle — logo stays top-left, hamburger sits to its right */}
           <div className="flex items-center gap-4">
             <Link href="/" className="w-[38px] h-[43px] flex-shrink-0">
