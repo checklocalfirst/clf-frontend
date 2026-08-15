@@ -114,7 +114,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="relative z-50">
+      <header className="sticky top-0 z-50 md:relative">
         {/* ── Desktop (md+) ── */}
         <div className="hidden md:flex items-center justify-between h-24 pl-16 pr-10 bg-[#faf6e9] border-b border-[#dbe0d9]">
           <Link href="/" className="flex-shrink-0 w-[62px] h-[70px]">
@@ -215,7 +215,7 @@ export default function Header() {
         </div>
 
         {/* ── Mobile bar (< md) ── */}
-        <div className="md:hidden sticky top-0 z-50 flex items-center justify-between h-[66px] px-5 bg-[#faf6e9] border-b border-[#d9d4cc]">
+        <div className="md:hidden flex items-center justify-between h-[66px] px-5 bg-[#faf6e9] border-b border-[#d9d4cc]">
           {/* Logo + menu toggle — logo stays top-left, hamburger sits to its right */}
           <div className="flex items-center gap-4">
             <Link href="/" className="w-[38px] h-[43px] flex-shrink-0">
