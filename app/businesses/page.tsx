@@ -54,15 +54,11 @@ const COPY = {
   whyHeading: "WHY DO BUSINESSES JOIN?",
   whySubheading: "A few reasons local business owners say yes.",
   pricingHeading: "FOUNDING MEMBER PRICING",
-  perkFreeMonths: "✓ 3 months free to start — get listed and get seen before you pay a thing.",
-  perkFoundingRate:
-    "✓ Founding businesses are grandfathered in at 25% off whatever the going rate is, for as long as you stay a member.",
   disclaimer: "Pricing and program details shown here are not final and may change before launch.",
   community: {
     tier: "FOUNDING MEMBER",
-    price: "FREE",
-    priceSuffix: "for 3 months",
-    afterPrice: "Then $19/month — locked in as your founding rate.",
+    price: "$19",
+    priceSuffix: "/ Month",
     perk1: "✓ Directory listing — be found by people looking to shop local",
     perk2: "✓ “Meet the Owner” feature — let customers see who they're supporting",
     perk3: "✓ Contact & hours — links to your socials, website, and hours of operation",
@@ -180,16 +176,6 @@ export default function BusinessesPage() {
           {COPY.pricingHeading}
         </h2>
 
-        {/* Perks banner */}
-        <div className="bg-[#c9d2cf] rounded-[12px] px-[28px] py-[24px] w-full flex flex-col gap-[10px]">
-          <p className="font-display font-bold text-[15px] text-[#423926]">
-            {COPY.perkFreeMonths}
-          </p>
-          <p className="font-display font-bold text-[15px] text-[#423926]">
-            {COPY.perkFoundingRate}
-          </p>
-        </div>
-
         {/* Pricing cards */}
         <div className="flex gap-[40px] w-full max-w-[900px]">
           {/* Community Card */}
@@ -199,9 +185,6 @@ export default function BusinessesPage() {
               <p className="font-display font-bold text-[40px] text-[#151814] leading-none">{COPY.community.price}</p>
               <p className="font-display text-[16px] text-[#b7a78c]">{COPY.community.priceSuffix}</p>
             </div>
-            <p className="font-display text-[13px] text-[#b7a78c] mt-[12px]">
-              {COPY.community.afterPrice}
-            </p>
             <div className="mt-[20px] flex flex-col gap-[12px]">
               <p className="font-display text-[14px] text-[#151814]">
                 {COPY.community.perk1}
@@ -250,12 +233,6 @@ export default function BusinessesPage() {
         <h2 className="font-display font-bold text-[24px] text-[#423926]">
           {COPY.pricingHeading}
         </h2>
-        <p className="font-body font-bold text-[15px] text-[#423926]">
-          {COPY.perkFreeMonths}
-        </p>
-        <p className="font-body font-bold text-[15px] text-[#423926]">
-          {COPY.perkFoundingRate}
-        </p>
 
         {/* Community Card Mobile */}
         <div className="bg-[#253022] rounded-[16px] p-[24px] flex flex-col gap-[12px]">
@@ -264,9 +241,6 @@ export default function BusinessesPage() {
             <p className="font-display font-bold text-[30px] text-[#faf6e9] leading-none">{COPY.community.price}</p>
             <p className="font-body text-[16px] text-[#faf6e9] opacity-70">{COPY.community.priceSuffix}</p>
           </div>
-          <p className="font-body text-[13px] text-[#faf6e9] opacity-60">
-            {COPY.community.afterPrice}
-          </p>
           <div className="flex flex-col gap-[10px] mt-[4px]">
             <p className="font-body text-[14px] text-[#faf6e9]">
               {COPY.community.perk1}

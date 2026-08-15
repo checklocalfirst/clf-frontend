@@ -40,9 +40,12 @@ const COPY = {
     basicPrice: "$19/month",
     premiumTier: "PREMIUM",
     premiumPrice: "$49/month",
+    couponLabel: "Coupon Code (optional)",
+    couponPlaceholder: "Enter a code",
     submitIdle: "CONTINUE TO PAYMENT",
     submitLoading: "Submitting...",
     paymentIntro: "Your business info is saved — enter payment details to finish signing up.",
+    discountApplied: "Coupon applied — your discount is reflected below.",
     paymentSubmitLabel: "COMPLETE SIGNUP",
     successHeading: "Payment received!",
     successBody: "Check your email for a link to set up your login and finish activating your business account.",
@@ -110,6 +113,7 @@ export default function SignupPage() {
   const [businessStep, setBusinessStep] = useState<"form" | "payment" | "success">("form");
   const [businessClientSecret, setBusinessClientSecret] = useState("");
   const [businessTier, setBusinessTier] = useState<"basic" | "premium">("basic");
+  const [businessDiscountApplied, setBusinessDiscountApplied] = useState(false);
 
   async function handlePersonalSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -164,23 +168,29 @@ export default function SignupPage() {
     setBusinessLoading(true);
 
     const fd = new FormData(e.currentTarget);
+    const couponCode = (fd.get("couponCode") as string).trim();
     try {
-      const data = await apiFetch<{ client_secret: string }>("/stripe/signup/business/checkout", {
-        method: "POST",
-        body: JSON.stringify({
-          firstname: fd.get("ownerFirstName"),
-          lastname: fd.get("ownerLastName"),
-          name: fd.get("businessName"),
-          email: fd.get("businessEmail"),
-          phone: fd.get("businessPhone"),
-          description: fd.get("description"),
-          address: fd.get("streetAddress"),
-          city: fd.get("city"),
-          state: fd.get("state"),
-          zip: fd.get("zip"),
-          business_tier: businessTier,
-        }),
-      });
+      const data = await apiFetch<{ client_secret: string; discount_applied?: boolean }>(
+        "/stripe/signup/business/checkout",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            firstname: fd.get("ownerFirstName"),
+            lastname: fd.get("ownerLastName"),
+            name: fd.get("businessName"),
+            email: fd.get("businessEmail"),
+            phone: fd.get("businessPhone"),
+            description: fd.get("description"),
+            address: fd.get("streetAddress"),
+            city: fd.get("city"),
+            state: fd.get("state"),
+            zip: fd.get("zip"),
+            business_tier: businessTier,
+            ...(couponCode ? { coupon_code: couponCode } : {}),
+          }),
+        }
+      );
+      setBusinessDiscountApplied(Boolean(data.discount_applied));
       setBusinessClientSecret(data.client_secret);
       setBusinessStep("payment");
     } catch (err) {
@@ -451,6 +461,13 @@ export default function SignupPage() {
                 )}
               </div>
 
+              <Field
+                label={COPY.business.couponLabel}
+                id="couponCode"
+                placeholder={COPY.business.couponPlaceholder}
+                error={businessFieldErrors.coupon_code}
+              />
+
               <button
                 type="submit"
                 disabled={businessLoading}
@@ -467,6 +484,11 @@ export default function SignupPage() {
               <p className="font-body text-[13px] text-[#596155]">
                 {COPY.business.paymentIntro}
               </p>
+              {businessDiscountApplied && (
+                <div className="bg-[#f0f5ee] border border-[#9ca889] rounded-[8px] px-4 py-3">
+                  <p className="font-body text-[13px] text-[#2c4a34]">{COPY.business.discountApplied}</p>
+                </div>
+              )}
               <StripeCheckout
                 clientSecret={businessClientSecret}
                 returnPath="/signup"
