@@ -528,7 +528,7 @@ export default async function BusinessDetailPage({
           {COPY.aboutHeading}
         </h2>
         <p className="font-body text-[20px] text-[rgba(66,57,38,0.8)] leading-[1.6] mt-[20px]">
-          {business.description ?? COPY.noDescriptionFallback}
+          <TextWithBreaks text={business.description ?? COPY.noDescriptionFallback} />
         </p>
       </div>
 
