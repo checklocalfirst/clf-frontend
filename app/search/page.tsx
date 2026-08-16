@@ -77,6 +77,12 @@ function buildCategoryTiles(categories: Category[]): CategoryTile[] {
   ];
 }
 
+const BR_TAG_PATTERN = /<br\s*\/?>/gi;
+
+function stripBrTags(text: string): string {
+  return text.replace(BR_TAG_PATTERN, " ").trim();
+}
+
 const NEAR_ME_RADIUS_MILES = 30;
 
 interface ResultCard {
@@ -380,8 +386,8 @@ export default async function SearchPage({
                   </div>
 
                   {/* Description — hidden on mobile to keep list compact */}
-                  <p className="hidden md:block font-display font-bold text-[14px] text-[#423926] leading-snug">
-                    {item.description}
+                  <p className="hidden md:block font-display font-bold text-[14px] text-[#423926] leading-snug line-clamp-2">
+                    {stripBrTags(item.description)}
                   </p>
                 </div>
               </Link>
