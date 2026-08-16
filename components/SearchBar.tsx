@@ -19,6 +19,7 @@ export default function SearchBar({
 
   function goToSearch() {
     const q = inputRef.current?.value.trim();
+    inputRef.current?.blur(); // dismiss the mobile keyboard before navigating away
     router.push(q ? `/search?q=${encodeURIComponent(q)}` : "/search");
   }
 
@@ -66,7 +67,7 @@ export default function SearchBar({
         placeholder={placeholder}
         defaultValue={defaultValue}
         className="w-full h-full bg-transparent outline-none select-text
-          pl-[39px] pr-[50px] font-body text-[11px] text-[#151814] placeholder:text-[#b7a78c]
+          pl-[39px] pr-[50px] font-body text-base text-[#151814] placeholder:text-[#b7a78c]
           md:pl-[55px] md:pr-[68px] md:text-[17px] md:placeholder:text-[#596155]"
       />
 
