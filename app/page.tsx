@@ -213,19 +213,7 @@ export default async function HomePage() {
           />
         </div>
 
-        <div className="relative w-full flex items-center bg-white rounded-[4px] overflow-hidden h-[50px] px-[14px] gap-[10px]">
-          <svg className="flex-shrink-0 w-[15px] h-[15px]" viewBox="0 0 16 16" fill="none">
-            <circle cx="7" cy="7" r="5.5" stroke="#596155" strokeWidth="1.4" />
-            <path d="M11 11L14.5 14.5" stroke="#596155" strokeWidth="1.4" strokeLinecap="round" />
-          </svg>
-          <span className="flex-1 font-body text-[11px] text-[#596155]">{COPY.heroSearchPlaceholder}</span>
-          <button className="bg-[#2c4a34] flex items-center justify-center rounded-[3px] w-[38px] h-[38px] flex-shrink-0">
-            <svg width="14" height="14" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="8" cy="8" r="6" stroke="white" strokeWidth="1.6" />
-              <path d="M13 13L16.5 16.5" stroke="white" strokeWidth="1.6" strokeLinecap="round" />
-            </svg>
-          </button>
-        </div>
+        <SearchBar placeholder={COPY.heroSearchPlaceholder} className="w-full" />
 
         <p className="relative font-body text-[12px] text-[#f0edd8] text-center leading-5">
           {COPY.heroTagline}
