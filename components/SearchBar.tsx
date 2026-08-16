@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useRef } from "react";
 
 interface SearchBarProps {
@@ -15,21 +15,16 @@ export default function SearchBar({
   defaultValue = "",
 }: SearchBarProps) {
   const router = useRouter();
-  const pathname = usePathname();
   const inputRef = useRef<HTMLInputElement>(null);
+
+  function goToSearch() {
+    const q = inputRef.current?.value.trim();
+    router.push(q ? `/search?q=${encodeURIComponent(q)}` : "/search");
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const q = inputRef.current?.value.trim();
-    if (q) router.push(`/search?q=${encodeURIComponent(q)}`);
-  }
-
-  // Already on /search means the bar is filtering results in place — let a click just
-  // focus it for typing there instead of navigating and dropping any category/location filters.
-  function handleClick() {
-    if (pathname !== "/search" && !inputRef.current?.value.trim()) {
-      router.push("/search");
-    }
+    goToSearch();
   }
 
   return (
@@ -39,8 +34,13 @@ export default function SearchBar({
       className={`relative flex items-center bg-white border border-[#dbe0d9] overflow-hidden select-none
         h-[46px] rounded-[23px] md:h-[64px] md:rounded-[32px] ${className}`}
     >
-      {/* Search icon */}
-      <div className="absolute left-[14px] top-1/2 -translate-y-1/2 pointer-events-none select-none md:left-[17px]">
+      {/* Search icon — also acts as a shortcut to the search page */}
+      <button
+        type="button"
+        aria-label="Go to search page"
+        onClick={goToSearch}
+        className="absolute left-[14px] top-1/2 -translate-y-1/2 select-none cursor-pointer md:left-[17px]"
+      >
         <svg
           width="16"
           height="16"
@@ -57,7 +57,7 @@ export default function SearchBar({
             strokeLinecap="round"
           />
         </svg>
-      </div>
+      </button>
 
       {/* Input */}
       <input
@@ -65,7 +65,6 @@ export default function SearchBar({
         type="search"
         placeholder={placeholder}
         defaultValue={defaultValue}
-        onClick={handleClick}
         className="w-full h-full bg-transparent outline-none select-text
           pl-[39px] pr-[50px] font-body text-[11px] text-[#151814] placeholder:text-[#b7a78c]
           md:pl-[55px] md:pr-[68px] md:text-[17px] md:placeholder:text-[#596155]"
