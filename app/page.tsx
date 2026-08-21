@@ -167,7 +167,7 @@ export default async function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/45 pointer-events-none" />
 
         {/* Wordmark */}
-        <div className="absolute left-1/2 -translate-x-1/2 top-20 w-[383px] h-[270px]">
+        <div className="absolute left-1/2 -translate-x-1/2 top-16 w-[383px] h-[270px]">
           <Image
             src={IMG.wordmarkDesktop}
             alt="Check Local First"
@@ -184,7 +184,7 @@ export default async function HomePage() {
         </p>
 
         {/* Search bar */}
-        <div className="absolute bottom-7 left-1/2 -translate-x-1/2 w-[880px]">
+        <div className="absolute bottom-14 left-1/2 -translate-x-1/2 w-[880px]">
           <SearchBar className="h-[64px]" />
         </div>
       </section>
