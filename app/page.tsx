@@ -31,7 +31,7 @@ const INSTAGRAM_URL = "https://www.instagram.com/checklocalfirstreno/";
 // User-facing copy, kept together so wording can be edited without touching layout/markup below.
 const COPY = {
   heroTagline: "Your guide to local shopping in Reno, NV",
-  heroSearchPlaceholder: "Search businesses, food & more...",
+  heroSearchPlaceholder: "Search specific items, businesses & more...",
   aboutPhotoAlt: "About Check Local First",
   startExploring: {
     heading: "Start Exploring",
@@ -167,7 +167,7 @@ export default async function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/45 pointer-events-none" />
 
         {/* Wordmark */}
-        <div className="absolute left-1/2 -translate-x-1/2 top-16 w-[383px] h-[270px]">
+        <div className="absolute left-1/2 -translate-x-1/2 top-20 w-[383px] h-[270px]">
           <Image
             src={IMG.wordmarkDesktop}
             alt="Check Local First"
@@ -272,7 +272,7 @@ export default async function HomePage() {
         </div>
         <div className="flex flex-col gap-4 items-center text-center pt-11 px-[30px]">
           <p className="font-display font-bold text-[9px] text-[#b7a78c] tracking-[3px] uppercase w-full">{COPY.aboutUs.eyebrow}</p>
-          <h2 className="font-display font-bold text-[24px] text-[#253022] leading-[32px] w-full">{COPY.aboutUs.mobileHeading}</h2>
+          <h2 className="font-display font-bold text-[24px] text-[#253022] uppercase leading-[32px] w-full">{COPY.aboutUs.mobileHeading}</h2>
           <p className="font-body text-[12px] text-[#596155] leading-[22px] w-full">
             {COPY.aboutUs.mobileBody}
           </p>
@@ -407,7 +407,7 @@ export default async function HomePage() {
       <section className="md:hidden bg-[#faf6e9] flex flex-col gap-5 pb-[56px]">
         <div className="flex flex-col gap-2 items-center text-center px-7 pt-[56px]">
           <h2 className="font-display font-bold text-[17px] text-[#253022] tracking-[0.5px] uppercase w-full">{COPY.followCommunity.mobileHeading}</h2>
-          <p className="font-body text-[11px] text-[#596155] w-full">{COPY.followCommunity.handle}</p>
+          <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="font-body text-[11px] text-[#596155] w-full hover:underline">{COPY.followCommunity.handle}</a>
         </div>
         <div className="flex flex-col gap-[2px]">
           <div className="flex gap-[2px] h-[128px]">
@@ -441,7 +441,7 @@ export default async function HomePage() {
           <h2 className="font-display font-bold text-[64px] text-[#151814] uppercase">{COPY.followCommunity.desktopHeading}</h2>
         </div>
         <FollowCarousel />
-        <p className="font-body text-[20px] text-[#6b7d67] text-center py-6">{COPY.followCommunity.handle}</p>
+        <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="font-body text-[20px] text-[#6b7d67] text-center py-6 hover:underline">{COPY.followCommunity.handle}</a>
       </section>
 
       <Footer />
