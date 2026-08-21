@@ -179,7 +179,7 @@ export default async function HomePage() {
         </div>
 
         {/* Tagline */}
-        <p className="absolute bottom-24 left-1/2 -translate-x-1/2 w-[1029px] text-center font-display font-bold text-[40px] text-[#faf6e9]">
+        <p className="absolute bottom-32 left-1/2 -translate-x-1/2 w-[1029px] text-center font-display font-bold text-[40px] text-[#faf6e9]">
           {COPY.heroTagline}
         </p>
 
