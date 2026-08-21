@@ -321,7 +321,7 @@ export default async function HomePage() {
           </div>
         </div>
         <div className="flex flex-col gap-5 items-center text-center pt-7 pb-[56px] px-[30px]">
-          <p className="font-body text-[12px] text-[#423926] leading-[22px]">
+          <p className="font-body text-[12px] text-[#423926] leading-[22px] line-clamp-4">
             <TextWithBreaks text={featured.description ?? COPY.featured.fallbackDescription} />
           </p>
           <Link href={`/businesses/${featured.slug}`} className="bg-[#2c4a34] text-[#faf6e9] font-display font-bold text-[10px] tracking-[1.8px] uppercase px-7 py-4 rounded-[2px] hover:bg-[#253022] transition-colors">
@@ -345,7 +345,7 @@ export default async function HomePage() {
 
             {/* Right: text */}
             <div className="flex flex-col gap-7 flex-1">
-              <p className="font-display text-[17px] text-[#151814] leading-relaxed">
+              <p className="font-display text-[17px] text-[#151814] leading-relaxed line-clamp-5">
                 <TextWithBreaks text={featured.description ?? COPY.featured.fallbackDescription} />
               </p>
               <Link href={`/businesses/${featured.slug}`} className="inline-flex items-center gap-3 bg-[#2c4a34] text-white font-display font-bold text-[16px] uppercase px-6 h-12 rounded-[8px] w-fit hover:bg-[#253022] transition-colors">
