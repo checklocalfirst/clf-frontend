@@ -29,6 +29,16 @@ const COMMUNITY_FEATURES = [
     description:
       "Display your phone number, email, social links, and weekly hours so customers can find and reach you easily — no more missed calls from people who couldn't figure out when you're open.",
   },
+  {
+    label: "Offer Discounts",
+    description:
+      "Incentivize looky loo's to actually visit your shop with a discount of your choice.",
+  },
+  {
+    label: "Track Analytics",
+    description:
+      "View interactions with your local supporters in your business dashboard.",
+  },
 ];
 
 const PREMIUM_FEATURES = [
@@ -49,16 +59,6 @@ const PREMIUM_FEATURES = [
   },
 ];
 
-const GALLERY = [
-  "/mainpage1.JPG",
-  "/picnic.JPG",
-  "/basket.JPG",
-  "/sierra-water-gardens.jpg",
-  "/people.JPG",
-  "/picnic2.JPG",
-  "/renomarket.JPG",
-];
-
 const IMG = {
   hero: "/market.JPG",
 };
@@ -76,13 +76,10 @@ const COPY = {
   pricingCta: "Join Now →",
   community: {
     tier: "COMMUNITY",
-    blurb: "Perfect for businesses just getting started with an online presence.",
   },
   premium: {
     tier: "PREMIUM",
-    blurb:
-      "Maximum visibility for businesses who want to be everyone's first stop — plus a personal account so the owner can shop local too.",
-    galleryLabel: "Photo Gallery",
+    everythingLine: "Everything in Community",
   },
 };
 
@@ -90,17 +87,13 @@ const PRICING_CARDS = {
   community: {
     price: "$19.99",
     tier: COPY.community.tier,
-    features: ["Directory listing", "Meet the Owner", "Contact & hours"],
+    features: COMMUNITY_FEATURES,
   },
   premium: {
     price: "$49.99",
     tier: COPY.premium.tier,
-    features: [
-      "Everything in Community",
-      "Homepage rotation",
-      "Featured business placement",
-      "Personal shopper account for you",
-    ],
+    extraLine: COPY.premium.everythingLine,
+    features: PREMIUM_FEATURES,
   },
 };
 
@@ -109,11 +102,13 @@ function PricingCard({
   price,
   tier,
   features,
+  extraLine,
 }: {
   bg: string;
   price: string;
   tier: string;
-  features: string[];
+  features: { label: string; description: string }[];
+  extraLine?: string;
 }) {
   return (
     <div
@@ -130,12 +125,21 @@ function PricingCard({
         {tier}
       </p>
 
-      {/* Features */}
-      <ul className="flex flex-col gap-2 font-body text-[14px] text-[#faf6e9]">
-        {features.map((f) => (
-          <li key={f}>- {f}</li>
-        ))}
-      </ul>
+      {/* Features — tap one to see what it includes */}
+      <div className="flex flex-col">
+        {extraLine && (
+          <p className="font-body text-[14px] text-[#faf6e9] pb-[14px] border-b border-[rgba(250,246,233,0.35)]">
+            {extraLine}
+          </p>
+        )}
+        <FeatureAccordion
+          features={features}
+          labelColor="text-[#faf6e9]"
+          descColor="text-[rgba(250,246,233,0.8)]"
+          dividerColor="border-[rgba(250,246,233,0.35)]"
+          plusColor="text-[#faf6e9]"
+        />
+      </div>
 
       {/* CTA */}
       <JoinNowLink className="mt-auto bg-[#2c4a34] rounded-full flex items-center justify-center px-7 py-3 text-[#faf6e9] font-body font-semibold text-[15px] hover:bg-[#253022] transition-colors">
@@ -197,108 +201,6 @@ export default function BusinessMembershipPage() {
         <div className="flex flex-col gap-4 md:flex-row md:gap-7 md:justify-center">
           <PricingCard bg="bg-[#9ca889]" {...PRICING_CARDS.community} />
           <PricingCard bg="bg-[#bc6239]" {...PRICING_CARDS.premium} />
-        </div>
-      </section>
-
-      {/* ── 04 Tier Detail Blocks ── */}
-      <section className="bg-[#faf6e9] px-4 pb-12 flex flex-col gap-4 md:px-[64px] md:pb-[96px] md:gap-8">
-
-        {/* ── Community ── */}
-        {/* Desktop */}
-        <div className="hidden md:flex bg-[#423926] rounded-[20px] p-[56px] gap-16 items-center">
-          <div className="flex-1 flex flex-col gap-3 min-w-0">
-            <h3 className="font-display font-bold text-[64px] text-[#faf6e9] leading-none">
-              {COPY.community.tier}
-            </h3>
-            <p className="font-body text-[14px] text-[#b7a78c]">
-              {COPY.community.blurb}
-            </p>
-          </div>
-          <div className="flex-1 flex flex-col min-w-0">
-            <FeatureAccordion
-              features={COMMUNITY_FEATURES}
-              labelColor="text-[#faf6e9]"
-              descColor="text-[#d9d9cc]"
-              dividerColor="border-[#b7a78c]"
-              plusColor="text-[#bc6239]"
-            />
-          </div>
-        </div>
-
-        {/* Mobile */}
-        <div className="md:hidden bg-[#253022] rounded-[16px] p-6">
-          <h3 className="font-display font-bold text-[30px] text-[#faf6e9] leading-none mb-3">
-            {COPY.community.tier}
-          </h3>
-          <p className="font-body text-[14px] text-[#d9d9cc] mb-5">
-            {COPY.community.blurb}
-          </p>
-          <FeatureAccordion
-            features={COMMUNITY_FEATURES}
-            labelColor="text-[#faf6e9]"
-            descColor="text-[#d9d9cc]"
-            dividerColor="border-[rgba(250,246,233,0.25)]"
-            plusColor="text-[#bc6239]"
-          />
-        </div>
-
-        {/* ── Premium ── */}
-        {/* Desktop */}
-        <div className="hidden md:flex flex-col bg-[#c9d2cf] rounded-[20px] px-[56px] py-[40px] gap-6">
-          {/* Top row */}
-          <div className="flex gap-16">
-            <div className="flex flex-col gap-3 min-w-0" style={{ width: "568px" }}>
-              <h3 className="font-display font-bold text-[64px] text-[#423926] leading-none">
-                {COPY.premium.tier}
-              </h3>
-              <p className="font-body text-[14px] text-[#423926]">
-                {COPY.premium.blurb}
-              </p>
-            </div>
-            <div className="flex-1 flex flex-col min-w-0">
-              <FeatureAccordion
-                features={PREMIUM_FEATURES}
-                labelColor="text-[#423926]"
-                descColor="text-[#596155]"
-                dividerColor="border-[#b7a78c]"
-                plusColor="text-[#2c4a34]"
-              />
-            </div>
-          </div>
-
-          {/* Gallery strip */}
-          <div className="flex flex-col gap-2">
-            <p className="font-body font-semibold text-[12px] text-white uppercase tracking-[0.6px]">
-              {COPY.premium.galleryLabel}
-            </p>
-            <div className="flex gap-3 overflow-x-auto pb-1">
-              {GALLERY.map((src, i) => (
-                <div
-                  key={i}
-                  className="relative w-[90px] h-[62px] flex-shrink-0 rounded-[6px] overflow-hidden bg-[rgba(240,222,199,0.9)]"
-                >
-                  <Image src={src} alt="" fill sizes="90px" className="object-cover" />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile */}
-        <div className="md:hidden bg-[#c9d2cf] rounded-[16px] p-6">
-          <h3 className="font-display font-bold text-[30px] text-[#253022] leading-none mb-3">
-            {COPY.premium.tier}
-          </h3>
-          <p className="font-body text-[14px] text-[#595e5c] mb-5">
-            {COPY.premium.blurb}
-          </p>
-          <FeatureAccordion
-            features={PREMIUM_FEATURES}
-            labelColor="text-[#253022]"
-            descColor="text-[#596155]"
-            dividerColor="border-[rgba(37,48,34,0.25)]"
-            plusColor="text-[#2c4a34]"
-          />
         </div>
       </section>
 

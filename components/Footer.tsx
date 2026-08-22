@@ -165,6 +165,14 @@ export default function Footer() {
           <p className="font-mono text-[20px] text-white opacity-40 whitespace-nowrap">
             © 2026 Check Local First. All rights reserved.
           </p>
+          <a
+            href="https://www.yashilaphoto.com/contact/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-mono text-[14px] text-white opacity-40 whitespace-nowrap hover:opacity-70 transition-opacity"
+          >
+            Thank you to Yashi for all photos
+          </a>
         </div>
       </div>
 
@@ -194,6 +202,14 @@ export default function Footer() {
           <p className="font-body text-[10px] text-[#6b7d67]">
             © 2026 Check Local First. All rights reserved.
           </p>
+          <a
+            href="https://www.yashilaphoto.com/contact/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-body text-[10px] text-[#6b7d67] hover:opacity-70 transition-opacity"
+          >
+            Thank you to Yashi for all photos
+          </a>
         </div>
       </div>
     </footer>

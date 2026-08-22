@@ -15,7 +15,8 @@ export const metadata: Metadata = {
 const HERO_IMG = "/renomarket.JPG";
 
 const COPY = {
-  heroTagline: "Shopping local, made easy",
+  heroTaglineLine1: "Shopping Local,",
+  heroTaglineLine2: "Made Easy",
   heroCta: "Start Your Membership",
   howItWorksHeading: "HOW MEMBERSHIP WORKS",
   howItWorksBody1: "Browsing the directory and saving your favorite businesses is always free.",
@@ -82,7 +83,10 @@ export default function LocalsMembershipPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/55" />
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 px-6 text-center">
           <p className="font-display font-bold text-[28px] md:text-[48px] text-[#faf6e9] leading-tight md:leading-none max-w-[900px]">
-            {COPY.heroTagline}
+            {COPY.heroTaglineLine1}
+            <br className="md:hidden" />
+            <span className="hidden md:inline"> </span>
+            {COPY.heroTaglineLine2}
           </p>
           <JoinNowLink className="bg-[#bc6239] rounded-full px-7 py-[14px] md:px-9 md:py-[18px] font-display font-bold text-[13px] md:text-[16px] text-[#faf6e9] uppercase hover:opacity-90 transition-opacity">
             {COPY.heroCta}
@@ -124,12 +128,8 @@ export default function LocalsMembershipPage() {
               <div className="relative h-[220px] rounded-[4px] overflow-hidden bg-[#c9d2cf]">
                 <Image src={photo} alt="" fill sizes="100vw" className="object-cover" />
               </div>
-              <div className="font-display font-bold text-[22px] text-[#423926] tracking-[-1px]">
-                {heading.map((line, j) => (
-                  <p key={j} className="leading-[1.1]">
-                    {line}
-                  </p>
-                ))}
+              <div className="font-display font-bold text-[15px] text-[#423926] tracking-[-1px] leading-[1.1] whitespace-nowrap">
+                {heading.join(" ")}
               </div>
               <p className="font-body text-[15px] text-[#423926] leading-[1.6]">{body}</p>
             </div>
@@ -142,12 +142,8 @@ export default function LocalsMembershipPage() {
                 </div>
               )}
               <div className="flex flex-col gap-5 justify-center w-1/2 px-[72px]">
-                <div className="font-display font-bold text-[40px] text-[#423926] tracking-[-1px] max-w-[576px]">
-                  {heading.map((line, j) => (
-                    <p key={j} className="leading-[1.05]">
-                      {line}
-                    </p>
-                  ))}
+                <div className="font-display font-bold text-[26px] text-[#423926] tracking-[-1px] max-w-[576px] leading-[1.05] whitespace-nowrap">
+                  {heading.join(" ")}
                 </div>
                 <p className="font-body text-[20px] text-[#423926] leading-[1.6] max-w-[576px]">{body}</p>
               </div>
