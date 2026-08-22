@@ -261,24 +261,9 @@ export default async function BusinessDetailPage({
               href={business.website_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="relative bg-[#bc6239] h-[52px] w-[199px] rounded-[8px] flex items-center px-[24px] hover:opacity-90 transition-opacity overflow-hidden"
+              className="relative bg-[#bc6239] h-[52px] w-[199px] rounded-[8px] flex items-center justify-center px-[24px] hover:opacity-90 transition-opacity overflow-hidden"
             >
               <span className="font-display font-bold text-[16px] text-white">{COPY.visitWebsite}</span>
-              <svg
-                className="absolute right-[24px]"
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-              >
-                <path
-                  d="M3 13L13 3M13 3H7M13 3V9"
-                  stroke="white"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
             </TrackedLink>
           )}
           <div className="flex items-center gap-[12px]">
@@ -387,24 +372,9 @@ export default async function BusinessDetailPage({
             href={business.website_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="relative flex items-center w-full bg-[#bc6239] h-[52px] rounded-[8px] mt-[16px] px-[24px] hover:opacity-90 transition-opacity"
+            className="relative flex items-center justify-center w-full bg-[#bc6239] h-[52px] rounded-[8px] mt-[16px] px-[24px] hover:opacity-90 transition-opacity"
           >
             <span className="font-display font-bold text-[16px] text-white">{COPY.visitWebsite}</span>
-            <svg
-              className="absolute right-[24px]"
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-            >
-              <path
-                d="M3 13L13 3M13 3H7M13 3V9"
-                stroke="white"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
           </TrackedLink>
         )}
         {(business.instagram_url || business.facebook_url || business.yelp_url) && (

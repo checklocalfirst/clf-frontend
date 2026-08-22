@@ -57,7 +57,7 @@ const COPY = {
   disclaimer: "Pricing and program details shown here are not final and may change before launch.",
   community: {
     tier: "FOUNDING MEMBER",
-    price: "$19",
+    price: "$19.99",
     priceSuffix: "/ Month",
     perk1: "✓ Directory listing — be found by people looking to shop local",
     perk2: "✓ “Meet the Owner” feature — let customers see who they're supporting",
@@ -65,7 +65,7 @@ const COPY = {
   },
   premium: {
     tier: "PREMIUM",
-    price: "$49",
+    price: "$49.99",
     priceSuffix: "/ Month",
     afterPrice: "Everything in Community, plus:",
     perk1: "✓ Featured Business on homepage",

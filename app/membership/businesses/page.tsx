@@ -88,12 +88,12 @@ const COPY = {
 
 const PRICING_CARDS = {
   community: {
-    price: "$19",
+    price: "$19.99",
     tier: COPY.community.tier,
     features: ["Directory listing", "Meet the Owner", "Contact & hours"],
   },
   premium: {
-    price: "$49",
+    price: "$49.99",
     tier: COPY.premium.tier,
     features: [
       "Everything in Community",

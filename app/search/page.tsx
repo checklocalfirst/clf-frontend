@@ -12,6 +12,7 @@ import {
   Leaf,
   Sparkles,
   Tag,
+  UtensilsCrossed,
   type LucideIcon,
 } from "lucide-react";
 import Header from "@/components/Header";
@@ -47,6 +48,7 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   "plants-and-garden": Flower2,
   "sustainable-living": Leaf,
   "beauty-and-wellness": Sparkles,
+  "food-and-drink": UtensilsCrossed,
 };
 const DEFAULT_CATEGORY_ICON = Tag;
 
@@ -81,6 +83,15 @@ const BR_TAG_PATTERN = /<br\s*\/?>/gi;
 
 function stripBrTags(text: string): string {
   return text.replace(BR_TAG_PATTERN, " ").trim();
+}
+
+// Card previews show only the first sentence so a business with a long description
+// doesn't stretch its card taller than the others — line-clamp then caps height in
+// case that one sentence is itself long enough to wrap onto extra lines.
+function firstSentence(text: string): string {
+  const stripped = stripBrTags(text);
+  const match = stripped.match(/^[^.!?]*[.!?]/);
+  return match ? match[0].trim() : stripped;
 }
 
 const NEAR_ME_RADIUS_MILES = 30;
@@ -302,8 +313,8 @@ export default async function SearchPage({
                   {card.location}
                   {card.distanceMiles != null && ` · ${card.distanceMiles.toFixed(1)} mi`}
                 </p>
-                <p className="font-mono text-[14px] text-[#423926] leading-snug line-clamp-3">
-                  {card.description}
+                <p className="font-mono text-[14px] text-[#423926] leading-snug line-clamp-2">
+                  {firstSentence(card.description)}
                 </p>
               </div>
             </Link>
@@ -344,8 +355,8 @@ export default async function SearchPage({
                   {card.location}
                   {card.distanceMiles != null && ` · ${card.distanceMiles.toFixed(1)} mi`}
                 </p>
-                <p className="font-mono text-[13px] text-[#423926] leading-snug line-clamp-3">
-                  {card.description}
+                <p className="font-mono text-[13px] text-[#423926] leading-snug line-clamp-2">
+                  {firstSentence(card.description)}
                 </p>
               </div>
             </Link>
@@ -387,7 +398,7 @@ export default async function SearchPage({
 
                   {/* Description — hidden on mobile to keep list compact */}
                   <p className="hidden md:block font-display font-bold text-[14px] text-[#423926] leading-snug line-clamp-2">
-                    {stripBrTags(item.description)}
+                    {firstSentence(item.description)}
                   </p>
                 </div>
               </Link>
