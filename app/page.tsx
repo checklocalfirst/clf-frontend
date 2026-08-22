@@ -46,7 +46,7 @@ const COPY = {
     eyebrow: "About us",
     mobileHeading: "Every dollar is a vote",
     mobileBody:
-      "Check Local First started with a simple idea: every dollar spent at a local business is a vote for the kind of city you want to live in. Every listing here is here because someone who loves this place vouched for it.",
+      "Check Local First started with a simple idea: every dollar spent at a local business is a vote for the kind of community we want to live in. We built this directory to make it effortless to find, support, and celebrate the small businesses that make Reno the Biggest Little City — and to keep neighbors connected to the people behind the counter.",
     mobileLink: "Learn more about our story",
     desktopHeading: "About Us",
     desktopBody:
@@ -271,7 +271,6 @@ export default async function HomePage() {
           <Image src={IMG.aboutMobile} alt={COPY.aboutPhotoAlt} fill sizes="100vw" className="object-cover" />
         </div>
         <div className="flex flex-col gap-4 items-center text-center pt-11 px-[30px]">
-          <p className="font-display font-bold text-[9px] text-[#b7a78c] tracking-[3px] uppercase w-full">{COPY.aboutUs.eyebrow}</p>
           <h2 className="font-display font-bold text-[24px] text-[#253022] uppercase leading-[32px] w-full">{COPY.aboutUs.mobileHeading}</h2>
           <p className="font-body text-[12px] text-[#596155] leading-[22px] w-full">
             {COPY.aboutUs.mobileBody}

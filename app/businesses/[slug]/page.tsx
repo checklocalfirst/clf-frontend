@@ -527,7 +527,7 @@ export default async function BusinessDetailPage({
         <h2 className="font-display font-bold text-[26px] text-[#423926] tracking-[0.26px] leading-none">
           {COPY.aboutHeading}
         </h2>
-        <p className="font-body text-[20px] text-[rgba(66,57,38,0.8)] leading-[1.6] mt-[20px]">
+        <p className="font-body text-[12px] text-[rgba(66,57,38,0.8)] leading-[22px] mt-[20px]">
           <TextWithBreaks text={business.description ?? COPY.noDescriptionFallback} />
         </p>
       </div>
@@ -591,7 +591,7 @@ export default async function BusinessDetailPage({
         <div className="relative mt-[16px] h-[260px] bg-[#c9d2cf] rounded-[12px] overflow-hidden">
           <Image src={ownerPhotoUrl} alt={COPY.ownerAlt} fill sizes="100vw" className="object-cover" />
         </div>
-        <p className="font-body text-[20px] text-[#666b61] leading-[1.6] mt-[16px]">
+        <p className="font-body text-[12px] text-[#666b61] leading-[22px] mt-[16px]">
           {business.about_owner}
         </p>
       </div>
