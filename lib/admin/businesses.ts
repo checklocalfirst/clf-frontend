@@ -1,5 +1,5 @@
 import { apiFetch, type Paginated } from "../api";
-import type { Business, BusinessStatus, BusinessTier, Category, Service, Photo } from "../directory";
+import type { Business, BusinessHours, BusinessStatus, BusinessTier, Category, Service, Photo } from "../directory";
 import type { BusinessProfileInput } from "../business-dashboard";
 
 export function listAdminBusinesses(
@@ -59,6 +59,10 @@ export interface AdminBusinessEditInput extends BusinessProfileInput {
   latitude?: number;
   longitude?: number;
   neighborhood?: string;
+  // Optional — omit the key entirely when admin isn't touching hours rather than
+  // sending null or a partial object, or the request is rejected. Still a full
+  // seven-day object whenever it is sent.
+  hours?: BusinessHours;
 }
 
 export function updateBusinessFull(

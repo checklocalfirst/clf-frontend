@@ -4,15 +4,18 @@ import { useState, type FormEvent } from "react";
 import { useToken } from "@/lib/auth";
 import { useBusiness } from "@/components/dashboard/BusinessContext";
 import { useApiResource } from "@/lib/useApiResource";
-import { getCategories, type Category, type Business } from "@/lib/directory";
+import { getCategories, type Category, type Business, type BusinessHours, type DayKey } from "@/lib/directory";
 import {
   getMyBusiness,
   updateMyBusiness,
+  updateMyBusinessHours,
   updateMyCategories,
   getMyCategories,
   type BusinessProfileInput,
 } from "@/lib/business-dashboard";
+import { DEFAULT_HOURS, validateHours, mapFieldErrorsToDays } from "@/lib/hours";
 import FormField from "@/components/FormField";
+import HoursEditor from "@/components/HoursEditor";
 import MultiSelect from "@/components/dashboard/MultiSelect";
 import PremiumUpsell from "@/components/dashboard/PremiumUpsell";
 import { useToast } from "@/components/dashboard/ToastProvider";
@@ -86,11 +89,16 @@ export default function BusinessProfilePage() {
   const [categoryIds, setCategoryIds] = useState<number[]>([]);
   const [savingCategories, setSavingCategories] = useState(false);
 
+  const [hoursForm, setHoursForm] = useState<BusinessHours>(() => business.hours ?? DEFAULT_HOURS);
+  const [hoursErrors, setHoursErrors] = useState<Partial<Record<DayKey, string>>>({});
+  const [savingHours, setSavingHours] = useState(false);
+
   // Reset the editable form whenever the loaded business changes underneath us.
   const [prevBusiness, setPrevBusiness] = useState(business);
   if (business !== prevBusiness) {
     setPrevBusiness(business);
     setForm(buildForm(business));
+    setHoursForm(business.hours ?? DEFAULT_HOURS);
   }
 
   // Sync the category selection once it arrives from its own (async) fetch.
@@ -156,6 +164,33 @@ export default function BusinessProfilePage() {
       toast.error(err instanceof ApiError ? err.message : "Couldn't update categories.");
     } finally {
       setSavingCategories(false);
+    }
+  }
+
+  async function handleSaveHours() {
+    if (!token) return;
+    const clientErrors = validateHours(hoursForm);
+    if (Object.keys(clientErrors).length > 0) {
+      setHoursErrors(clientErrors);
+      return;
+    }
+    setHoursErrors({});
+    setSavingHours(true);
+    try {
+      await updateMyBusinessHours(token, business.slug, hoursForm);
+      // Don't trust the PUT response's shape — re-fetch the canonical row, same
+      // reasoning as the profile form's own save above.
+      setBusiness(await getMyBusiness(token));
+      toast.success("Hours updated.");
+    } catch (err) {
+      if (err instanceof ApiError && err.fieldErrors) {
+        setHoursErrors(mapFieldErrorsToDays(err.fieldErrors));
+        toast.error(Object.values(err.fieldErrors).flat().join(" "));
+      } else {
+        toast.error(err instanceof ApiError ? err.message : "Something went wrong. Please try again.");
+      }
+    } finally {
+      setSavingHours(false);
     }
   }
 
@@ -265,6 +300,24 @@ export default function BusinessProfilePage() {
           className="self-start bg-[#2c4a34] rounded-[8px] px-6 py-[12px] font-display font-bold text-[14px] text-white uppercase hover:bg-[#253022] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {savingCategories ? "Saving..." : "Save Categories"}
+        </button>
+      </div>
+
+      <div className="flex flex-col gap-4 bg-white border border-[#dbe0d9] rounded-[16px] p-6 md:p-8">
+        <div>
+          <h3 className="font-display font-bold text-[18px] text-[#423926]">Hours</h3>
+          <p className="font-body text-[13px] text-[#596155] mt-1">
+            Shown on your public listing. Toggle a day off to mark it closed.
+          </p>
+        </div>
+        <HoursEditor value={hoursForm} onChange={setHoursForm} errors={hoursErrors} />
+        <button
+          type="button"
+          onClick={handleSaveHours}
+          disabled={savingHours}
+          className="self-start bg-[#2c4a34] rounded-[8px] px-6 py-[12px] font-display font-bold text-[14px] text-white uppercase hover:bg-[#253022] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {savingHours ? "Saving..." : "Save Hours"}
         </button>
       </div>
     </div>

@@ -14,8 +14,10 @@ import {
   type AdminBusinessEditInput,
   type BusinessFull,
 } from "@/lib/admin/businesses";
-import type { BusinessStatus, BusinessTier } from "@/lib/directory";
+import type { BusinessHours, BusinessStatus, BusinessTier, DayKey } from "@/lib/directory";
+import { DEFAULT_HOURS, validateHours, mapFieldErrorsToDays } from "@/lib/hours";
 import FormField from "@/components/FormField";
+import HoursEditor from "@/components/HoursEditor";
 import Toggle from "@/components/dashboard/Toggle";
 import { useConfirm } from "@/components/dashboard/ConfirmDialog";
 import { useToast } from "@/components/dashboard/ToastProvider";
@@ -63,11 +65,18 @@ export default function AdminBusinessProfilePage() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
+  const [hoursForm, setHoursForm] = useState<BusinessHours>(() => business.hours ?? DEFAULT_HOURS);
+  const [hoursTouched, setHoursTouched] = useState(false);
+  const [hoursErrors, setHoursErrors] = useState<Partial<Record<DayKey, string>>>({});
+
   // Reset the editable form whenever the admin-loaded business changes underneath us.
   const [prevBusiness, setPrevBusiness] = useState(business);
   if (business !== prevBusiness) {
     setPrevBusiness(business);
     setForm(buildForm(business));
+    setHoursForm(business.hours ?? DEFAULT_HOURS);
+    setHoursTouched(false);
+    setHoursErrors({});
   }
 
   function set<K extends keyof AdminBusinessEditInput>(key: K, value: AdminBusinessEditInput[K]) {
@@ -94,6 +103,19 @@ export default function AdminBusinessProfilePage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!token) return;
+
+    // Only validate/send hours when admin actually touched the editor — sending the
+    // key at all (even unchanged) is optional, and a partial/invalid object gets
+    // rejected outright, so skip the whole check when it's untouched.
+    if (hoursTouched) {
+      const clientErrors = validateHours(hoursForm);
+      if (Object.keys(clientErrors).length > 0) {
+        setHoursErrors(clientErrors);
+        return;
+      }
+    }
+    setHoursErrors({});
+
     setFieldErrors({});
     setSaving(true);
     try {
@@ -105,6 +127,9 @@ export default function AdminBusinessProfilePage() {
         if (value === "") continue;
         if (value !== undefined) (patch as Record<string, unknown>)[key] = value;
       }
+      // Optional key — only send it when admin actually edited hours, never as
+      // null/partial.
+      if (hoursTouched) patch.hours = hoursForm;
       const updated = await updateBusinessFull(token, business.id, patch);
       setBusiness({ ...business, ...updated });
       toast.success("Business updated.");
@@ -115,6 +140,7 @@ export default function AdminBusinessProfilePage() {
           flat[k] = Array.isArray(msgs) ? msgs[0] : String(msgs);
         }
         setFieldErrors(flat);
+        if (hoursTouched) setHoursErrors(mapFieldErrorsToDays(err.fieldErrors));
         // The backend doesn't always key fieldErrors by actual field name (e.g. a
         // top-level "body" key), so inline field highlighting can silently miss —
         // always surface the raw messages in a toast too.
@@ -303,6 +329,18 @@ export default function AdminBusinessProfilePage() {
           <FormField label="Instagram" id="admin_ig" value={form.instagram_url ?? ""} onChange={(e) => set("instagram_url", e.target.value)} className="flex-1" />
           <FormField label="Yelp" id="admin_yelp" value={form.yelp_url ?? ""} onChange={(e) => set("yelp_url", e.target.value)} className="flex-1" />
         </div>
+
+        <p className="font-display font-bold text-[11px] text-[#b7a78c] uppercase tracking-widest pt-2">
+          Hours
+        </p>
+        <HoursEditor
+          value={hoursForm}
+          onChange={(next) => {
+            setHoursTouched(true);
+            setHoursForm(next);
+          }}
+          errors={hoursErrors}
+        />
 
         <p className="font-display font-bold text-[11px] text-[#b7a78c] uppercase tracking-widest pt-2">
           Timeline (admin can set regardless of tier)

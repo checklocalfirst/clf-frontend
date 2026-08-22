@@ -6,6 +6,7 @@ import { useApiResource } from "@/lib/useApiResource";
 import { getMyPhotos, getMyDiscounts, type Discount } from "@/lib/business-dashboard";
 import type { Photo } from "@/lib/directory";
 import TextWithBreaks from "@/components/TextWithBreaks";
+import BusinessHoursButton from "@/components/BusinessHoursButton";
 
 const HERO_IMG = "/mainpage3.JPG";
 const OWNER_IMG = "/people.JPG";
@@ -112,6 +113,13 @@ export default function MyListingPreviewPage() {
                 >
                   {fullAddress}
                 </a>
+                {business.hours && (
+                  <BusinessHoursButton
+                    hours={business.hours}
+                    businessName={business.name}
+                    className="self-start font-body text-[13px] text-[#2c4a34] underline hover:opacity-70 transition-opacity cursor-pointer"
+                  />
+                )}
               </div>
 
               <div className="flex items-center gap-3 flex-shrink-0">

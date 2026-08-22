@@ -4,6 +4,26 @@ import type { AnalyticsEventType } from "./business-dashboard";
 export type BusinessStatus = "pending" | "approved" | "suspended" | "rejected";
 export type BusinessTier = "basic" | "premium";
 
+export type DayKey =
+  | "sunday"
+  | "monday"
+  | "tuesday"
+  | "wednesday"
+  | "thursday"
+  | "friday"
+  | "saturday";
+
+// `open`/`close` are 24-hour "HH:MM" strings in the business's own local time — no
+// timezone math, display as-is. Omitted whenever `closed` is true. Overnight ranges
+// (e.g. 18:00-02:00) aren't supported by the backend.
+export interface BusinessHoursDay {
+  closed: boolean;
+  open?: string;
+  close?: string;
+}
+
+export type BusinessHours = Record<DayKey, BusinessHoursDay>;
+
 export interface Business {
   id: number;
   owner_user_id: string;
@@ -41,6 +61,8 @@ export interface Business {
   neighborhood?: string | null;
   created_at: string;
   updated_at: string;
+  // null means hours haven't been set yet — never treat that as "closed every day."
+  hours: BusinessHours | null;
   // Only present on GET /businesses/:slug (single approved business by slug)
   users?: { first_name: string } | null;
 }

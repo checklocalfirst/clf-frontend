@@ -1,5 +1,5 @@
 import { apiFetch } from "./api";
-import type { Business, Category, Photo, Service } from "./directory";
+import type { Business, BusinessHours, Category, Photo, Service } from "./directory";
 
 export interface BusinessProfileInput {
   name?: string;
@@ -38,6 +38,20 @@ export function updateMyBusiness(
     method: "PUT",
     token,
     body: JSON.stringify(patch),
+  });
+}
+
+// Full replace, not a patch — always send all seven day keys, every save, even
+// when only one day actually changed. Available to basic and premium alike.
+export function updateMyBusinessHours(
+  token: string,
+  slug: string,
+  hours: BusinessHours
+): Promise<Business> {
+  return apiFetch<Business>(`/businesses/${encodeURIComponent(slug)}/hours`, {
+    method: "PUT",
+    token,
+    body: JSON.stringify(hours),
   });
 }
 

@@ -9,6 +9,7 @@ import TrackedLink from "@/components/TrackedLink";
 import DiscountRedeemButton from "@/components/DiscountRedeemButton";
 import FavoriteButton from "@/components/FavoriteButton";
 import BusinessGallery from "@/components/BusinessGallery";
+import BusinessHoursButton from "@/components/BusinessHoursButton";
 import TextWithBreaks from "@/components/TextWithBreaks";
 import { getBusinessBySlug, getBusinessPhotos, trackBusinessEvent } from "@/lib/directory";
 import { getPublicDiscounts } from "@/lib/business-dashboard";
@@ -243,6 +244,13 @@ export default async function BusinessDetailPage({
           >
             {fullAddress}
           </TrackedLink>
+          {business.hours && (
+            <BusinessHoursButton
+              hours={business.hours}
+              businessName={business.name}
+              className="self-start font-body text-[16px] text-[#2c4a34] underline hover:opacity-70 transition-opacity cursor-pointer"
+            />
+          )}
         </div>
 
         <div className="flex items-center gap-[16px] flex-shrink-0">
@@ -357,6 +365,13 @@ export default async function BusinessDetailPage({
         >
           {fullAddress}
         </TrackedLink>
+        {business.hours && (
+          <BusinessHoursButton
+            hours={business.hours}
+            businessName={business.name}
+            className="mt-[8px] font-body text-[16px] text-[#2c4a34] underline hover:opacity-70 transition-opacity cursor-pointer"
+          />
+        )}
         <TrackedLink
           slug={business.slug}
           event="call_click"
