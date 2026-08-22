@@ -69,10 +69,10 @@ const COPY = {
   introLeft:
     "Membership at Check Local First means real support for your business — a listing that actually gets seen by Reno neighbors who are ready to buy local.",
   introRight:
-    "Every tier includes a free profile on the directory. Upgrade for homepage features, unlimited photos, and priority placement in local search.",
+    "Every tier includes a profile on the directory. Upgrade for homepage features, unlimited photos, and priority placement in local search.",
   pricingHeading: "PRICING & PACKAGES",
   pricingSubheading:
-    "Every membership includes a free directory profile. Choose a tier that fits how visible you want your business to be.",
+    "Every membership includes a directory profile. Choose a tier that fits how visible you want your business to be.",
   pricingCta: "Join Now →",
   community: {
     tier: "COMMUNITY",

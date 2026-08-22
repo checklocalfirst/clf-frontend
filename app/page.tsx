@@ -41,6 +41,7 @@ const COPY = {
       "Check Local First is Reno's local directory, browse by category or search for exactly what you need, save the places you love, and discover the independently owned shops that make this city what it is.",
     desktopBody2:
       "Sign up to join a community that keeps Reno's money in Reno, while unlocking exclusive member discounts along the way.",
+    cta: "Save Businesses",
   },
   aboutUs: {
     eyebrow: "About us",
@@ -253,6 +254,12 @@ export default async function HomePage() {
           <br /><br />
           {COPY.startExploring.desktopBody2}
         </p>
+        <Link href="/signup" className="md:hidden bg-[#2c4a34] text-[#faf6e9] font-display font-bold text-[10px] tracking-[1.8px] uppercase px-7 py-4 rounded-[2px] hover:bg-[#253022] transition-colors">
+          {COPY.startExploring.cta}
+        </Link>
+        <Link href="/signup" className="hidden md:inline-flex items-center gap-3 bg-[#2c4a34] text-white font-display font-bold text-[16px] uppercase px-6 h-12 rounded-[8px] w-fit hover:bg-[#253022] transition-colors">
+          {COPY.startExploring.cta} <ChevronRight color="white" />
+        </Link>
       </section>
 
       {/* ════════════════════════════════

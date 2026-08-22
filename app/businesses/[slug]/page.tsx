@@ -575,7 +575,7 @@ export default async function BusinessDetailPage({
               {COPY.meetTheOwnerHeading}
             </h2>
             <p className="font-body text-[20px] text-[#f3f5e7] leading-[1.6] mt-[56px]">
-              {business.about_owner}
+              <TextWithBreaks text={business.about_owner ?? ""} />
             </p>
           </div>
         </div>
@@ -592,7 +592,7 @@ export default async function BusinessDetailPage({
           <Image src={ownerPhotoUrl} alt={COPY.ownerAlt} fill sizes="100vw" className="object-cover" />
         </div>
         <p className="font-body text-[12px] text-[#666b61] leading-[22px] mt-[16px]">
-          {business.about_owner}
+          <TextWithBreaks text={business.about_owner ?? ""} />
         </p>
       </div>
       )}
