@@ -214,7 +214,9 @@ export default function MyListingPreviewPage() {
                 <h2 className="font-display font-bold text-[28px] md:text-[36px] text-[#f3f5e7] tracking-[0.28px] leading-none">
                   MEET THE OWNER
                 </h2>
-                <p className="font-body text-[15px] text-[#f3f5e7] leading-[1.6] mt-4">{business.about_owner}</p>
+                <p className="font-body text-[15px] text-[#f3f5e7] leading-[1.6] mt-4">
+                  <TextWithBreaks text={business.about_owner ?? ""} />
+                </p>
               </div>
             </div>
           )}

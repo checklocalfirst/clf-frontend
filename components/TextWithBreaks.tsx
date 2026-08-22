@@ -1,12 +1,14 @@
 import { Fragment } from "react";
 
 /**
- * Renders text with literal "<br>" (typed by business owners in a plain
- * textarea) as real line breaks — without dangerouslySetInnerHTML, since only
- * this one literal tag is recognized rather than arbitrary HTML.
+ * Renders line breaks typed by business owners in a plain textarea as real
+ * <br> elements — without dangerouslySetInnerHTML. Handles both actual
+ * newlines (pressing Enter/leaving a blank line) and literal "<br>" text
+ * (kept for businesses that saved descriptions before newlines were
+ * supported).
  */
 export default function TextWithBreaks({ text }: { text: string }) {
-  const parts = text.split(/<br\s*\/?>/gi);
+  const parts = text.split(/<br\s*\/?>|\r\n|\r|\n/gi);
   return (
     <>
       {parts.map((part, i) => (

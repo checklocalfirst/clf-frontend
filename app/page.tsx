@@ -275,7 +275,7 @@ export default async function HomePage() {
       {/* Mobile */}
       <section className="md:hidden bg-[#faf6e9] flex flex-col pb-[56px]">
         <div className="relative h-[320px] w-full overflow-hidden">
-          <Image src={IMG.aboutMobile} alt={COPY.aboutPhotoAlt} fill sizes="100vw" className="object-cover" />
+          <Image src={IMG.aboutMobile} alt={COPY.aboutPhotoAlt} fill sizes="100vw" className="object-cover object-bottom" />
         </div>
         <div className="flex flex-col gap-4 items-center text-center pt-11 px-[30px]">
           <h2 className="font-display font-bold text-[24px] text-[#253022] uppercase leading-[32px] w-full">{COPY.aboutUs.mobileHeading}</h2>
