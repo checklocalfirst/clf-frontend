@@ -136,6 +136,9 @@ export default async function BusinessDetailPage({
     }));
   const showTimeline = business.business_tier === "premium" && timelineEntries.length > 0;
   const showOwnerSection = !!business.about_owner?.trim() && !!ownerPhoto;
+  // Past this length the side-by-side layout leaves the polaroid stranded above
+  // a lot of empty space, so switch to a stacked (photo-above-text) layout.
+  const isLongOwnerBio = (business.about_owner?.length ?? 0) > 500;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -536,7 +539,53 @@ export default async function BusinessDetailPage({
       <BusinessGallery photos={galleryPhotos} businessName={business.name} />
 
       {/* ── Desktop: Meet the Owner ── */}
-      {showOwnerSection && (
+      {showOwnerSection && isLongOwnerBio && (
+      <div className="hidden md:block bg-[#9ca889] py-[67px]">
+        <div className="flex flex-col items-start pl-[139px] pr-[105px] gap-[48px]">
+          <h2 className="font-display font-bold text-[64px] text-[#f3f5e7] tracking-[0.64px] leading-none">
+            {COPY.meetTheOwnerHeading}
+          </h2>
+
+          {/* Polaroid */}
+          <div className="relative flex-shrink-0 ml-[95px]">
+            {/* Tape accent — offset relative to polaroid top-left */}
+            <div
+              className="absolute flex items-center justify-center"
+              style={{ left: "-95px", top: "-50px", width: "95px", height: "62px" }}
+            >
+              <div
+                className="bg-[rgba(156,168,137,0.88)] h-[30px] w-[90px]"
+                style={{ transform: "rotate(-22deg)" }}
+              />
+            </div>
+
+            {/* Polaroid card */}
+            <div className="relative bg-[#faf6e9] rounded-[4px] shadow-[0px_8px_16px_0px_rgba(0,0,0,0.25)] w-[380px] h-[430px]">
+              <div
+                className="absolute rounded-[2px] overflow-hidden"
+                style={{ top: "33px", left: "24px", right: "26px", height: "307px" }}
+              >
+                <Image src={ownerPhotoUrl} alt={COPY.ownerAlt} fill sizes="330px" className="object-cover" />
+              </div>
+              <p
+                className="absolute font-display text-[14px] text-[#423926] tracking-[0.56px] whitespace-nowrap overflow-hidden text-ellipsis"
+                style={{ left: "24px", right: "26px", top: "380px", textAlign: "center" }}
+              >
+                {COPY.meetPrefix} {(business.users?.first_name ?? business.name).toUpperCase()}
+              </p>
+            </div>
+          </div>
+
+          {/* Text — full width below the photo so it can grow as long as it needs to */}
+          <p className="w-full font-body text-[20px] text-[#f3f5e7] leading-[1.6]">
+            <TextWithBreaks text={business.about_owner ?? ""} />
+          </p>
+        </div>
+      </div>
+      )}
+
+      {/* ── Desktop: Meet the Owner (short bio) ── */}
+      {showOwnerSection && !isLongOwnerBio && (
       <div className="hidden md:block bg-[#9ca889] py-[67px]">
         <div className="flex items-start pl-[139px] pr-[105px] gap-[253px]">
           {/* Polaroid — sits 31px lower than the text to match Figma */}

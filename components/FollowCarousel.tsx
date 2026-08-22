@@ -7,11 +7,9 @@ const PHOTOS = [
   "/breadcompany.JPG",
   "/farmers1.JPG",
   "/modestmix.JPG",
-  "/sasquatchsnacks.jpg",
-  "/market.JPG",
 ];
 
-const VISIBLE = 5;
+const VISIBLE = 3;
 const TOTAL = PHOTOS.length;
 
 // Three copies back-to-back so sliding past either edge always reveals more real
@@ -45,6 +43,27 @@ export default function FollowCarousel() {
 
   const trackWidthPercent = (TRACK.length / VISIBLE) * 100;
   const offsetPercent = (index * 100) / TRACK.length;
+  // With this few photos, every one already fits in view — sliding would just
+  // loop through identical copies, so skip the arrows/animation entirely.
+  const canScroll = TOTAL > VISIBLE;
+
+  if (!canScroll) {
+    return (
+      <div className="relative h-[320px] mt-8 overflow-hidden flex">
+        {PHOTOS.map((src, i) => (
+          <a
+            key={i}
+            href="https://www.instagram.com/checklocalfirstreno/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="h-full relative overflow-hidden flex-1"
+          >
+            <Image src={src} alt="" fill sizes="33vw" className="object-cover" />
+          </a>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="relative h-[320px] mt-8 overflow-hidden">

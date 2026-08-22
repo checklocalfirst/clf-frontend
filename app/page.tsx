@@ -415,29 +415,16 @@ export default async function HomePage() {
           <h2 className="font-display font-bold text-[17px] text-[#253022] tracking-[0.5px] uppercase w-full">{COPY.followCommunity.mobileHeading}</h2>
           <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="font-body text-[11px] text-[#596155] w-full hover:underline">{COPY.followCommunity.handle}</a>
         </div>
-        <div className="flex flex-col gap-[2px]">
-          <div className="flex gap-[2px] h-[128px]">
-            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden">
-              <Image src={IMG.ig1} alt="" fill sizes="33vw" className="object-cover" />
-            </a>
-            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden">
-              <Image src={IMG.ig2} alt="" fill sizes="33vw" className="object-cover" />
-            </a>
-            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden">
-              <Image src={IMG.ig3} alt="" fill sizes="33vw" className="object-cover" />
-            </a>
-          </div>
-          <div className="flex gap-[2px] h-[128px]">
-            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden">
-              <Image src={IMG.ig4} alt="" fill sizes="33vw" className="object-cover" />
-            </a>
-            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden">
-              <Image src={IMG.ig1} alt="" fill sizes="33vw" className="object-cover" />
-            </a>
-            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden">
-              <Image src={IMG.ig2} alt="" fill sizes="33vw" className="object-cover" />
-            </a>
-          </div>
+        <div className="flex gap-[2px] h-[128px]">
+          <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden">
+            <Image src={IMG.ig1} alt="" fill sizes="33vw" className="object-cover" />
+          </a>
+          <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden">
+            <Image src={IMG.ig2} alt="" fill sizes="33vw" className="object-cover" />
+          </a>
+          <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden">
+            <Image src={IMG.ig3} alt="" fill sizes="33vw" className="object-cover" />
+          </a>
         </div>
       </section>
 
