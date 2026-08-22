@@ -8,9 +8,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${siteUrl}/`, changeFrequency: "daily", priority: 1 },
     { url: `${siteUrl}/about`, changeFrequency: "monthly", priority: 0.5 },
-    { url: `${siteUrl}/businesses`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${siteUrl}/search`, changeFrequency: "daily", priority: 0.8 },
-    { url: `${siteUrl}/membership/businesses`, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${siteUrl}/membership/businesses`, changeFrequency: "monthly", priority: 0.6 },
   ];
 
   // GET /businesses only ever returns approved businesses (lib/directory.ts), so

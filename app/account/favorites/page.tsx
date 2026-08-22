@@ -39,7 +39,7 @@ export default function FavoritesPage() {
         <div className="bg-white border border-[#dbe0d9] rounded-[16px] p-8 text-center">
           <p className="font-body text-[14px] text-[#596155]">
             You haven&apos;t saved any businesses yet.{" "}
-            <Link href="/businesses" className="text-[#2c4a34] underline hover:text-[#253022]">
+            <Link href="/search" className="text-[#2c4a34] underline hover:text-[#253022]">
               Browse local businesses
             </Link>
             .

@@ -11,7 +11,6 @@ const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
   { label: "Search", href: "/search" },
-  { label: "Businesses", href: "/businesses" },
 ];
 
 const MEMBERSHIP_LINKS = [

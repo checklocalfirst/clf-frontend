@@ -23,7 +23,6 @@ const emptyForm: DiscountInput = {
   discount_type: "percent",
   value: 0,
   starts_at: "",
-  expires_at: "",
   max_redemptions: undefined,
   active: true,
 };
@@ -51,7 +50,6 @@ export default function DiscountsPage() {
       discount_type: d.discount_type,
       value: d.value,
       starts_at: d.starts_at ?? "",
-      expires_at: d.expires_at ?? "",
       max_redemptions: undefined,
       active: d.active,
     });
@@ -179,26 +177,14 @@ export default function DiscountsPage() {
               className="flex-1"
             />
           </div>
-          <div className="flex gap-3">
-            <FormField
-              label="Starts"
-              id="discount_starts_at"
-              type="date"
-              value={form.starts_at ?? ""}
-              onChange={(e) => setForm((f) => ({ ...f, starts_at: e.target.value }))}
-              error={fieldErrors.starts_at}
-              className="flex-1"
-            />
-            <FormField
-              label="Expires"
-              id="discount_expires_at"
-              type="date"
-              value={form.expires_at ?? ""}
-              onChange={(e) => setForm((f) => ({ ...f, expires_at: e.target.value }))}
-              error={fieldErrors.expires_at}
-              className="flex-1"
-            />
-          </div>
+          <FormField
+            label="Starts"
+            id="discount_starts_at"
+            type="date"
+            value={form.starts_at ?? ""}
+            onChange={(e) => setForm((f) => ({ ...f, starts_at: e.target.value }))}
+            error={fieldErrors.starts_at}
+          />
           <FormField
             label="Max Redemptions (optional)"
             id="discount_max"

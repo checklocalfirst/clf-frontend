@@ -65,7 +65,7 @@ export default function NeighborsCarousel({ businesses }: { businesses: Business
             <ArrowButton direction="left" onClick={() => scrollBy(mobileRef, "left", 220)} size="sm" />
             <ArrowButton direction="right" onClick={() => scrollBy(mobileRef, "right", 220)} size="sm" />
             <Link
-              href="/businesses"
+              href="/search"
               className="ml-1 font-display font-bold text-[9px] text-[#596155] tracking-[1.8px] uppercase underline"
             >
               View all
@@ -108,7 +108,7 @@ export default function NeighborsCarousel({ businesses }: { businesses: Business
             <ArrowButton direction="left" onClick={() => scrollBy(desktopRef, "left", 380)} />
             <ArrowButton direction="right" onClick={() => scrollBy(desktopRef, "right", 380)} />
             <Link
-              href="/businesses"
+              href="/search"
               className="ml-2 font-display font-bold text-[20px] text-[#253022] uppercase flex items-center gap-2 hover:opacity-70 transition-opacity"
             >
               View all businesses
