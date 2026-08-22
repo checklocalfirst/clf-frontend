@@ -541,13 +541,13 @@ export default async function BusinessDetailPage({
       {/* ── Desktop: Meet the Owner ── */}
       {showOwnerSection && isLongOwnerBio && (
       <div className="hidden md:block bg-[#9ca889] py-[67px]">
-        <div className="flex flex-col items-start pl-[139px] pr-[105px] gap-[48px]">
+        <div className="flex flex-col items-center text-center pl-[139px] pr-[105px] gap-[48px]">
           <h2 className="font-display font-bold text-[64px] text-[#f3f5e7] tracking-[0.64px] leading-none">
             {COPY.meetTheOwnerHeading}
           </h2>
 
           {/* Polaroid */}
-          <div className="relative flex-shrink-0 ml-[95px]">
+          <div className="relative flex-shrink-0">
             {/* Tape accent — offset relative to polaroid top-left */}
             <div
               className="absolute flex items-center justify-center"
@@ -577,7 +577,7 @@ export default async function BusinessDetailPage({
           </div>
 
           {/* Text — full width below the photo so it can grow as long as it needs to */}
-          <p className="w-full font-body text-[20px] text-[#f3f5e7] leading-[1.6]">
+          <p className="w-full text-left font-body text-[20px] text-[#f3f5e7] leading-[1.6]">
             <TextWithBreaks text={business.about_owner ?? ""} />
           </p>
         </div>
