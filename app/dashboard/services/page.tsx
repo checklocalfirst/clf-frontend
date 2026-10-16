@@ -129,7 +129,7 @@ export default function ServicesPage() {
       {editingId !== null && (
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 bg-white border border-[#dbe0d9] rounded-[16px] p-6">
           <FormField
-            label="Name"
+            label="Offering"
             id="service_name"
             value={form.name}
             onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
