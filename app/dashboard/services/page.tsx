@@ -136,7 +136,7 @@ export default function ServicesPage() {
             error={fieldErrors.name}
           />
           <FormField
-            label="Description"
+            label="Keywords"
             id="service_description"
             as="textarea"
             value={form.description ?? ""}
