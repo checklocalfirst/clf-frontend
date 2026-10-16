@@ -39,7 +39,7 @@ const COPY = {
     basicTier: "BASIC",
     basicPrice: "$19.99/month",
     premiumTier: "PREMIUM",
-    premiumPrice: "$49.98/month",
+    premiumPrice: "$49.99/month",
     couponLabel: "Coupon Code (optional)",
     couponPlaceholder: "Enter a code",
     submitIdle: "CONTINUE TO PAYMENT",
