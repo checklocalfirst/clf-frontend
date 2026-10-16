@@ -123,7 +123,7 @@ const PRICING_CARDS = {
     features: COMMUNITY_FEATURES,
   },
   premium: {
-    price: "$49.99",
+    price: "$49.98",
     tier: COPY.premium.tier,
     extraLine: COPY.premium.everythingLine,
     features: PREMIUM_FEATURES,
