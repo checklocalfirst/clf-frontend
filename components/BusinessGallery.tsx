@@ -99,17 +99,12 @@ export default function BusinessGallery({
     <>
       {/* ── Desktop ── */}
       <div className="hidden md:block bg-[#faf6e9] px-[64px] pt-[16px] pb-[48px]">
-        <div className="flex items-center justify-between mb-[24px]">
-          <h2 className="font-display font-bold text-[64px] text-[#423926] tracking-[0.64px] leading-none">
-            GALLERY
-          </h2>
-          {scrollable && (
-            <div className="flex items-center gap-3 flex-shrink-0">
-              <ArrowButton direction="left" onClick={() => scrollBy(desktopRef, "left", 400)} />
-              <ArrowButton direction="right" onClick={() => scrollBy(desktopRef, "right", 400)} />
-            </div>
-          )}
-        </div>
+        {scrollable && (
+          <div className="flex items-center justify-end gap-3 mb-[24px]">
+            <ArrowButton direction="left" onClick={() => scrollBy(desktopRef, "left", 400)} />
+            <ArrowButton direction="right" onClick={() => scrollBy(desktopRef, "right", 400)} />
+          </div>
+        )}
         <div
           ref={desktopRef}
           onMouseEnter={() => scrollable && setPaused(true)}
@@ -145,17 +140,12 @@ export default function BusinessGallery({
 
       {/* ── Mobile ── */}
       <div className="md:hidden px-[16px] pt-[8px] pb-[32px]">
-        <div className="flex items-center justify-between mb-[16px]">
-          <h2 className="font-display font-bold text-[26px] text-[#423926] tracking-[0.26px] leading-none">
-            GALLERY
-          </h2>
-          {scrollable && (
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <ArrowButton direction="left" onClick={() => scrollBy(mobileRef, "left", 220)} size="sm" />
-              <ArrowButton direction="right" onClick={() => scrollBy(mobileRef, "right", 220)} size="sm" />
-            </div>
-          )}
-        </div>
+        {scrollable && (
+          <div className="flex items-center justify-end gap-2 mb-[16px]">
+            <ArrowButton direction="left" onClick={() => scrollBy(mobileRef, "left", 220)} size="sm" />
+            <ArrowButton direction="right" onClick={() => scrollBy(mobileRef, "right", 220)} size="sm" />
+          </div>
+        )}
         <div
           ref={mobileRef}
           onTouchStart={() => scrollable && pauseThenResume()}
