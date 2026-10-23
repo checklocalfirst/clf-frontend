@@ -14,6 +14,8 @@ const LINKS = [
   { label: "Services", href: "/admin/services" },
   { label: "Categories", href: "/admin/categories" },
   { label: "Search synonyms", href: "/admin/search-synonyms" },
+  { label: "Missed searches", href: "/admin/search-misses" },
+  { label: "Activity", href: "/admin/activity" },
 ];
 
 export default function AdminShell({ children }: { children: ReactNode }) {

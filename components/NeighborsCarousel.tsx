@@ -8,6 +8,7 @@ interface Business {
   category: string;
   name: string;
   neighborhood: string;
+  addressLabel?: string | null;
   description?: string | null;
   img: string | null;
   href: string;
@@ -86,6 +87,9 @@ export default function NeighborsCarousel({ businesses }: { businesses: Business
                   {b.category}
                 </p>
                 <p className="font-display font-bold text-[13px] text-[#253022] leading-[19px]">{b.name}</p>
+                {b.addressLabel && (
+                  <p className="font-body font-semibold text-[10px] text-[#423926]">{b.addressLabel}</p>
+                )}
                 <p className="font-body text-[10px] text-[#596155]">{b.neighborhood}</p>
               </div>
               <div className="border border-[#253022] flex items-center justify-center py-[11px] rounded-[2px]">
@@ -130,6 +134,9 @@ export default function NeighborsCarousel({ businesses }: { businesses: Business
               <div className="relative aspect-square rounded-[8px] overflow-hidden bg-[#b7a78c] flex-shrink-0">
                 {b.img && <Image src={b.img} alt={b.name} fill sizes="360px" className="object-cover" />}
               </div>
+              {b.addressLabel && (
+                <p className="font-body font-semibold text-[16px] text-[#423926] line-clamp-1">{b.addressLabel}</p>
+              )}
               <p className="font-body text-[20px] text-[#596155] leading-[1.5] line-clamp-2">
                 {b.description ?? b.neighborhood}
               </p>

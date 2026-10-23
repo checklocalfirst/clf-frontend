@@ -123,6 +123,7 @@ export default async function HomePage() {
     category: b.categoryNames[0] ?? "Local Business",
     name: b.name,
     neighborhood: `${b.city}, ${b.state}`,
+    addressLabel: b.address_label?.trim() || null,
     description: b.description,
     img: neighborPhotos[i] ?? null,
     href: `/businesses/${b.slug}`,

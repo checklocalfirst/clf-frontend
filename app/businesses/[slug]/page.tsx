@@ -12,7 +12,13 @@ import FavoriteButton from "@/components/FavoriteButton";
 import BusinessGallery from "@/components/BusinessGallery";
 import BusinessHoursButton from "@/components/BusinessHoursButton";
 import TextWithBreaks from "@/components/TextWithBreaks";
-import { getBusinessBySlug, getBusinessPhotos, trackBusinessEvent } from "@/lib/directory";
+import {
+  cityLine,
+  fullStreetAddress,
+  getBusinessBySlug,
+  getBusinessPhotos,
+  trackBusinessEvent,
+} from "@/lib/directory";
 import { getPublicDiscounts } from "@/lib/business-dashboard";
 import { ApiError } from "@/lib/api";
 import { getSiteUrl } from "@/lib/site";
@@ -120,8 +126,13 @@ export default async function BusinessDetailPage({
   const heroPhotoUrl = listingPhoto?.photo_url ?? HERO_IMG;
   const ownerPhotoUrl = ownerPhoto?.photo_url ?? OWNER_IMG;
 
-  const fullAddress = `${business.address}, ${business.city}, ${business.state} ${business.zip}`;
-  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`;
+  // Null when the owner hid their street address — then there's no map link at all,
+  // just the city/neighborhood line.
+  const fullAddress = fullStreetAddress(business);
+  const mapsUrl = fullAddress
+    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`
+    : null;
+  const addressLabel = business.address_label?.trim() || null;
   const phoneDigits = business.phone.replace(/\D/g, "");
 
   const timelineEntries = (
@@ -156,10 +167,10 @@ export default async function BusinessDetailPage({
     image: listingPhoto?.photo_url ?? heroPhotoUrl,
     address: {
       "@type": "PostalAddress",
-      streetAddress: business.address,
+      streetAddress: business.address ?? undefined,
       addressLocality: business.city,
       addressRegion: business.state,
-      postalCode: business.zip,
+      postalCode: business.zip ?? undefined,
       addressCountry: "US",
     },
     ...(business.website_url ? { sameAs: [business.website_url] } : {}),
@@ -238,16 +249,23 @@ export default async function BusinessDetailPage({
           <h1 className="font-display font-bold text-[64px] text-[#423926] tracking-[-0.32px] leading-none">
             {business.name.toUpperCase()}
           </h1>
-          <TrackedLink
-            slug={business.slug}
-            event="address_click"
-            href={mapsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block font-body text-[20px] text-[rgba(66,57,38,0.8)] max-w-[500px] hover:opacity-70 transition-opacity"
-          >
-            {fullAddress}
-          </TrackedLink>
+          {addressLabel && (
+            <p className="font-body font-semibold text-[18px] text-[#423926] max-w-[500px]">{addressLabel}</p>
+          )}
+          {mapsUrl ? (
+            <TrackedLink
+              slug={business.slug}
+              event="address_click"
+              href={mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block font-body text-[20px] text-[rgba(66,57,38,0.8)] max-w-[500px] hover:opacity-70 transition-opacity"
+            >
+              {fullAddress}
+            </TrackedLink>
+          ) : (
+            <p className="font-body text-[20px] text-[rgba(66,57,38,0.8)] max-w-[500px]">{cityLine(business)}</p>
+          )}
           {business.hours && (
             <BusinessHoursButton
               hours={business.hours}
@@ -359,16 +377,25 @@ export default async function BusinessDetailPage({
         <h1 className="font-display font-bold text-[30px] text-[#423926] tracking-[-0.15px] leading-tight mt-[12px]">
           {business.name.toUpperCase()}
         </h1>
-        <TrackedLink
-          slug={business.slug}
-          event="address_click"
-          href={mapsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block font-body text-[20px] text-[rgba(66,57,38,0.8)] mt-[16px] hover:opacity-70 transition-opacity"
-        >
-          {fullAddress}
-        </TrackedLink>
+        {addressLabel && (
+          <p className="font-body font-semibold text-[16px] text-[#423926] mt-[16px]">{addressLabel}</p>
+        )}
+        {mapsUrl ? (
+          <TrackedLink
+            slug={business.slug}
+            event="address_click"
+            href={mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`block font-body text-[20px] text-[rgba(66,57,38,0.8)] hover:opacity-70 transition-opacity ${addressLabel ? "mt-[4px]" : "mt-[16px]"}`}
+          >
+            {fullAddress}
+          </TrackedLink>
+        ) : (
+          <p className={`font-body text-[20px] text-[rgba(66,57,38,0.8)] ${addressLabel ? "mt-[4px]" : "mt-[16px]"}`}>
+            {cityLine(business)}
+          </p>
+        )}
         {business.hours && (
           <BusinessHoursButton
             hours={business.hours}

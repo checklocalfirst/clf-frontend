@@ -50,6 +50,8 @@ function buildForm(business: BusinessFull): AdminBusinessEditInput {
     latitude: business.latitude ?? undefined,
     longitude: business.longitude ?? undefined,
     neighborhood: business.neighborhood ?? "",
+    address_label: business.address_label ?? "",
+    hide_address: !!business.hide_address,
   };
 }
 
@@ -123,10 +125,15 @@ export default function AdminBusinessProfilePage() {
       // validates url/number fields whenever they're present at all, and "" fails both
       // (e.g. an unset website_url, or a blank timeline_year coercing to 0).
       const patch: AdminBusinessEditInput = {};
-      for (const [key, value] of Object.entries(form) as [keyof AdminBusinessEditInput, unknown][]) {
+      const { address_label, hide_address, ...rest } = form;
+      for (const [key, value] of Object.entries(rest) as [keyof AdminBusinessEditInput, unknown][]) {
         if (value === "") continue;
         if (value !== undefined) (patch as Record<string, unknown>)[key] = value;
       }
+      // Only when changed — "" is how a label gets cleared, so it can't go through the loop above.
+      const label = (address_label ?? "").trim();
+      if (label !== (business.address_label ?? "")) patch.address_label = label;
+      if (hide_address !== !!business.hide_address) patch.hide_address = hide_address;
       // Optional key — only send it when admin actually edited hours, never as
       // null/partial.
       if (hoursTouched) patch.hours = hoursForm;
@@ -282,6 +289,24 @@ export default function AdminBusinessProfilePage() {
           <FormField label="City" id="admin_city" value={form.city ?? ""} onChange={(e) => set("city", e.target.value)} error={fieldErrors.city} className="flex-1" />
           <FormField label="State" id="admin_state" value={form.state ?? ""} onChange={(e) => set("state", e.target.value)} error={fieldErrors.state} className="w-24" />
           <FormField label="Zip" id="admin_zip" value={form.zip ?? ""} onChange={(e) => set("zip", e.target.value)} error={fieldErrors.zip} className="w-28" />
+        </div>
+        <FormField
+          label="Address label"
+          id="admin_address_label"
+          value={form.address_label ?? ""}
+          onChange={(e) => set("address_label", e.target.value)}
+          error={fieldErrors.address_label}
+          maxLength={100}
+          placeholder="Find us at the Riverside Market"
+        />
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="font-body text-[14px] text-[#423926]">Hide street address</p>
+            <p className="font-body text-[12px] text-[#b7a78c] mt-1">
+              Public pages show city and neighborhood only — no street address or map pin.
+            </p>
+          </div>
+          <Toggle checked={!!form.hide_address} onChange={(next) => set("hide_address", next)} label="Hide street address" />
         </div>
         <div className="flex flex-col gap-4 sm:flex-row">
           <FormField label="Phone" id="admin_phone" value={form.phone ?? ""} onChange={(e) => set("phone", e.target.value)} error={fieldErrors.phone} className="flex-1" />

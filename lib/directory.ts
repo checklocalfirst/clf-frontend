@@ -30,10 +30,14 @@ export interface Business {
   id: number;
   name: string;
   description: string | null;
-  address: string;
+  // Public routes null address/zip (and latitude/longitude) when hide_address is on;
+  // GET /businesses/me and /admin/* always return the real values.
+  address: string | null;
   city: string;
   state: string;
-  zip: string;
+  zip: string | null;
+  address_label?: string | null;
+  hide_address?: boolean;
   phone: string;
   email: string;
   slug: string;
@@ -204,6 +208,25 @@ export function searchBusinesses(
     params.set("radius_miles", String(location.radiusMiles));
   }
   return apiFetch<SearchResponse>(`/search?${params.toString()}`);
+}
+
+// "City, ST", prefixed with the neighborhood when there is one — what shoppers see in
+// place of a street address when it's hidden.
+export function cityLine(b: Pick<Business, "city" | "state" | "neighborhood">): string {
+  const city = `${b.city}, ${b.state}`;
+  return b.neighborhood ? `${b.neighborhood} · ${city}` : city;
+}
+
+// Full street address, or null when the owner hid it (the public API nulls the street).
+export function fullStreetAddress(b: Pick<Business, "address" | "city" | "state" | "zip">): string | null {
+  if (!b.address) return null;
+  return `${b.address}, ${b.city}, ${b.state}${b.zip ? ` ${b.zip}` : ""}`;
+}
+
+// Hidden-address businesses get a whole-number distance from the API — show it as sent
+// rather than padding it to a fake "3.0".
+export function formatMiles(miles: number): string {
+  return `${Number.isInteger(miles) ? miles : miles.toFixed(1)} mi`;
 }
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;

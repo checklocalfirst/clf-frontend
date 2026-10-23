@@ -18,10 +18,14 @@ import FormField from "@/components/FormField";
 import HoursEditor from "@/components/HoursEditor";
 import MultiSelect from "@/components/dashboard/MultiSelect";
 import PremiumUpsell from "@/components/dashboard/PremiumUpsell";
+import Toggle from "@/components/dashboard/Toggle";
 import { useToast } from "@/components/dashboard/ToastProvider";
 import { ApiError } from "@/lib/api";
 
-const BASIC_FIELD_KEYS: (keyof BusinessProfileInput)[] = [
+// The plain text fields — address_label/hide_address have their own state below.
+type TextFieldKey = Exclude<keyof BusinessProfileInput, "address_label" | "hide_address">;
+
+const BASIC_FIELD_KEYS: TextFieldKey[] = [
   "name",
   "description",
   "address",
@@ -37,7 +41,7 @@ const BASIC_FIELD_KEYS: (keyof BusinessProfileInput)[] = [
   "yelp_url",
 ];
 
-const PREMIUM_FIELD_KEYS: (keyof BusinessProfileInput)[] = [
+const PREMIUM_FIELD_KEYS: TextFieldKey[] = [
   "timeline_year_1",
   "timeline_description_1",
   "timeline_year_2",
@@ -83,6 +87,10 @@ export default function BusinessProfilePage() {
   );
 
   const [form, setForm] = useState<BusinessProfileInput>(() => buildForm(business));
+  // Kept apart from `form`: a blank label has to be sent (as "") to clear it, unlike the
+  // fields above where blanks are omitted, and hide_address is the form's only boolean.
+  const [addressLabel, setAddressLabel] = useState(business.address_label ?? "");
+  const [hideAddress, setHideAddress] = useState(!!business.hide_address);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
@@ -98,6 +106,8 @@ export default function BusinessProfilePage() {
   if (business !== prevBusiness) {
     setPrevBusiness(business);
     setForm(buildForm(business));
+    setAddressLabel(business.address_label ?? "");
+    setHideAddress(!!business.hide_address);
     setHoursForm(business.hours ?? DEFAULT_HOURS);
   }
 
@@ -126,6 +136,9 @@ export default function BusinessProfilePage() {
         // backend validates url/number fields whenever they're present at all.
         if (value !== undefined && value !== "") (patch as Record<string, string>)[key] = value;
       }
+      // Only when changed — "" is how a label gets cleared.
+      if (addressLabel.trim() !== (business.address_label ?? "")) patch.address_label = addressLabel.trim();
+      if (hideAddress !== !!business.hide_address) patch.hide_address = hideAddress;
       await updateMyBusiness(token, business.slug, patch);
       // Don't trust the PUT response's shape for the form — same reasoning as
       // handleSaveCategories below: re-fetch the canonical row from GET /businesses/me
@@ -220,6 +233,25 @@ export default function BusinessProfilePage() {
           <FormField label="State" id="state" value={form.state ?? ""} onChange={(e) => set("state", e.target.value)} error={fieldErrors.state} className="w-24" />
           <FormField label="Zip" id="zip" value={form.zip ?? ""} onChange={(e) => set("zip", e.target.value)} error={fieldErrors.zip} className="w-28" />
         </div>
+        <FormField
+          label="Address label"
+          id="address_label"
+          value={addressLabel}
+          onChange={(e) => setAddressLabel(e.target.value)}
+          error={fieldErrors.address_label}
+          maxLength={100}
+          placeholder="Find us at the Riverside Market"
+          hint="Optional — shown above your address on your public page."
+        />
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="font-body font-semibold text-[13px] text-[#423926]">Hide my street address</p>
+            <p className="font-body text-[12px] text-[#b7a78c] mt-1">
+              Shoppers will see your city and neighborhood, but not your street address or map pin.
+            </p>
+          </div>
+          <Toggle checked={hideAddress} onChange={setHideAddress} label="Hide my street address" />
+        </div>
         <FormField label="Phone" id="phone" type="tel" value={form.phone ?? ""} onChange={(e) => set("phone", e.target.value)} error={fieldErrors.phone} />
 
         <p className="font-display font-bold text-[11px] text-[#b7a78c] uppercase tracking-widest pt-2">
@@ -250,7 +282,7 @@ export default function BusinessProfilePage() {
                 <FormField
                   label={`Timeline Year ${n}`}
                   id={`timeline_year_${n}`}
-                  value={form[`timeline_year_${n}` as keyof BusinessProfileInput] ?? ""}
+                  value={form[`timeline_year_${n}` as TextFieldKey] ?? ""}
                   onChange={(e) => set(`timeline_year_${n}` as keyof BusinessProfileInput, e.target.value)}
                   error={fieldErrors[`timeline_year_${n}`]}
                   className="w-32"
@@ -258,7 +290,7 @@ export default function BusinessProfilePage() {
                 <FormField
                   label={`Timeline ${n} Description`}
                   id={`timeline_description_${n}`}
-                  value={form[`timeline_description_${n}` as keyof BusinessProfileInput] ?? ""}
+                  value={form[`timeline_description_${n}` as TextFieldKey] ?? ""}
                   onChange={(e) => set(`timeline_description_${n}` as keyof BusinessProfileInput, e.target.value)}
                   error={fieldErrors[`timeline_description_${n}`]}
                   className="flex-1"

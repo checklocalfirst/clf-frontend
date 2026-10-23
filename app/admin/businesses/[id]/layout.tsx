@@ -23,6 +23,7 @@ export default function AdminBusinessLayout({
     { label: "Photos", href: `/admin/businesses/${id}/photos` },
     { label: "Discounts", href: `/admin/businesses/${id}/discounts` },
     { label: "Analytics", href: `/admin/businesses/${id}/analytics` },
+    { label: "Activity", href: `/admin/businesses/${id}/activity` },
   ];
 
   return (

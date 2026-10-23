@@ -57,6 +57,11 @@ export default function FavoritesPage() {
               <p className="font-display font-bold text-[16px] text-[#253022] truncate">
                 {fav.businesses.name}
               </p>
+              {fav.businesses.address_label?.trim() && (
+                <p className="font-body font-semibold text-[13px] text-[#423926] truncate">
+                  {fav.businesses.address_label}
+                </p>
+              )}
               <p className="font-body text-[13px] text-[#596155] truncate">
                 {fav.businesses.city}, {fav.businesses.state}
               </p>

@@ -15,6 +15,9 @@ export interface BusinessProfileInput {
   facebook_url?: string;
   instagram_url?: string;
   yelp_url?: string;
+  // All tiers. "" or null clears the label.
+  address_label?: string | null;
+  hide_address?: boolean;
   // premium-only — a basic-tier business gets a 403 if these are present at all,
   // so omit the keys entirely rather than sending them as empty/undefined
   timeline_year_1?: string;

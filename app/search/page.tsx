@@ -28,6 +28,7 @@ import {
   searchBusinesses,
   type Category,
   type SearchResult,
+  formatMiles,
 } from "@/lib/directory";
 
 export const metadata: Metadata = {
@@ -109,6 +110,7 @@ interface ResultCard {
   isNew: boolean;
   href: string;
   distanceMiles?: number;
+  addressLabel?: string;
 }
 
 interface SearchView {
@@ -136,6 +138,7 @@ async function toResultCards(results: SearchResult[]): Promise<ResultCard[]> {
     isNew: isNewBusiness(business.created_at),
     href: `/businesses/${business.slug}`,
     distanceMiles: distance_miles,
+    addressLabel: business.address_label?.trim() || undefined,
   }));
 }
 
@@ -194,6 +197,7 @@ async function getSearchView(
     photo: photos[i],
     isNew: b.isNew,
     href: `/businesses/${b.slug}`,
+    addressLabel: b.address_label?.trim() || undefined,
   }));
   return { cards, relatedCards: [] };
 }
@@ -414,9 +418,12 @@ function ResultsBlock({ cards }: { cards: ResultCard[] }) {
               <p className="font-display font-bold text-[20px] text-[#423926] uppercase underline leading-tight">
                 {card.name}
               </p>
+              {card.addressLabel && (
+                <p className="font-mono font-semibold text-[13px] text-[#423926] -mb-[6px]">{card.addressLabel}</p>
+              )}
               <p className="font-mono text-[13px] text-[#b7a78c]">
                 {card.location}
-                {card.distanceMiles != null && ` · ${card.distanceMiles.toFixed(1)} mi`}
+                {card.distanceMiles != null && ` · ${formatMiles(card.distanceMiles)}`}
               </p>
               <p className="font-mono text-[14px] text-[#423926] leading-snug line-clamp-2">
                 {firstSentence(card.description)}
@@ -456,9 +463,12 @@ function ResultsBlock({ cards }: { cards: ResultCard[] }) {
               <p className="font-display font-bold text-[16px] text-[#423926] uppercase underline leading-tight">
                 {card.name}
               </p>
+              {card.addressLabel && (
+                <p className="font-mono font-semibold text-[12px] text-[#423926] -mb-[4px]">{card.addressLabel}</p>
+              )}
               <p className="font-mono text-[12px] text-[#b7a78c]">
                 {card.location}
-                {card.distanceMiles != null && ` · ${card.distanceMiles.toFixed(1)} mi`}
+                {card.distanceMiles != null && ` · ${formatMiles(card.distanceMiles)}`}
               </p>
               <p className="font-mono text-[13px] text-[#423926] leading-snug line-clamp-2">
                 {firstSentence(card.description)}
@@ -490,9 +500,14 @@ function ResultsBlock({ cards }: { cards: ResultCard[] }) {
                   </p>
                   <p className="font-mono text-[12px] md:text-[13px] text-[#b7a78c] whitespace-nowrap flex-shrink-0">
                     {item.location}
-                    {item.distanceMiles != null && ` · ${item.distanceMiles.toFixed(1)} mi`}
+                    {item.distanceMiles != null && ` · ${formatMiles(item.distanceMiles)}`}
                   </p>
                 </div>
+                {item.addressLabel && (
+                  <p className="font-mono font-semibold text-[12px] md:text-[13px] text-[#423926] truncate">
+                    {item.addressLabel}
+                  </p>
+                )}
 
                 {/* Category tag */}
                 <div className="bg-[#c9d2cf] self-start px-3 py-[4px] rounded-full">

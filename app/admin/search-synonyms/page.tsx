@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { use, useState, type FormEvent } from "react";
 import { useToken } from "@/lib/auth";
 import { useApiResource } from "@/lib/useApiResource";
 import {
@@ -16,7 +16,14 @@ import { ApiError } from "@/lib/api";
 
 const emptyForm = { term: "", synonym: "" };
 
-export default function AdminSearchSynonymsPage() {
+export default function AdminSearchSynonymsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  // ?term= prefills the form — the "Add synonym" shortcut on Missed searches links here.
+  const rawTerm = use(searchParams).term;
+  const initialTerm = typeof rawTerm === "string" ? rawTerm : "";
   const token = useToken();
   const toast = useToast();
   const confirm = useConfirm();
@@ -25,7 +32,7 @@ export default function AdminSearchSynonymsPage() {
     getSearchSynonyms(token)
   );
 
-  const [form, setForm] = useState(emptyForm);
+  const [form, setForm] = useState({ ...emptyForm, term: initialTerm });
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
