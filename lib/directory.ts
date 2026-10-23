@@ -116,6 +116,9 @@ export interface SearchFallback {
 
 export interface SearchResponse extends Paginated<SearchResult> {
   fallback?: SearchFallback;
+  // Text searches only: the auto-corrected wording the results also matched, or null
+  // when the search ran exactly as typed.
+  corrected_query?: string | null;
 }
 
 export interface EnrichedBusiness extends Business {

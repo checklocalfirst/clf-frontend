@@ -65,6 +65,7 @@ const COPY = {
   relatedResultsLabel: "Related results",
   didYouMeanPrefix: "Did you mean",
   fallbackHeading: "No exact matches — you might like",
+  correctedQueryPrefix: "Showing results for",
 };
 
 interface CategoryTile {
@@ -119,6 +120,8 @@ interface SearchView {
   relatedCards: ResultCard[];
   // Only when a search with input came back empty
   fallback?: { didYouMean: string | null; cards: ResultCard[] };
+  // Set when a text search was auto-corrected (e.g. "blankit" → "blanket")
+  correctedQuery?: string;
 }
 
 async function toResultCards(results: SearchResult[]): Promise<ResultCard[]> {
@@ -154,7 +157,7 @@ async function getSearchView(
   // Distance filtering only exists on /search, so a location fix routes through the
   // same path as a text/category search, even with neither of those actually set.
   if (query || category || coords) {
-    const { data: results, fallback } = await searchBusinesses(
+    const { data: results, fallback, corrected_query } = await searchBusinesses(
       query,
       category,
       undefined,
@@ -184,6 +187,7 @@ async function getSearchView(
       cards,
       relatedCards,
       fallback: fallback && { didYouMean: fallback.did_you_mean, cards: fallbackCards },
+      correctedQuery: corrected_query?.trim() || undefined,
     };
   }
 
@@ -233,7 +237,7 @@ export default async function SearchPage({
   const lng = lngStr !== undefined ? Number(lngStr) : NaN;
   const coords = Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : undefined;
 
-  const [{ cards, relatedCards, fallback }, categories] = await Promise.all([
+  const [{ cards, relatedCards, fallback, correctedQuery }, categories] = await Promise.all([
     getSearchView(query, category, coords),
     getCategories(),
   ]);
@@ -328,6 +332,12 @@ export default async function SearchPage({
           </div>
         </div>
       </div>
+
+      {correctedQuery && (
+        <p className="font-mono text-[12px] md:text-[13px] text-[#b7a78c] pb-3 md:pb-4">
+          {COPY.correctedQueryPrefix} <strong className="font-bold text-[#423926]">{correctedQuery}</strong>
+        </p>
+      )}
 
       {/* ── Business Grid + List ── */}
       <section className="pb-8 md:pb-12">
