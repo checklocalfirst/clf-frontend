@@ -26,6 +26,8 @@ export default function DiscountRedeemButton({
   const toast = useToast();
   const [code, setCode] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  // Set after a 409 (redeem contention) so the button invites another click.
+  const [canRetry, setCanRetry] = useState(false);
 
   async function handleClick() {
     trackBusinessEvent(slug, "discount_click");
@@ -40,12 +42,16 @@ export default function DiscountRedeemButton({
     if (code || loading) return;
 
     setLoading(true);
+    setCanRetry(false);
     try {
       const result = await redeemDiscount(token, slug, discountId);
       setCode(result.code);
     } catch (err) {
       if (err instanceof ApiError && err.status === 403) {
         toast.error("Premium membership required to use this discount.");
+      } else if (err instanceof ApiError && err.status === 409) {
+        toast.error(err.message);
+        setCanRetry(true);
       } else {
         toast.error(err instanceof ApiError ? err.message : "Couldn't reveal your discount code.");
       }
@@ -57,7 +63,15 @@ export default function DiscountRedeemButton({
   return (
     <button type="button" onClick={handleClick} disabled={loading} className={className}>
       <span className={textClassName}>
-        {code ? `CODE: ${code}` : loading ? "..." : token ? "REVEAL CODE" : "SIGN UP TO USE DISCOUNT"}
+        {code
+          ? `CODE: ${code}`
+          : loading
+            ? "..."
+            : !token
+              ? "SIGN UP TO USE DISCOUNT"
+              : canRetry
+                ? "TRY AGAIN"
+                : "REVEAL CODE"}
       </span>
     </button>
   );

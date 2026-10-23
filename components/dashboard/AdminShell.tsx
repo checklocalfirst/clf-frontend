@@ -13,6 +13,7 @@ const LINKS = [
   { label: "Users", href: "/admin/users" },
   { label: "Services", href: "/admin/services" },
   { label: "Categories", href: "/admin/categories" },
+  { label: "Search synonyms", href: "/admin/search-synonyms" },
 ];
 
 export default function AdminShell({ children }: { children: ReactNode }) {

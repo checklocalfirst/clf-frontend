@@ -82,7 +82,12 @@ export async function apiFetch<T = unknown>(
 
   // Success envelope: { success: true, data }, { success: true, data, pagination }, or { success: true, message }
   if ("data" in body) {
-    if ("pagination" in body) return { data: body.data, pagination: body.pagination } as T;
+    if ("pagination" in body) {
+      // Keep any extra top-level fields alongside the page (e.g. /search's `fallback`).
+      const page = { ...body };
+      delete page.success;
+      return page as T;
+    }
     return body.data as T;
   }
   return body as T;

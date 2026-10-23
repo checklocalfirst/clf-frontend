@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -136,6 +137,9 @@ export default async function BusinessDetailPage({
       img: timelinePhotos.find((p) => p.timeline_slot === t.slot)?.photo_url,
     }));
   const showTimeline = business.business_tier === "premium" && timelineEntries.length > 0;
+  const hasTimelinePhoto = timelineEntries.some((t) => t.img);
+  const showTimelineDots = timelineEntries.length > 1;
+  const timelineDotRow = hasTimelinePhoto ? 2 : 1;
   const showOwnerSection = !!business.about_owner?.trim() && !!ownerPhoto;
   // Past this length the side-by-side layout leaves the polaroid stranded above
   // a lot of empty space, so switch to a stacked (photo-above-text) layout.
@@ -452,7 +456,8 @@ export default async function BusinessDetailPage({
       </div>
 
       {/* ── Mobile: Hero Photo + Pilot Badge ── */}
-      <div className="md:hidden relative mx-[16px] mt-[24px] h-[240px] bg-[#c96f47] rounded-[12px] overflow-hidden">
+      {/* TEMP: hero hidden — swap `hidden` back to `md:hidden` to restore */}
+      <div className="hidden relative mx-[16px] mt-[24px] h-[240px] bg-[#c96f47] rounded-[12px] overflow-hidden">
         <Image src={heroPhotoUrl} alt={`${business.name} ${COPY.heroAltSuffix}`} fill priority sizes="100vw" className="object-cover" />
         {business.pilot_business && (
           <div className="absolute z-10 bottom-[8px] right-[8px] w-[96px] h-[82px]">
@@ -468,10 +473,14 @@ export default async function BusinessDetailPage({
         )}
       </div>
 
+      {/* ── Gallery ── */}
+      <BusinessGallery photos={galleryPhotos} businessName={business.name} />
+
       {/* ── Desktop: Hero Photo + About + Pilot Badge ── */}
       <div className="hidden md:block relative">
         {/* Hero Photo */}
-        <div className="relative h-[700px] bg-[#b7a78c] overflow-hidden">
+        {/* TEMP: hero hidden — remove `hidden` to restore */}
+        <div className="hidden relative h-[700px] bg-[#b7a78c] overflow-hidden">
           <Image
             src={heroPhotoUrl}
             alt={`${business.name} ${COPY.heroAltSuffix}`}
@@ -493,9 +502,10 @@ export default async function BusinessDetailPage({
         </div>
 
         {/* Pilot Business Badge */}
+        {/* TEMP: hidden with the hero (it's positioned over the hero) — remove `hidden` to restore */}
         {business.pilot_business && (
         <div
-          className="absolute z-10"
+          className="hidden absolute z-10"
           style={{ top: "569px", right: "40px", width: "292px", height: "248px" }}
         >
           <Image
@@ -520,8 +530,6 @@ export default async function BusinessDetailPage({
         </p>
       </div>
 
-      {/* ── Gallery ── */}
-      <BusinessGallery photos={galleryPhotos} businessName={business.name} />
 
       {/* ── Desktop: Meet the Owner ── */}
       {showOwnerSection && isLongOwnerBio && (
@@ -545,16 +553,16 @@ export default async function BusinessDetailPage({
             </div>
 
             {/* Polaroid card */}
-            <div className="relative bg-[#faf6e9] rounded-[4px] shadow-[0px_8px_16px_0px_rgba(0,0,0,0.25)] w-[380px] h-[430px]">
+            <div className="relative bg-[#faf6e9] rounded-[4px] shadow-[0px_8px_16px_0px_rgba(0,0,0,0.25)] w-[380px] h-[453px]">
               <div
                 className="absolute rounded-[2px] overflow-hidden"
-                style={{ top: "33px", left: "24px", right: "26px", height: "307px" }}
+                style={{ top: "33px", left: "24px", right: "26px", height: "330px" }}
               >
                 <Image src={ownerPhotoUrl} alt={COPY.ownerAlt} fill sizes="330px" className="object-cover" />
               </div>
               <p
                 className="absolute font-display text-[14px] text-[#423926] tracking-[0.56px] whitespace-nowrap overflow-hidden text-ellipsis"
-                style={{ left: "24px", right: "26px", top: "380px", textAlign: "center" }}
+                style={{ left: "24px", right: "26px", top: "403px", textAlign: "center" }}
               >
                 {COPY.meetPrefix} {(business.users?.first_name ?? business.name).toUpperCase()}
               </p>
@@ -587,16 +595,16 @@ export default async function BusinessDetailPage({
             </div>
 
             {/* Polaroid card */}
-            <div className="relative bg-[#faf6e9] rounded-[4px] shadow-[0px_8px_16px_0px_rgba(0,0,0,0.25)] w-[380px] h-[430px]">
+            <div className="relative bg-[#faf6e9] rounded-[4px] shadow-[0px_8px_16px_0px_rgba(0,0,0,0.25)] w-[380px] h-[453px]">
               <div
                 className="absolute rounded-[2px] overflow-hidden"
-                style={{ top: "33px", left: "24px", right: "26px", height: "307px" }}
+                style={{ top: "33px", left: "24px", right: "26px", height: "330px" }}
               >
                 <Image src={ownerPhotoUrl} alt={COPY.ownerAlt} fill sizes="330px" className="object-cover" />
               </div>
               <p
                 className="absolute font-display text-[14px] text-[#423926] tracking-[0.56px] whitespace-nowrap overflow-hidden text-ellipsis"
-                style={{ left: "24px", right: "26px", top: "380px", textAlign: "center" }}
+                style={{ left: "24px", right: "26px", top: "403px", textAlign: "center" }}
               >
                 {COPY.meetPrefix} {(business.users?.first_name ?? business.name).toUpperCase()}
               </p>
@@ -622,7 +630,7 @@ export default async function BusinessDetailPage({
         <h2 className="font-display font-bold text-[26px] text-[#253022] tracking-[0.26px] leading-none">
           {COPY.meetTheOwnerHeading}
         </h2>
-        <div className="relative mt-[16px] h-[260px] bg-[#c9d2cf] rounded-[12px] overflow-hidden">
+        <div className="relative mt-[16px] aspect-square bg-[#c9d2cf] rounded-[12px] overflow-hidden">
           <Image src={ownerPhotoUrl} alt={COPY.ownerAlt} fill sizes="100vw" className="object-cover" />
         </div>
         <p className="font-body text-[12px] text-[#666b61] leading-[22px] mt-[16px]">
@@ -638,31 +646,51 @@ export default async function BusinessDetailPage({
           {COPY.howTheyStartedHeading}
         </h2>
 
-        <div className="relative flex gap-[100px] items-start">
-          {/* Connecting timeline line at dot level */}
-          <div
-            className="absolute left-0 right-0 h-[2px] bg-[rgba(250,246,233,0.25)]"
-            style={{ top: "284px" }}
-          />
+        {/* Grid rows (photo / dot / text) keep every dot at the same height no matter which
+            entries have photos; the photo row is dropped entirely when none do. */}
+        <div
+          className={`grid gap-x-[100px] gap-y-[24px] ${timelineEntries.length === 1 ? "max-w-[720px]" : ""}`}
+          style={{ gridTemplateColumns: `repeat(${timelineEntries.length}, minmax(0, 1fr))` }}
+        >
+          {/* Connecting line — lives in the dot row, so it always runs through the dots.
+              A lone dot with nothing to connect to reads as a stray bullet, so one entry skips both. */}
+          {showTimelineDots && (
+            <div
+              className="self-center h-[2px] bg-[rgba(250,246,233,0.25)]"
+              style={{ gridRow: timelineDotRow, gridColumn: "1 / -1" }}
+            />
+          )}
 
           {timelineEntries.map(({ year, img, desc }, i) => (
-            <div key={i} className="flex flex-col gap-[24px] items-center flex-1 min-w-0">
-              {/* Polaroid mount — only when this slot has a photo */}
-              {img && (
-                <div className="bg-[#faf6e9] rounded-[4px] shadow-[0px_8px_8px_rgba(0,0,0,0.25)] p-[12px] pb-[24px] w-[240px] h-[240px] flex-shrink-0">
-                  <div className="relative w-full h-full rounded-[2px] overflow-hidden">
-                    <Image src={img} alt={year} fill sizes="240px" className="object-cover" />
-                  </div>
+            <Fragment key={i}>
+              {/* Polaroid sits on the line; entries without a photo leave the cell empty */}
+              {hasTimelinePhoto && (
+                <div className="self-end flex justify-center" style={{ gridRow: 1, gridColumn: i + 1 }}>
+                  {img && (
+                    <div className="bg-[#faf6e9] rounded-[4px] shadow-[0px_8px_8px_rgba(0,0,0,0.25)] p-[12px] pb-[24px] w-[240px] max-w-full">
+                      <div className="relative w-full aspect-square rounded-[2px] overflow-hidden">
+                        <Image src={img} alt={year} fill sizes="240px" className="object-cover" />
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
               {/* Dot */}
-              <div className="flex items-center justify-center h-[40px] w-full relative z-10">
-                <div className="w-[16px] h-[16px] rounded-full bg-[#faf6e9]" />
-              </div>
+              {showTimelineDots && (
+                <div
+                  className="relative z-10 flex items-center justify-center h-[40px]"
+                  style={{ gridRow: timelineDotRow, gridColumn: i + 1 }}
+                >
+                  <div className="w-[16px] h-[16px] rounded-full bg-[#faf6e9]" />
+                </div>
+              )}
 
               {/* Year + description */}
-              <div className="flex flex-col gap-[16px] w-full">
+              <div
+                className="flex flex-col gap-[16px] min-w-0"
+                style={{ gridRow: showTimelineDots ? timelineDotRow + 1 : timelineDotRow, gridColumn: i + 1 }}
+              >
                 <p className="font-display font-bold text-[48px] text-[#c9d2cf] tracking-[-0.5px] leading-none">
                   {year}
                 </p>
@@ -670,7 +698,7 @@ export default async function BusinessDetailPage({
                   {desc}
                 </p>
               </div>
-            </div>
+            </Fragment>
           ))}
         </div>
 
@@ -709,8 +737,8 @@ export default async function BusinessDetailPage({
             <div key={i} className="flex flex-col gap-[16px]">
               {/* Polaroid mount — only when this slot has a photo */}
               {img && (
-                <div className="bg-[#faf6e9] rounded-[4px] shadow-[0px_8px_8px_rgba(0,0,0,0.25)] p-[10px] pb-[20px] w-[180px] h-[180px] mx-auto">
-                  <div className="relative w-full h-full rounded-[2px] overflow-hidden">
+                <div className="bg-[#faf6e9] rounded-[4px] shadow-[0px_8px_8px_rgba(0,0,0,0.25)] p-[10px] pb-[20px] w-[180px] mx-auto">
+                  <div className="relative w-full aspect-square rounded-[2px] overflow-hidden">
                     <Image src={img} alt={year} fill sizes="180px" className="object-cover" />
                   </div>
                 </div>

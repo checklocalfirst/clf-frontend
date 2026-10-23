@@ -79,6 +79,11 @@ export default function ServicesPage() {
           flat[k] = Array.isArray(msgs) ? msgs[0] : String(msgs);
         }
         setFieldErrors(flat);
+      } else if (err instanceof ApiError && err.status === 404 && typeof editingId === "number") {
+        // Service no longer belongs to this business (deleted elsewhere) — resync the list.
+        toast.error(err.message);
+        setEditingId(null);
+        setServices(await getMyServices(token, business.slug).catch(() => services));
       } else {
         toast.error(err instanceof ApiError ? err.message : "Something went wrong. Please try again.");
       }
@@ -94,7 +99,15 @@ export default function ServicesPage() {
       confirmLabel: "Delete",
       onConfirm: async () => {
         if (!token) return;
-        await deleteService(token, business.slug, service.id);
+        try {
+          await deleteService(token, business.slug, service.id);
+        } catch (err) {
+          if (!(err instanceof ApiError && err.status === 404)) throw err;
+          // Already gone from this business — close the dialog and resync instead of retrying.
+          toast.error(err.message);
+          setServices(await getMyServices(token, business.slug).catch(() => services));
+          return;
+        }
         setServices((prev) => prev?.filter((s) => s.id !== service.id) ?? null);
         toast.success("Service deleted.");
       },

@@ -24,9 +24,10 @@ export interface BusinessHoursDay {
 
 export type BusinessHours = Record<DayKey, BusinessHoursDay>;
 
+// Public shape — the public routes (/businesses, /search, /favorites, …) strip owner and
+// billing fields. Use OwnerBusiness for GET /businesses/me.
 export interface Business {
   id: number;
-  owner_user_id: string;
   name: string;
   description: string | null;
   address: string;
@@ -38,7 +39,6 @@ export interface Business {
   slug: string;
   status: BusinessStatus;
   business_tier: BusinessTier;
-  is_comped: boolean;
   is_featured: boolean;
   featured_since: string | null;
   in_carousel: boolean;
@@ -65,6 +65,12 @@ export interface Business {
   hours: BusinessHours | null;
   // Only present on GET /businesses/:slug (single approved business by slug)
   users?: { first_name: string } | null;
+}
+
+// Only GET /businesses/me (and /admin/*) still return these.
+export interface OwnerBusiness extends Business {
+  owner_user_id: string;
+  is_comped: boolean;
 }
 
 export interface Service {
@@ -94,6 +100,18 @@ export interface SearchResult {
   matchCount: number;
   // Only present when a lat/lng/radius_miles location filter was active on the request.
   distance_miles?: number;
+  // Only on text searches. Results arrive sorted with every "all_words" match first.
+  match_quality?: "all_words" | "partial";
+}
+
+// Sent only when a search with input returned no results.
+export interface SearchFallback {
+  did_you_mean: string | null;
+  businesses: SearchResult[];
+}
+
+export interface SearchResponse extends Paginated<SearchResult> {
+  fallback?: SearchFallback;
 }
 
 export interface EnrichedBusiness extends Business {
@@ -175,7 +193,7 @@ export function searchBusinesses(
   category?: string,
   page?: number,
   location?: { lat: number; lng: number; radiusMiles: number }
-): Promise<Paginated<SearchResult>> {
+): Promise<SearchResponse> {
   const params = new URLSearchParams();
   if (q) params.set("q", q);
   if (category) params.set("category", category);
@@ -185,7 +203,7 @@ export function searchBusinesses(
     params.set("lng", String(location.lng));
     params.set("radius_miles", String(location.radiusMiles));
   }
-  return apiFetch<Paginated<SearchResult>>(`/search?${params.toString()}`);
+  return apiFetch<SearchResponse>(`/search?${params.toString()}`);
 }
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;

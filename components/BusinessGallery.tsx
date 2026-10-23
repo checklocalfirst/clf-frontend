@@ -112,7 +112,7 @@ export default function BusinessGallery({
           className={
             scrollable
               ? "flex gap-6 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-              : "flex gap-6"
+              : "flex gap-6 justify-center"
           }
         >
           {photos.map((photo, i) => (
@@ -120,17 +120,16 @@ export default function BusinessGallery({
               key={photo.id}
               className={
                 scrollable
-                  ? "relative w-[380px] h-[380px] flex-shrink-0 rounded-[12px] overflow-hidden bg-[#c9d2cf]"
-                  : photos.length === 1
-                    ? "relative w-full h-[500px] rounded-[12px] overflow-hidden bg-[#c9d2cf]"
-                    : "relative flex-1 h-[420px] rounded-[12px] overflow-hidden bg-[#c9d2cf]"
+                  ? "relative w-[380px] aspect-square flex-shrink-0 rounded-[12px] overflow-hidden bg-[#c9d2cf]"
+                  : // Square photos are capped so a lone one doesn't grow to the full page width.
+                    "relative w-[500px] max-w-full aspect-square rounded-[12px] overflow-hidden bg-[#c9d2cf]"
               }
             >
               <Image
                 src={photo.url}
                 alt={`${businessName} gallery photo ${i + 1}`}
                 fill
-                sizes={scrollable ? "380px" : photos.length === 1 ? "1120px" : "50vw"}
+                sizes={scrollable ? "380px" : "500px"}
                 className="object-cover"
               />
             </div>
@@ -160,17 +159,17 @@ export default function BusinessGallery({
               key={photo.id}
               className={
                 scrollable
-                  ? "relative w-[220px] h-[220px] flex-shrink-0 rounded-[10px] overflow-hidden bg-[#c9d2cf]"
+                  ? "relative w-[220px] aspect-square flex-shrink-0 rounded-[10px] overflow-hidden bg-[#c9d2cf]"
                   : photos.length === 1
-                    ? "relative w-full h-[260px] rounded-[10px] overflow-hidden bg-[#c9d2cf]"
-                    : "relative flex-1 h-[200px] rounded-[10px] overflow-hidden bg-[#c9d2cf]"
+                    ? "relative w-full aspect-square rounded-[10px] overflow-hidden bg-[#c9d2cf]"
+                    : "relative flex-1 aspect-square rounded-[10px] overflow-hidden bg-[#c9d2cf]"
               }
             >
               <Image
                 src={photo.url}
                 alt={`${businessName} gallery photo ${i + 1}`}
                 fill
-                sizes={scrollable ? "220px" : "50vw"}
+                sizes={scrollable ? "220px" : photos.length === 1 ? "100vw" : "50vw"}
                 className="object-cover"
               />
             </div>

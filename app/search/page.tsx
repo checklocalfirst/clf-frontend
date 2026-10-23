@@ -27,6 +27,7 @@ import {
   isNewBusiness,
   searchBusinesses,
   type Category,
+  type SearchResult,
 } from "@/lib/directory";
 
 export const metadata: Metadata = {
@@ -60,6 +61,9 @@ const COPY = {
   resultsSuffix: "results",
   uncategorizedLabel: "Uncategorized",
   noDescriptionFallback: "No description yet.",
+  relatedResultsLabel: "Related results",
+  didYouMeanPrefix: "Did you mean",
+  fallbackHeading: "No exact matches — you might like",
 };
 
 interface CategoryTile {
@@ -107,47 +111,82 @@ interface ResultCard {
   distanceMiles?: number;
 }
 
-async function getResultCards(
+interface SearchView {
+  cards: ResultCard[];
+  // match_quality "partial" results, shown under a "Related results" divider
+  relatedCards: ResultCard[];
+  // Only when a search with input came back empty
+  fallback?: { didYouMean: string | null; cards: ResultCard[] };
+}
+
+async function toResultCards(results: SearchResult[]): Promise<ResultCard[]> {
+  // Business's own category badges, not the matched service's category — those can
+  // differ, and business_categories is what the category filter actually uses.
+  const [photos, categoryLists] = await Promise.all([
+    Promise.all(results.map(({ business }) => getListingPhotoUrl(business.slug))),
+    Promise.all(results.map(({ business }) => getBusinessCategories(business.slug).catch(() => []))),
+  ]);
+
+  return results.map(({ business, bestMatch, distance_miles }, i) => ({
+    name: business.name,
+    category: categoryLists[i][0]?.name ?? COPY.uncategorizedLabel,
+    location: `${business.city}, ${business.state}`,
+    description: business.description ?? bestMatch.name,
+    photo: photos[i],
+    isNew: isNewBusiness(business.created_at),
+    href: `/businesses/${business.slug}`,
+    distanceMiles: distance_miles,
+  }));
+}
+
+function byDistance(a: ResultCard, b: ResultCard): number {
+  return (a.distanceMiles ?? Infinity) - (b.distanceMiles ?? Infinity);
+}
+
+async function getSearchView(
   query: string,
   category: string,
   coords?: { lat: number; lng: number }
-): Promise<ResultCard[]> {
+): Promise<SearchView> {
   // Distance filtering only exists on /search, so a location fix routes through the
   // same path as a text/category search, even with neither of those actually set.
   if (query || category || coords) {
-    const { data: results } = await searchBusinesses(
+    const { data: results, fallback } = await searchBusinesses(
       query,
       category,
       undefined,
       coords ? { ...coords, radiusMiles: NEAR_ME_RADIUS_MILES } : undefined
     );
-    // Business's own category badges, not the matched service's category — those can
-    // differ, and business_categories is what the category filter above actually uses.
-    const [photos, categoryLists] = await Promise.all([
-      Promise.all(results.map(({ business }) => getListingPhotoUrl(business.slug))),
-      Promise.all(results.map(({ business }) => getBusinessCategories(business.slug).catch(() => []))),
+
+    // Results arrive all_words-first. Only split when there's at least one full match to
+    // sit above the divider — if every result is partial, a divider on top says nothing.
+    const firstPartial = results.findIndex((r) => r.match_quality === "partial");
+    const splitAt = firstPartial > 0 ? firstPartial : results.length;
+
+    const [cards, relatedCards, fallbackCards] = await Promise.all([
+      toResultCards(results.slice(0, splitAt)),
+      toResultCards(results.slice(splitAt)),
+      fallback ? toResultCards(fallback.businesses) : Promise.resolve([]),
     ]);
 
-    const cards = results.map(({ business, bestMatch, distance_miles }, i) => ({
-      name: business.name,
-      category: categoryLists[i][0]?.name ?? COPY.uncategorizedLabel,
-      location: `${business.city}, ${business.state}`,
-      description: business.description ?? bestMatch.name,
-      photo: photos[i],
-      isNew: isNewBusiness(business.created_at),
-      href: `/businesses/${business.slug}`,
-      distanceMiles: distance_miles,
-    }));
-
     // Closest-first is the whole point of "near me" — sort client-side on the page
-    // we already have rather than trusting the backend's default ordering.
-    if (coords) cards.sort((a, b) => (a.distanceMiles ?? Infinity) - (b.distanceMiles ?? Infinity));
-    return cards;
+    // we already have rather than trusting the backend's default ordering. Each group
+    // sorts on its own so related results stay below the divider.
+    if (coords) {
+      cards.sort(byDistance);
+      relatedCards.sort(byDistance);
+    }
+
+    return {
+      cards,
+      relatedCards,
+      fallback: fallback && { didYouMean: fallback.did_you_mean, cards: fallbackCards },
+    };
   }
 
   const businesses = await getEnrichedBusinesses();
   const photos = await Promise.all(businesses.map((b) => getListingPhotoUrl(b.slug)));
-  return businesses.map((b, i) => ({
+  const cards = businesses.map((b, i) => ({
     name: b.name,
     category: b.categoryNames[0] ?? COPY.uncategorizedLabel,
     location: `${b.city}, ${b.state}`,
@@ -156,6 +195,18 @@ async function getResultCards(
     isNew: b.isNew,
     href: `/businesses/${b.slug}`,
   }));
+  return { cards, relatedCards: [] };
+}
+
+// Re-runs the current search with the suggested term, keeping any category/location filter.
+function didYouMeanHref(term: string, category: string, coords?: { lat: number; lng: number }): string {
+  const params = new URLSearchParams({ q: term });
+  if (category) params.set("category", category);
+  if (coords) {
+    params.set("lat", String(coords.lat));
+    params.set("lng", String(coords.lng));
+  }
+  return `/search?${params.toString()}`;
 }
 
 export default async function SearchPage({
@@ -178,14 +229,12 @@ export default async function SearchPage({
   const lng = lngStr !== undefined ? Number(lngStr) : NaN;
   const coords = Number.isFinite(lat) && Number.isFinite(lng) ? { lat, lng } : undefined;
 
-  const [allResults, categories] = await Promise.all([
-    getResultCards(query, category, coords),
+  const [{ cards, relatedCards, fallback }, categories] = await Promise.all([
+    getSearchView(query, category, coords),
     getCategories(),
   ]);
-  const GRID_CARDS = allResults.slice(0, 3);
-  const LIST_ITEMS = allResults.slice(3);
 
-  const resultCount = GRID_CARDS.length + LIST_ITEMS.length;
+  const resultCount = cards.length + relatedCards.length;
   const CATEGORIES = buildCategoryTiles(categories);
 
   return (
@@ -278,144 +327,194 @@ export default async function SearchPage({
 
       {/* ── Business Grid + List ── */}
       <section className="pb-8 md:pb-12">
+        <ResultsBlock cards={cards} />
 
-        {/* ── DESKTOP: 3-column grid cards ── */}
-        <div className="hidden md:flex gap-6 mb-6">
-          {GRID_CARDS.map((card) => (
-            <Link
-              key={card.name}
-              href={card.href}
-              className="flex-1 flex flex-col rounded-[16px] border border-[#dbe0d9] overflow-hidden bg-[#faf6e9] hover:shadow-md transition-shadow"
-            >
-              {/* Photo */}
-              <div className="relative h-[220px] w-full bg-[#c9d2cf] flex-shrink-0 rounded-t-[16px] overflow-hidden">
-                {card.photo && <Image src={card.photo} alt={card.name} fill sizes="360px" className="object-cover" />}
-                {card.isNew && (
-                  <div className="absolute top-[14px] left-[14px] bg-[#2c4a34] px-[10px] py-[5px] rounded-[4px]">
-                    <span className="font-mono font-semibold text-[11px] text-white uppercase">
-                      NEWLY ADDED
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* Card Body */}
-              <div className="flex flex-col gap-[10px] p-6">
-                <div className="bg-[#c9d2cf] self-start px-3 py-[5px] rounded-full">
-                  <span className="font-mono font-semibold text-[12px] text-[#423926] uppercase">
-                    {card.category}
-                  </span>
-                </div>
-                <p className="font-display font-bold text-[20px] text-[#423926] uppercase underline leading-tight">
-                  {card.name}
-                </p>
-                <p className="font-mono text-[13px] text-[#b7a78c]">
-                  {card.location}
-                  {card.distanceMiles != null && ` · ${card.distanceMiles.toFixed(1)} mi`}
-                </p>
-                <p className="font-mono text-[14px] text-[#423926] leading-snug line-clamp-2">
-                  {firstSentence(card.description)}
-                </p>
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        {/* ── MOBILE: stacked full-width cards ── */}
-        <div className="md:hidden flex flex-col gap-4 mb-4">
-          {GRID_CARDS.map((card) => (
-            <Link
-              key={card.name}
-              href={card.href}
-              className="flex flex-col rounded-[12px] border border-[#dbe0d9] overflow-hidden bg-[#faf6e9]"
-            >
-              {/* Photo */}
-              <div className="relative h-[180px] w-full bg-[#c9d2cf] overflow-hidden">
-                {card.photo && <Image src={card.photo} alt={card.name} fill sizes="100vw" className="object-cover" />}
-                {card.isNew && (
-                  <div className="absolute top-3 left-3 bg-[#2c4a34] px-2 py-1 rounded-[4px]">
-                    <span className="font-mono font-semibold text-[10px] text-white uppercase">
-                      NEWLY ADDED
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* Card Body */}
-              <div className="flex flex-col gap-2 p-4">
-                <div className="bg-[#c9d2cf] self-start px-3 py-1 rounded-full">
-                  <span className="font-mono font-semibold text-[11px] text-[#423926] uppercase">
-                    {card.category}
-                  </span>
-                </div>
-                <p className="font-display font-bold text-[16px] text-[#423926] uppercase underline leading-tight">
-                  {card.name}
-                </p>
-                <p className="font-mono text-[12px] text-[#b7a78c]">
-                  {card.location}
-                  {card.distanceMiles != null && ` · ${card.distanceMiles.toFixed(1)} mi`}
-                </p>
-                <p className="font-mono text-[13px] text-[#423926] leading-snug line-clamp-2">
-                  {firstSentence(card.description)}
-                </p>
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        {/* ── List Items (desktop + mobile) ── */}
-        <div className="flex flex-col">
-          {LIST_ITEMS.map((item, i) => (
-            <div key={item.name}>
-              <Link
-                href={item.href}
-                className="flex gap-4 items-center py-3 md:py-[12px] group"
-              >
-                {/* Thumbnail */}
-                <div className="relative w-[52px] h-[52px] md:w-[72px] md:h-[72px] flex-shrink-0 rounded-[8px] md:rounded-[12px] border border-[#dbe0d9] overflow-hidden bg-[#c9d2cf]">
-                  {item.photo && <Image src={item.photo} alt={item.name} fill sizes="72px" className="object-cover" />}
-                </div>
-
-                {/* Content */}
-                <div className="flex flex-1 flex-col gap-[5px] min-w-0">
-                  {/* Name + Location */}
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="font-display font-bold text-[15px] md:text-[18px] text-[#423926] uppercase underline leading-none truncate group-hover:text-[#2c4a34] transition-colors">
-                      {item.name}
-                    </p>
-                    <p className="font-mono text-[12px] md:text-[13px] text-[#b7a78c] whitespace-nowrap flex-shrink-0">
-                      {item.location}
-                      {item.distanceMiles != null && ` · ${item.distanceMiles.toFixed(1)} mi`}
-                    </p>
-                  </div>
-
-                  {/* Category tag */}
-                  <div className="bg-[#c9d2cf] self-start px-3 py-[4px] rounded-full">
-                    <span className="font-mono font-bold text-[11px] md:text-[13px] text-[#423926] uppercase whitespace-nowrap">
-                      {item.category}
-                    </span>
-                  </div>
-
-                  {/* Description — hidden on mobile to keep list compact */}
-                  <p className="hidden md:block font-display font-bold text-[14px] text-[#423926] leading-snug line-clamp-2">
-                    {firstSentence(item.description)}
-                  </p>
-                </div>
-              </Link>
-
-              {/* Divider (skip after last) */}
-              {i < LIST_ITEMS.length - 1 && (
-                <div className="h-px bg-[#dbe0d9] w-full" />
-              )}
+        {relatedCards.length > 0 && (
+          <>
+            <div className="flex items-center gap-3 pt-4 pb-4 md:pt-6">
+              <span className="font-mono font-bold text-[12px] md:text-[13px] text-[#b7a78c] uppercase whitespace-nowrap">
+                {COPY.relatedResultsLabel}
+              </span>
+              <div className="h-px bg-[#dbe0d9] flex-1" />
             </div>
-          ))}
-        </div>
+            <ResultsBlock cards={relatedCards} />
+          </>
+        )}
+
+        {fallback && (
+          <div className="flex flex-col gap-4 md:gap-6">
+            {fallback.didYouMean && (
+              <p className="font-mono text-[14px] md:text-[16px] text-[#423926]">
+                {COPY.didYouMeanPrefix}{" "}
+                <Link
+                  href={didYouMeanHref(fallback.didYouMean, category, coords)}
+                  className="font-bold underline hover:text-[#2c4a34] transition-colors"
+                >
+                  {fallback.didYouMean}
+                </Link>
+                ?
+              </p>
+            )}
+            {fallback.cards.length > 0 && (
+              <>
+                <h2 className="font-display font-bold text-[18px] md:text-[22px] text-[#423926] uppercase">
+                  {COPY.fallbackHeading}
+                </h2>
+                <ResultsBlock cards={fallback.cards} />
+              </>
+            )}
+          </div>
+        )}
       </section>
 
       </div>{/* max-w container */}
       </div>{/* bg wrapper */}
 
       <Footer />
+    </>
+  );
+}
+
+// First three results as large cards, the rest as a compact list. Shared by the main
+// results, the "Related results" group and the no-match fallback.
+function ResultsBlock({ cards }: { cards: ResultCard[] }) {
+  const grid = cards.slice(0, 3);
+  const list = cards.slice(3);
+
+  return (
+    <>
+      {/* ── DESKTOP: 3-column grid cards ── */}
+      <div className="hidden md:flex gap-6 mb-6">
+        {grid.map((card) => (
+          <Link
+            key={card.name}
+            href={card.href}
+            // Capped at a third of the row so 1–2 results don't stretch into giant square photos.
+            className="flex-1 max-w-[calc((100%-48px)/3)] flex flex-col rounded-[16px] border border-[#dbe0d9] overflow-hidden bg-[#faf6e9] hover:shadow-md transition-shadow"
+          >
+            {/* Photo */}
+            <div className="relative aspect-square w-full bg-[#c9d2cf] flex-shrink-0 rounded-t-[16px] overflow-hidden">
+              {card.photo && <Image src={card.photo} alt={card.name} fill sizes="360px" className="object-cover" />}
+              {card.isNew && (
+                <div className="absolute top-[14px] left-[14px] bg-[#2c4a34] px-[10px] py-[5px] rounded-[4px]">
+                  <span className="font-mono font-semibold text-[11px] text-white uppercase">
+                    NEWLY ADDED
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Card Body */}
+            <div className="flex flex-col gap-[10px] p-6">
+              <div className="bg-[#c9d2cf] self-start px-3 py-[5px] rounded-full">
+                <span className="font-mono font-semibold text-[12px] text-[#423926] uppercase">
+                  {card.category}
+                </span>
+              </div>
+              <p className="font-display font-bold text-[20px] text-[#423926] uppercase underline leading-tight">
+                {card.name}
+              </p>
+              <p className="font-mono text-[13px] text-[#b7a78c]">
+                {card.location}
+                {card.distanceMiles != null && ` · ${card.distanceMiles.toFixed(1)} mi`}
+              </p>
+              <p className="font-mono text-[14px] text-[#423926] leading-snug line-clamp-2">
+                {firstSentence(card.description)}
+              </p>
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      {/* ── MOBILE: stacked full-width cards ── */}
+      <div className="md:hidden flex flex-col gap-4 mb-4">
+        {grid.map((card) => (
+          <Link
+            key={card.name}
+            href={card.href}
+            className="flex flex-col rounded-[12px] border border-[#dbe0d9] overflow-hidden bg-[#faf6e9]"
+          >
+            {/* Photo */}
+            <div className="relative aspect-square w-full bg-[#c9d2cf] overflow-hidden">
+              {card.photo && <Image src={card.photo} alt={card.name} fill sizes="100vw" className="object-cover" />}
+              {card.isNew && (
+                <div className="absolute top-3 left-3 bg-[#2c4a34] px-2 py-1 rounded-[4px]">
+                  <span className="font-mono font-semibold text-[10px] text-white uppercase">
+                    NEWLY ADDED
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Card Body */}
+            <div className="flex flex-col gap-2 p-4">
+              <div className="bg-[#c9d2cf] self-start px-3 py-1 rounded-full">
+                <span className="font-mono font-semibold text-[11px] text-[#423926] uppercase">
+                  {card.category}
+                </span>
+              </div>
+              <p className="font-display font-bold text-[16px] text-[#423926] uppercase underline leading-tight">
+                {card.name}
+              </p>
+              <p className="font-mono text-[12px] text-[#b7a78c]">
+                {card.location}
+                {card.distanceMiles != null && ` · ${card.distanceMiles.toFixed(1)} mi`}
+              </p>
+              <p className="font-mono text-[13px] text-[#423926] leading-snug line-clamp-2">
+                {firstSentence(card.description)}
+              </p>
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      {/* ── List Items (desktop + mobile) ── */}
+      <div className="flex flex-col">
+        {list.map((item, i) => (
+          <div key={item.name}>
+            <Link
+              href={item.href}
+              className="flex gap-4 items-center py-3 md:py-[12px] group"
+            >
+              {/* Thumbnail */}
+              <div className="relative w-[52px] h-[52px] md:w-[72px] md:h-[72px] flex-shrink-0 rounded-[8px] md:rounded-[12px] border border-[#dbe0d9] overflow-hidden bg-[#c9d2cf]">
+                {item.photo && <Image src={item.photo} alt={item.name} fill sizes="72px" className="object-cover" />}
+              </div>
+
+              {/* Content */}
+              <div className="flex flex-1 flex-col gap-[5px] min-w-0">
+                {/* Name + Location */}
+                <div className="flex items-center justify-between gap-2">
+                  <p className="font-display font-bold text-[15px] md:text-[18px] text-[#423926] uppercase underline leading-none truncate group-hover:text-[#2c4a34] transition-colors">
+                    {item.name}
+                  </p>
+                  <p className="font-mono text-[12px] md:text-[13px] text-[#b7a78c] whitespace-nowrap flex-shrink-0">
+                    {item.location}
+                    {item.distanceMiles != null && ` · ${item.distanceMiles.toFixed(1)} mi`}
+                  </p>
+                </div>
+
+                {/* Category tag */}
+                <div className="bg-[#c9d2cf] self-start px-3 py-[4px] rounded-full">
+                  <span className="font-mono font-bold text-[11px] md:text-[13px] text-[#423926] uppercase whitespace-nowrap">
+                    {item.category}
+                  </span>
+                </div>
+
+                {/* Description — hidden on mobile to keep list compact */}
+                <p className="hidden md:block font-display font-bold text-[14px] text-[#423926] leading-snug line-clamp-2">
+                  {firstSentence(item.description)}
+                </p>
+              </div>
+            </Link>
+
+            {/* Divider (skip after last) */}
+            {i < list.length - 1 && (
+              <div className="h-px bg-[#dbe0d9] w-full" />
+            )}
+          </div>
+        ))}
+      </div>
     </>
   );
 }

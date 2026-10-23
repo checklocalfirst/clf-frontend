@@ -23,7 +23,7 @@ export default function BusinessCard({
       {/* ── Mobile layout (< md): photo-first, compact ── */}
       <div className="md:hidden flex flex-col gap-3">
         {/* Photo */}
-        <div className="relative h-[224px] w-full rounded-[2px] overflow-hidden bg-[#b7a78c]">
+        <div className="relative aspect-square w-full rounded-[2px] overflow-hidden bg-[#b7a78c]">
           {imageUrl && <Image src={imageUrl} alt={name} fill sizes="100vw" className="object-cover" />}
         </div>
 
@@ -57,7 +57,7 @@ export default function BusinessCard({
         </p>
 
         {/* Photo */}
-        <div className="relative h-[120px] w-full rounded-[8px] overflow-hidden bg-[#b7a78c] flex-shrink-0">
+        <div className="relative aspect-square w-full rounded-[8px] overflow-hidden bg-[#b7a78c] flex-shrink-0">
           {imageUrl && <Image src={imageUrl} alt={name} fill sizes="360px" className="object-cover" />}
         </div>
 

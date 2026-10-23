@@ -1,5 +1,5 @@
 import { apiFetch } from "./api";
-import type { Business, BusinessHours, Category, Photo, Service } from "./directory";
+import type { Business, BusinessHours, Category, OwnerBusiness, Photo, Service } from "./directory";
 
 export interface BusinessProfileInput {
   name?: string;
@@ -25,8 +25,8 @@ export interface BusinessProfileInput {
   timeline_description_3?: string;
 }
 
-export function getMyBusiness(token: string): Promise<Business> {
-  return apiFetch<Business>("/businesses/me", { token });
+export function getMyBusiness(token: string): Promise<OwnerBusiness> {
+  return apiFetch<OwnerBusiness>("/businesses/me", { token });
 }
 
 export function updateMyBusiness(
