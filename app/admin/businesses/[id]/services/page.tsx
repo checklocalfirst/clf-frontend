@@ -109,14 +109,14 @@ function ServiceRow({
   return (
     <div className="flex flex-col gap-3 bg-white border border-[#dbe0d9] rounded-[12px] p-4">
       <FormField
-        label="Name"
+        label="Offering"
         id={`svc-name-${service.id}`}
         value={form.name}
         onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
         error={fieldErrors.name}
       />
       <FormField
-        label="Description"
+        label="Keywords"
         id={`svc-desc-${service.id}`}
         as="textarea"
         value={form.description}
@@ -252,14 +252,14 @@ export default function AdminBusinessServicesPage() {
           className="flex flex-col gap-4 bg-white border border-[#dbe0d9] rounded-[16px] p-6"
         >
           <FormField
-            label="Name"
+            label="Offering"
             id="svc_new_name"
             value={form.name}
             onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
             error={fieldErrors.name}
           />
           <FormField
-            label="Description"
+            label="Keywords"
             id="svc_new_description"
             as="textarea"
             value={form.description}

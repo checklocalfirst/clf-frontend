@@ -68,7 +68,7 @@ export default function AdminServicesPage() {
   }
 
   const columns: Column<ServiceWithBusiness>[] = [
-    { key: "name", header: "Name", render: (s) => s.name },
+    { key: "name", header: "Offering", render: (s) => s.name },
     { key: "business", header: "Business", render: (s) => s.businesses.name },
     {
       key: "category",
@@ -109,13 +109,13 @@ export default function AdminServicesPage() {
           className="flex flex-col gap-4 bg-white border border-[#dbe0d9] rounded-[16px] p-6 max-w-[480px]"
         >
           <FormField
-            label="Name"
+            label="Offering"
             id="edit_service_name"
             value={form.name}
             onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
           />
           <FormField
-            label="Description"
+            label="Keywords"
             id="edit_service_description"
             as="textarea"
             value={form.description}
